@@ -23,39 +23,21 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using Microsoft.EntityFrameworkCore;
-using RomRepoMgr.Database.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database
+namespace RomRepoMgr.Database.Models
 {
-    public sealed class Context : DbContext
+    public class DbFile : BaseModel<ulong>
     {
-        public Context(DbContextOptions options) : base(options) {}
-
-        public DbSet<DbFile> Files { get; set; }
-
-        public static Context Create(string dbPath)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder();
-            optionsBuilder.UseLazyLoadingProxies().UseSqlite($"Data Source={dbPath}");
-
-            return new Context(optionsBuilder.Options);
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<DbFile>(entity =>
-            {
-                entity.HasIndex(e => e.Crc32);
-
-                entity.HasIndex(e => e.Sha1);
-
-                entity.HasIndex(e => e.Sha256);
-
-                entity.HasIndex(e => e.Size);
-            });
-        }
+        [Required]
+        public ulong Size { get; set; }
+        [StringLength(8, MinimumLength = 8)]
+        public string Crc32 { get; set; }
+        [StringLength(32, MinimumLength = 32)]
+        public string Md5 { get; set; }
+        [StringLength(40, MinimumLength = 40)]
+        public string Sha1 { get; set; }
+        [StringLength(64, MinimumLength = 64)]
+        public string Sha256 { get; set; }
     }
 }

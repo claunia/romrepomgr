@@ -23,39 +23,18 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using Microsoft.EntityFrameworkCore;
-using RomRepoMgr.Database.Models;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RomRepoMgr.Database
+namespace RomRepoMgr.Database.Models
 {
-    public sealed class Context : DbContext
+    public abstract class BaseModel<TKey>
     {
-        public Context(DbContextOptions options) : base(options) {}
+        public TKey Id { get; set; }
 
-        public DbSet<DbFile> Files { get; set; }
-
-        public static Context Create(string dbPath)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder();
-            optionsBuilder.UseLazyLoadingProxies().UseSqlite($"Data Source={dbPath}");
-
-            return new Context(optionsBuilder.Options);
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<DbFile>(entity =>
-            {
-                entity.HasIndex(e => e.Crc32);
-
-                entity.HasIndex(e => e.Sha1);
-
-                entity.HasIndex(e => e.Sha256);
-
-                entity.HasIndex(e => e.Size);
-            });
-        }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreatedOn { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime UpdatedOn { get; set; }
     }
 }
