@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RomRepoMgr", "RomRepoMgr\Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RomRepoMgr.Database", "RomRepoMgr.Database\RomRepoMgr.Database.csproj", "{FE5ACD61-90F1-4B9F-9BDA-50934040882A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RomRepoMgr.Settings", "RomRepoMgr.Settings\RomRepoMgr.Settings.csproj", "{FEAC8090-8F64-44D4-9DE2-C9E6CEDB4FC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RomRepoMgr.Core", "RomRepoMgr.Core\RomRepoMgr.Core.csproj", "{1C7E7286-1BA6-43B0-A042-4A3C378BDDC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{FE5ACD61-90F1-4B9F-9BDA-50934040882A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE5ACD61-90F1-4B9F-9BDA-50934040882A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE5ACD61-90F1-4B9F-9BDA-50934040882A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEAC8090-8F64-44D4-9DE2-C9E6CEDB4FC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEAC8090-8F64-44D4-9DE2-C9E6CEDB4FC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEAC8090-8F64-44D4-9DE2-C9E6CEDB4FC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEAC8090-8F64-44D4-9DE2-C9E6CEDB4FC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C7E7286-1BA6-43B0-A042-4A3C378BDDC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C7E7286-1BA6-43B0-A042-4A3C378BDDC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C7E7286-1BA6-43B0-A042-4A3C378BDDC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C7E7286-1BA6-43B0-A042-4A3C378BDDC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
