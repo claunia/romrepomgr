@@ -5,10 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.Security.Principal.Windows" Version="4.5.0" />
+      <PackageReference Include="SharpCompress" Version="0.26.0" />
+      <PackageReference Include="System.Security.Principal.Windows" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
+      <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
       <ProjectReference Include="..\SabreTools\SabreTools.Library\SabreTools.Library.csproj" />
     </ItemGroup>
 

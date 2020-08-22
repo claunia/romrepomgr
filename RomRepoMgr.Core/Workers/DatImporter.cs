@@ -25,17 +25,25 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
+using Aaru.Checksums;
 using RomRepoMgr.Core.EventArgs;
 using SabreTools.Library.DatFiles;
+using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.Core.Workers
 {
     public sealed class DatImporter
     {
+        readonly string _datFilesPath;
         readonly string _datPath;
         bool            _aborted;
 
-        public DatImporter(string datPath) => _datPath = datPath;
+        public DatImporter(string datPath)
+        {
+            _datPath      = datPath;
+            _datFilesPath = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
+        }
 
         public void Import()
         {
@@ -52,6 +60,38 @@ namespace RomRepoMgr.Core.Workers
                 var      datFile = DatFile.CreateAndParse(_datPath);
                 DateTime end     = DateTime.UtcNow;
                 double   elapsed = (end - start).TotalSeconds;
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Hashing DAT file..."
+                });
+
+                string datHash = Sha384Context.File(_datPath, out _);
+
+                if(!Directory.Exists(_datFilesPath))
+                    Directory.CreateDirectory(_datFilesPath);
+
+                string compressedDatPath = Path.Combine(_datFilesPath, datHash + ".lz");
+
+                if(File.Exists(compressedDatPath))
+                {
+                    ErrorOccurred?.Invoke(this, new ErrorEventArgs
+                    {
+                        Message = "DAT file is already in database, not importing duplicates."
+                    });
+
+                    return;
+                }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Compressing DAT file..."
+                });
+
+                var datCompress = new Compression();
+                datCompress.SetProgress       += SetProgress;
+                datCompress.SetProgressBounds += SetProgressBounds;
+                datCompress.CompressFile(_datPath, compressedDatPath);
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
             }
