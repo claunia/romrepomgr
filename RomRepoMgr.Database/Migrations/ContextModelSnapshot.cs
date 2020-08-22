@@ -53,6 +53,27 @@ namespace RomRepoMgr.Database.Migrations
                 b.ToTable("Files");
             });
 
+            modelBuilder.Entity("RomRepoMgr.Database.Models.FileByMachine", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<ulong>("FileId").HasColumnType("INTEGER");
+
+                b.Property<ulong>("MachineId").HasColumnType("INTEGER");
+
+                b.Property<string>("Name").IsRequired().HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("FileId");
+
+                b.HasIndex("MachineId");
+
+                b.HasIndex("Name");
+
+                b.ToTable("FilesByMachines");
+            });
+
             modelBuilder.Entity("RomRepoMgr.Database.Models.Machine", b =>
             {
                 b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
@@ -121,6 +142,15 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Version");
 
                 b.ToTable("RomSets");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.FileByMachine", b =>
+            {
+                b.HasOne("RomRepoMgr.Database.Models.DbFile", "File").WithMany("Machines").HasForeignKey("FileId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
+
+                b.HasOne("RomRepoMgr.Database.Models.Machine", "Machine").WithMany("Files").HasForeignKey("MachineId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
             });
 
             modelBuilder.Entity("RomRepoMgr.Database.Models.Machine", b =>

@@ -125,7 +125,12 @@ namespace RomRepoMgr.ViewModels
         public string                      CloseLabel   => "Close";
         public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
-        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() => CanClose = true);
+        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+        {
+            StatusMessage   = "Finished";
+            ProgressVisible = false;
+            CanClose        = true;
+        });
 
         void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
@@ -145,9 +150,10 @@ namespace RomRepoMgr.ViewModels
 
         void OnWorkerOnErrorOccurred(object sender, ErrorEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
-            ErrorMessage = args.Message;
-            ErrorVisible = true;
-            CanClose     = true;
+            ErrorMessage    = args.Message;
+            ProgressVisible = false;
+            ErrorVisible    = true;
+            CanClose        = true;
         });
 
         void ExecuteCloseCommand() => _view.Close();

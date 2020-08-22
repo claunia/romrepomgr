@@ -23,6 +23,7 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
@@ -32,6 +33,7 @@ namespace RomRepoMgr.Database.Models
         [Required]
         public string Name { get; set; }
         [Required]
-        public virtual RomSet RomSet { get; set; }
+        public virtual RomSet RomSet { get;                    set; }
+        public virtual ICollection<FileByMachine> Files { get; set; }
     }
 }

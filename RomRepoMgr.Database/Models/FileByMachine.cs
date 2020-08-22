@@ -23,27 +23,19 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
 {
-    public class DbFile : BaseModel<ulong>
+    public class FileByMachine
     {
+        [Key]
+        public ulong Id { get; set; }
         [Required]
-        public ulong Size { get; set; }
-        [StringLength(8, MinimumLength = 8)]
-        public string Crc32 { get; set; }
-        [StringLength(32, MinimumLength = 32)]
-        public string Md5 { get; set; }
-        [StringLength(40, MinimumLength = 40)]
-        public string Sha1 { get; set; }
-        [StringLength(64, MinimumLength = 64)]
-        public string Sha256 { get; set; }
-        [StringLength(96, MinimumLength = 96)]
-        public string Sha384 { get; set; }
-        [StringLength(128, MinimumLength = 128)]
-        public string Sha512 { get;                               set; }
-        public virtual ICollection<FileByMachine> Machines { get; set; }
+        public virtual DbFile File { get; set; }
+        [Required]
+        public virtual Machine Machine { get; set; }
+        [Required]
+        public string Name { get; set; }
     }
 }

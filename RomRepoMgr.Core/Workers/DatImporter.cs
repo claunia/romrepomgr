@@ -34,7 +34,9 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.Library.DatFiles;
+using SabreTools.Library.DatItems;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
+using Machine = RomRepoMgr.Database.Models.Machine;
 
 namespace RomRepoMgr.Core.Workers
 {
@@ -61,10 +63,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Parsing DAT file..."
                 });
 
-                DateTime start   = DateTime.UtcNow;
-                var      datFile = DatFile.CreateAndParse(_datPath);
-                DateTime end     = DateTime.UtcNow;
-                double   elapsed = (end - start).TotalSeconds;
+                var datFile = DatFile.CreateAndParse(_datPath);
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
@@ -194,6 +193,285 @@ namespace RomRepoMgr.Core.Workers
 
                 Context.Singleton.SaveChanges();
 
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Retrieving ROMs and disks..."
+                });
+
+                List<Rom>  roms  = new List<Rom>();
+                List<Disk> disks = new List<Disk>();
+
+                foreach(List<DatItem> values in datFile.Items.Values)
+                {
+                    foreach(DatItem item in values)
+                    {
+                        switch(item)
+                        {
+                            case Rom rom:
+                                roms.Add(rom);
+
+                                continue;
+                            case Disk disk:
+                                disks.Add(disk);
+
+                                continue;
+                        }
+                    }
+                }
+
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = roms.Count
+                });
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Adding ROMs..."
+                });
+
+                position = 0;
+
+                Dictionary<string, DbFile> pendingFilesBySha512 = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha384 = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha256 = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha1   = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesByMd5    = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesByCrc    = new Dictionary<string, DbFile>();
+                List<DbFile>               pendingFiles         = new List<DbFile>();
+
+                foreach(Rom rom in roms)
+                {
+                    bool hashCollision = false;
+
+                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = position
+                    });
+
+                    if(!machines.TryGetValue(rom.Machine.Name, out Machine machine))
+                    {
+                        ErrorOccurred?.Invoke(this, new ErrorEventArgs
+                        {
+                            Message = "Found a ROM with an unknown machine, this should not happen."
+                        });
+
+                        return;
+                    }
+
+                    ulong uSize = (ulong)rom.Size;
+
+                    DbFile file = null;
+
+                    if(rom.SHA512 != null)
+                        if(pendingFilesBySha512.TryGetValue(rom.SHA512, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(rom.SHA384 != null &&
+                       file       == null)
+                        if(pendingFilesBySha384.TryGetValue(rom.SHA384, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(rom.SHA256 != null &&
+                       file       == null)
+                        if(pendingFilesBySha256.TryGetValue(rom.SHA256, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(rom.SHA1 != null &&
+                       file     == null)
+                        if(pendingFilesBySha1.TryGetValue(rom.SHA1, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(rom.MD5 != null &&
+                       file    == null)
+                        if(pendingFilesByMd5.TryGetValue(rom.MD5, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(rom.CRC != null &&
+                       file    == null)
+                        if(pendingFilesByCrc.TryGetValue(rom.CRC, out file))
+                            if(file.Size != uSize)
+                            {
+                                hashCollision = true;
+                                file          = null;
+                            }
+
+                    if(file == null && hashCollision)
+                    {
+                        if(rom.SHA512 != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Sha512 == rom.SHA512 && f.Size == uSize);
+
+                        if(file       == null &&
+                           rom.SHA384 != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Sha384 == rom.SHA384 && f.Size == uSize);
+
+                        if(file       == null &&
+                           rom.SHA256 != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Sha256 == rom.SHA256 && f.Size == uSize);
+
+                        if(file     == null &&
+                           rom.SHA1 != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Sha1 == rom.SHA1 && f.Size == uSize);
+
+                        if(file    == null &&
+                           rom.MD5 != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Md5 == rom.MD5 && f.Size == uSize);
+
+                        if(file    == null &&
+                           rom.CRC != null)
+                            file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
+                    }
+
+                    if(file       == null &&
+                       rom.SHA512 != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha512 == rom.SHA512 && f.Size == uSize);
+
+                    if(file       == null &&
+                       rom.SHA384 != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha384 == rom.SHA384 && f.Size == uSize);
+
+                    if(file       == null &&
+                       rom.SHA256 != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha256 == rom.SHA256 && f.Size == uSize);
+
+                    if(file     == null &&
+                       rom.SHA1 != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha1 == rom.SHA1 && f.Size == uSize);
+
+                    if(file    == null &&
+                       rom.MD5 != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Md5 == rom.MD5 && f.Size == uSize);
+
+                    if(file    == null &&
+                       rom.CRC != null)
+                        file = Context.Singleton.Files.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
+
+                    if(file == null)
+                    {
+                        file = new DbFile
+                        {
+                            Crc32     = rom.CRC,
+                            CreatedOn = DateTime.UtcNow,
+                            Md5       = rom.MD5,
+                            Sha1      = rom.SHA1,
+                            Sha256    = rom.SHA256,
+                            Sha384    = rom.SHA384,
+                            Sha512    = rom.SHA512,
+                            Size      = uSize,
+                            UpdatedOn = DateTime.UtcNow
+                        };
+
+                        Context.Singleton.Files.Add(file);
+                    }
+
+                    if(string.IsNullOrEmpty(file.Crc32) &&
+                       !string.IsNullOrEmpty(rom.CRC))
+                    {
+                        file.Crc32     = rom.CRC;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(file.Md5) &&
+                       !string.IsNullOrEmpty(rom.MD5))
+                    {
+                        file.Md5       = rom.MD5;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(file.Sha1) &&
+                       !string.IsNullOrEmpty(rom.SHA1))
+                    {
+                        file.Sha1      = rom.SHA1;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(file.Sha256) &&
+                       !string.IsNullOrEmpty(rom.SHA256))
+                    {
+                        file.Sha256    = rom.SHA256;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(file.Sha384) &&
+                       !string.IsNullOrEmpty(rom.SHA384))
+                    {
+                        file.Sha384    = rom.SHA384;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(file.Sha512) &&
+                       !string.IsNullOrEmpty(rom.SHA512))
+                    {
+                        file.Sha512    = rom.SHA512;
+                        file.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    Context.Singleton.FilesByMachines.Add(new FileByMachine
+                    {
+                        File    = file,
+                        Machine = machine,
+                        Name    = rom.Name
+                    });
+
+                    if(hashCollision)
+                        pendingFiles.Add(file);
+                    else if(file.Sha512 != null)
+                        pendingFilesBySha512[file.Sha512] = file;
+                    else if(file.Sha384 != null)
+                        pendingFilesBySha384[file.Sha384] = file;
+                    else if(file.Sha256 != null)
+                        pendingFilesBySha256[file.Sha256] = file;
+                    else if(file.Sha1 != null)
+                        pendingFilesBySha1[file.Sha1] = file;
+                    else if(file.Md5 != null)
+                        pendingFilesByMd5[file.Md5] = file;
+                    else if(file.Crc32 != null)
+                        pendingFilesByCrc[file.Crc32] = file;
+
+                    position++;
+                }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Saving changes to database..."
+                });
+
+                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                Context.Singleton.SaveChanges();
+
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = disks.Count
+                });
+
+                // TODO: Support CHDs
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Adding disks..."
+                });
+
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
             }
             catch(Exception e)
@@ -208,6 +486,7 @@ namespace RomRepoMgr.Core.Workers
             }
         }
 
+        // TODO: Cancel and get back
         public void Abort() => _aborted = true;
 
         public event EventHandler                          SetIndeterminateProgress;

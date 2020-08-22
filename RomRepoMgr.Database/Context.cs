@@ -52,9 +52,10 @@ namespace RomRepoMgr.Database
             }
         }
 
-        public DbSet<DbFile>  Files    { get; set; }
-        public DbSet<RomSet>  RomSets  { get; set; }
-        public DbSet<Machine> Machines { get; set; }
+        public DbSet<DbFile>        Files           { get; set; }
+        public DbSet<RomSet>        RomSets         { get; set; }
+        public DbSet<Machine>       Machines        { get; set; }
+        public DbSet<FileByMachine> FilesByMachines { get; set; }
 
         public static Context Create(string dbPath)
         {
@@ -109,6 +110,15 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Name);
 
                 entity.HasOne(e => e.RomSet).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<FileByMachine>(entity =>
+            {
+                entity.HasIndex(e => e.Name);
+
+                entity.HasOne(e => e.Machine).WithMany(e => e.Files).OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.File).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
