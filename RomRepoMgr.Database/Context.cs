@@ -23,6 +23,7 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using Microsoft.EntityFrameworkCore;
 using RomRepoMgr.Database.Models;
 
@@ -30,7 +31,26 @@ namespace RomRepoMgr.Database
 {
     public sealed class Context : DbContext
     {
+        static Context _singleton;
+
         public Context(DbContextOptions options) : base(options) {}
+
+        public static Context Singleton
+        {
+            get
+            {
+                if(_singleton != null)
+                    return _singleton;
+
+                if(Settings.Settings.Current?.DatabasePath is null)
+                    throw new ArgumentNullException(nameof(Settings.Settings.Current.DatabasePath),
+                                                    "Settings are not initialized!");
+
+                _singleton = Create(Settings.Settings.Current.DatabasePath);
+
+                return _singleton;
+            }
+        }
 
         public DbSet<DbFile> Files { get; set; }
 

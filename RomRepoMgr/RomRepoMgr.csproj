@@ -20,6 +20,7 @@
         <PackageReference Include="Svg.Skia.Avalonia" Version="0.10.0-preview3" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
       <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
     </ItemGroup>
 </Project>

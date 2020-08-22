@@ -24,12 +24,15 @@
 *******************************************************************************/
 
 using System;
+using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
+using RomRepoMgr.Database;
 
 namespace RomRepoMgr.ViewModels
 {
@@ -201,6 +204,71 @@ namespace RomRepoMgr.ViewModels
         {
             LoadingSettingsUnknown = false;
             LoadingSettingsOk      = true;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string dbPathFolder = Path.GetDirectoryName(Settings.Settings.Current.DatabasePath);
+
+                    if(!Directory.Exists(dbPathFolder))
+                        Directory.CreateDirectory(dbPathFolder);
+
+                    _ = Context.Singleton;
+                }
+                catch(Exception e)
+                {
+                    // TODO: Log error
+                    Dispatcher.UIThread.Post(FailedLoadingDatabase);
+                }
+
+                Dispatcher.UIThread.Post(MigrateDatabase);
+            });
         }
+
+        void FailedLoadingDatabase()
+        {
+            LoadingDatabaseUnknown = false;
+            LoadingDatabaseError   = true;
+            ExitVisible            = true;
+        }
+
+        void MigrateDatabase()
+        {
+            LoadingDatabaseUnknown = false;
+            LoadingDatabaseOk      = true;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    Context.Singleton.Database.Migrate();
+                }
+                catch(Exception e)
+                {
+                    // TODO: Log error
+                    Dispatcher.UIThread.Post(FailedMigratingDatabase);
+                }
+
+                Dispatcher.UIThread.Post(LoadMainWindow);
+            });
+        }
+
+        void FailedMigratingDatabase()
+        {
+            MigratingDatabaseUnknown = false;
+            MigratingDatabaseError   = true;
+            ExitVisible              = true;
+        }
+
+        void LoadMainWindow()
+        {
+            MigratingDatabaseUnknown = false;
+            MigratingDatabaseOk      = true;
+
+            WorkFinished?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal event EventHandler WorkFinished;
     }
 }

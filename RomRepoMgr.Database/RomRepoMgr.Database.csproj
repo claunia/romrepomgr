@@ -18,4 +18,8 @@
       <Folder Include="Migrations" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
+    </ItemGroup>
+
 </Project>
