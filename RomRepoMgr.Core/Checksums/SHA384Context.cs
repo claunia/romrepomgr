@@ -83,7 +83,7 @@ namespace Aaru.Checksums
         public static byte[] File(string filename)
         {
             var    localSha384Provider = SHA384.Create();
-            var    fileStream          = new FileStream(filename, FileMode.Open);
+            var    fileStream          = new FileStream(filename, FileMode.Open, FileAccess.Read);
             byte[] result              = localSha384Provider.ComputeHash(fileStream);
             fileStream.Close();
 
@@ -96,7 +96,7 @@ namespace Aaru.Checksums
         public static string File(string filename, out byte[] hash)
         {
             var localSha384Provider = SHA384.Create();
-            var fileStream          = new FileStream(filename, FileMode.Open);
+            var fileStream          = new FileStream(filename, FileMode.Open, FileAccess.Read);
             hash = localSha384Provider.ComputeHash(fileStream);
             var sha384Output = new StringBuilder();
 

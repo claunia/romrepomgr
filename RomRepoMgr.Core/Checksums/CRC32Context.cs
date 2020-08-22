@@ -144,7 +144,7 @@ namespace Aaru.Checksums
         /// <param name="seed">CRC seed</param>
         public static string File(string filename, out byte[] hash, uint polynomial, uint seed)
         {
-            var fileStream = new FileStream(filename, FileMode.Open);
+            var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read);
 
             uint localhashInt = seed;
 

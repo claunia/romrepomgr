@@ -83,7 +83,7 @@ namespace Aaru.Checksums
         public static byte[] File(string filename)
         {
             var    localMd5Provider = MD5.Create();
-            var    fileStream       = new FileStream(filename, FileMode.Open);
+            var    fileStream       = new FileStream(filename, FileMode.Open, FileAccess.Read);
             byte[] result           = localMd5Provider.ComputeHash(fileStream);
             fileStream.Close();
 
@@ -96,7 +96,7 @@ namespace Aaru.Checksums
         public static string File(string filename, out byte[] hash)
         {
             var localMd5Provider = MD5.Create();
-            var fileStream       = new FileStream(filename, FileMode.Open);
+            var fileStream       = new FileStream(filename, FileMode.Open, FileAccess.Read);
             hash = localMd5Provider.ComputeHash(fileStream);
             var md5Output = new StringBuilder();
 
