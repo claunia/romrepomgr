@@ -68,12 +68,14 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Hashing DAT file..."
                 });
 
-                string datHash = Sha384Context.File(_datPath, out _);
+                string datHash = Sha384Context.File(_datPath, out byte[] datHashBinary);
+
+                string datHash32 = Base32.ToBase32String(datHashBinary);
 
                 if(!Directory.Exists(_datFilesPath))
                     Directory.CreateDirectory(_datFilesPath);
 
-                string compressedDatPath = Path.Combine(_datFilesPath, datHash + ".lz");
+                string compressedDatPath = Path.Combine(_datFilesPath, datHash32 + ".lz");
 
                 if(File.Exists(compressedDatPath))
                 {
@@ -90,7 +92,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Adding DAT to database..."
                 });
 
-                // TODO: Check if there is a has in database but not in repo
+                // TODO: Check if there is a hash in database but not in repo
 
                 var romSet = new RomSet
                 {
