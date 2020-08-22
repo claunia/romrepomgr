@@ -5,7 +5,7 @@
         xmlns:svg="clr-namespace:Svg.Skia.Avalonia;assembly=Svg.Skia.Avalonia" mc:Ignorable="d" d:DesignWidth="450"
         d:DesignHeight="250" x:Class="RomRepoMgr.Views.SplashWindow" Icon="/Assets/avalonia-logo.ico"
         Title="ROM Repository Manager" SystemDecorations="BorderOnly" WindowStartupLocation="CenterScreen" Width="250"
-        Height="120">
+        Height="140">
     <Design.DataContext>
         <vm:SplashWindowViewModel />
     </Design.DataContext>
@@ -65,6 +65,24 @@
                 </Image.Source>
             </Image>
             <TextBlock Text="{Binding MigratingDatabaseText}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingRomSetsOk}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-checked.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingRomSetsError}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-error.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingRomSetsUnknown}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-question.svg" />
+                </Image.Source>
+            </Image>
+            <TextBlock Text="{Binding LoadingRomSetsText}" VerticalAlignment="Center" />
         </StackPanel>
         <Button Command="{Binding ExitCommand}" IsVisible="{Binding ExitVisible}" HorizontalAlignment="Right">
             <TextBlock Text="{Binding ExitButtonText}" />

@@ -23,6 +23,7 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
@@ -30,7 +31,13 @@ namespace RomRepoMgr.Views
 {
     public class MainWindow : Window
     {
-        public MainWindow() => InitializeComponent();
+        public MainWindow()
+        {
+            InitializeComponent();
+        #if DEBUG
+            this.AttachDevTools();
+        #endif
+        }
 
         void InitializeComponent() => AvaloniaXamlLoader.Load(this);
     }

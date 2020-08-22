@@ -27,10 +27,41 @@
                 </TabItem.Header>
                 <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="{Binding RomSetNameLabel}" Binding="{Binding Name}" Width="Auto"
-                                            IsReadOnly="True" />
-                        <DataGridTextColumn Header="{Binding RomSetVersionLabel}" Binding="{Binding Version}"
-                                            Width="Auto" IsReadOnly="True" />
+                        <DataGridTextColumn Binding="{Binding Name}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetNameLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Version}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetVersionLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Author}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetAuthorLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Date}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetDateLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Description}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetDescriptionLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Comment}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetCommentLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Homepage}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetHomepageLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>

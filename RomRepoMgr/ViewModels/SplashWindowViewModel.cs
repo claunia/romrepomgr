@@ -24,7 +24,9 @@
 *******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
@@ -33,6 +35,7 @@ using Avalonia.Threading;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using RomRepoMgr.Database;
+using RomRepoMgr.Models;
 
 namespace RomRepoMgr.ViewModels
 {
@@ -44,6 +47,11 @@ namespace RomRepoMgr.ViewModels
         bool   _loadingDatabaseOk;
         string _loadingDatabaseText;
         bool   _loadingDatabaseUnknown;
+        bool   _loadingRomSetsError;
+
+        bool   _loadingRomSetsOk;
+        string _loadingRomSetsText;
+        bool   _loadingRomSetsUnknown;
         bool   _loadingSettingsError;
         bool   _loadingSettingsOk;
         string _loadingSettingsText;
@@ -69,6 +77,9 @@ namespace RomRepoMgr.ViewModels
             MigratingDatabaseOk      = false;
             MigratingDatabaseError   = false;
             MigratingDatabaseUnknown = true;
+            LoadingRomSetsOk         = false;
+            LoadingRomSetsError      = false;
+            LoadingRomSetsUnknown    = true;
             ExitVisible              = false;
         }
 
@@ -164,6 +175,30 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _exitButtonText, value);
         }
 
+        public bool LoadingRomSetsOk
+        {
+            get => _loadingRomSetsOk;
+            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsOk, value);
+        }
+
+        public bool LoadingRomSetsError
+        {
+            get => _loadingRomSetsError;
+            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsError, value);
+        }
+
+        public bool LoadingRomSetsUnknown
+        {
+            get => _loadingRomSetsUnknown;
+            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
+        }
+
+        public string LoadingRomSetsText
+        {
+            get => _loadingRomSetsText;
+            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsText, value);
+        }
+
         internal void ExecuteExitCommand() =>
             (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();
 
@@ -173,6 +208,7 @@ namespace RomRepoMgr.ViewModels
             LoadingSettingsText   = "Loading settings...";
             LoadingDatabaseText   = "Loading database...";
             MigratingDatabaseText = "Migrating database...";
+            LoadingRomSetsText    = "Loading ROM sets...";
             ExitButtonText        = "Exit";
         }
 
@@ -183,14 +219,14 @@ namespace RomRepoMgr.ViewModels
             try
             {
                 Settings.Settings.LoadSettings();
+
+                Dispatcher.UIThread.Post(LoadDatabase);
             }
             catch(Exception e)
             {
                 // TODO: Log error
                 Dispatcher.UIThread.Post(FailedLoadingSettings);
             }
-
-            Dispatcher.UIThread.Post(LoadDatabase);
         });
 
         void FailedLoadingSettings()
@@ -215,14 +251,14 @@ namespace RomRepoMgr.ViewModels
                         Directory.CreateDirectory(dbPathFolder);
 
                     _ = Context.Singleton;
+
+                    Dispatcher.UIThread.Post(MigrateDatabase);
                 }
                 catch(Exception e)
                 {
                     // TODO: Log error
                     Dispatcher.UIThread.Post(FailedLoadingDatabase);
                 }
-
-                Dispatcher.UIThread.Post(MigrateDatabase);
             });
         }
 
@@ -243,14 +279,14 @@ namespace RomRepoMgr.ViewModels
                 try
                 {
                     Context.Singleton.Database.Migrate();
+
+                    Dispatcher.UIThread.Post(LoadRomSets);
                 }
                 catch(Exception e)
                 {
                     // TODO: Log error
                     Dispatcher.UIThread.Post(FailedMigratingDatabase);
                 }
-
-                Dispatcher.UIThread.Post(LoadMainWindow);
             });
         }
 
@@ -261,14 +297,65 @@ namespace RomRepoMgr.ViewModels
             ExitVisible              = true;
         }
 
-        void LoadMainWindow()
+        void LoadRomSets()
         {
             MigratingDatabaseUnknown = false;
             MigratingDatabaseOk      = true;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    GotRomSets?.Invoke(this, new RomSetEventArgs
+                    {
+                        RomSets = Context.Singleton.RomSets.OrderBy(r => r.Name).ThenBy(r => r.Version).
+                                          ThenBy(r => r.Date).ThenBy(r => r.Description).ThenBy(r => r.Comment).
+                                          ThenBy(r => r.Filename).Select(r => new RomSetModel
+                                          {
+                                              Author      = r.Author,
+                                              Comment     = r.Comment,
+                                              Date        = r.Date,
+                                              Description = r.Description,
+                                              Filename    = r.Filename,
+                                              Homepage    = r.Homepage,
+                                              Name        = r.Name,
+                                              Sha384      = r.Sha384,
+                                              Version     = r.Version
+                                          }).ToList()
+                    });
+
+                    Dispatcher.UIThread.Post(LoadMainWindow);
+                }
+                catch(Exception e)
+                {
+                    // TODO: Log error
+                    Dispatcher.UIThread.Post(FailedLoadingRomSets);
+                }
+            });
+        }
+
+        void FailedLoadingRomSets()
+        {
+            LoadingRomSetsUnknown = false;
+            LoadingRomSetsError   = true;
+            ExitVisible           = true;
+        }
+
+        void LoadMainWindow()
+        {
+            LoadingRomSetsUnknown = false;
+            LoadingRomSetsOk      = true;
 
             WorkFinished?.Invoke(this, EventArgs.Empty);
         }
 
         internal event EventHandler WorkFinished;
+
+        internal event EventHandler<RomSetEventArgs> GotRomSets;
+
+        public sealed class RomSetEventArgs : EventArgs
+        {
+            public List<RomSetModel> RomSets { get; set; }
+        }
     }
 }

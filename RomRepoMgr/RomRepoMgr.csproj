@@ -17,6 +17,7 @@
         <PackageReference Include="Avalonia" Version="0.10.0-preview3" />
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.0-preview3" />
         <PackageReference Include="Avalonia.Desktop" Version="0.10.0-preview3" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0-preview3" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0-preview3" />
         <PackageReference Include="Svg.Skia.Avalonia" Version="0.10.0-preview3" />
     </ItemGroup>

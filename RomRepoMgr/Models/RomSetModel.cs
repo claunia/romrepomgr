@@ -25,9 +25,16 @@
 
 namespace RomRepoMgr.Models
 {
-    public sealed class RomSetModel
+    public class RomSetModel
     {
-        public string Name    { get; set; }
-        public string Version { get; set; }
+        public string Author      { get; set; }
+        public string Comment     { get; set; }
+        public string Date        { get; set; }
+        public string Description { get; set; }
+        public string Homepage    { get; set; }
+        public string Name        { get; set; }
+        public string Version     { get; set; }
+        public string Filename    { get; set; }
+        public string Sha384      { get; set; }
     }
 }

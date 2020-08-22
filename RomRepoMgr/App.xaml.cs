@@ -24,10 +24,12 @@
 *******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using RomRepoMgr.Models;
 using RomRepoMgr.ViewModels;
 using RomRepoMgr.Views;
 
@@ -35,6 +37,8 @@ namespace RomRepoMgr
 {
     public class App : Application
     {
+        List<RomSetModel> _romSets;
+
         public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
         public override void OnFrameworkInitializationCompleted()
@@ -44,12 +48,15 @@ namespace RomRepoMgr
                 var splashWindow = new SplashWindow();
                 var swvm         = new SplashWindowViewModel();
                 swvm.WorkFinished        += OnSplashFinished;
+                swvm.GotRomSets          += OnGotRomSets;
                 splashWindow.DataContext =  swvm;
                 desktop.MainWindow       =  splashWindow;
             }
 
             base.OnFrameworkInitializationCompleted();
         }
+
+        void OnGotRomSets(object sender, SplashWindowViewModel.RomSetEventArgs e) => _romSets = e.RomSets;
 
         void OnSplashFinished(object sender, EventArgs e)
         {
@@ -64,7 +71,7 @@ namespace RomRepoMgr
 
             // Create and show main window
             desktop.MainWindow             = new MainWindow();
-            desktop.MainWindow.DataContext = new MainWindowViewModel(desktop.MainWindow as MainWindow);
+            desktop.MainWindow.DataContext = new MainWindowViewModel(desktop.MainWindow as MainWindow, _romSets);
             desktop.MainWindow.Show();
 
             // Now can close when all windows are closed

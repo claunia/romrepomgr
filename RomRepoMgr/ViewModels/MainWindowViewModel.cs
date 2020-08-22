@@ -39,20 +39,25 @@ namespace RomRepoMgr.ViewModels
     {
         readonly MainWindow _view;
 
-        public MainWindowViewModel(MainWindow view)
+        public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
         {
             _view            = view;
             ExitCommand      = ReactiveCommand.Create(ExecuteExitCommand);
             SettingsCommand  = ReactiveCommand.Create(ExecuteSettingsCommand);
             AboutCommand     = ReactiveCommand.Create(ExecuteAboutCommand);
             ImportDatCommand = ReactiveCommand.Create(ExecuteImportDatCommand);
-            RomSets          = new ObservableCollection<RomSetModel>();
+            RomSets          = new ObservableCollection<RomSetModel>(romSets);
         }
 
-        public ObservableCollection<RomSetModel> RomSets            { get; }
-        public string                            RomSetLabel        => "ROM sets";
-        public string                            RomSetNameLabel    => "Name";
-        public string                            RomSetVersionLabel => "Version";
+        public ObservableCollection<RomSetModel> RomSets                { get; }
+        public string                            RomSetLabel            => "ROM sets";
+        public string                            RomSetNameLabel        => "Name";
+        public string                            RomSetVersionLabel     => "Version";
+        public string                            RomSetAuthorLabel      => "Author";
+        public string                            RomSetDateLabel        => "Date";
+        public string                            RomSetDescriptionLabel => "Description";
+        public string                            RomSetCommentLabel     => "Comment";
+        public string                            RomSetHomepageLabel    => "Homepage";
 
         public string Greeting => "Hello World!";
         public bool NativeMenuSupported =>
