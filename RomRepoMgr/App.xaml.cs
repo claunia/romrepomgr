@@ -13,9 +13,9 @@ namespace RomRepoMgr
         public override void OnFrameworkInitializationCompleted()
         {
             if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                desktop.MainWindow = new MainWindow
+                desktop.MainWindow = new SplashWindow
                 {
-                    DataContext = new MainWindowViewModel()
+                    DataContext = new SplashWindowViewModel()
                 };
 
             base.OnFrameworkInitializationCompleted();

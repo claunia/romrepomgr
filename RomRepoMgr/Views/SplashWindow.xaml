@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:svg="clr-namespace:Svg.Skia.Avalonia;assembly=Svg.Skia.Avalonia" mc:Ignorable="d" d:DesignWidth="450"
+        d:DesignHeight="250" x:Class="RomRepoMgr.Views.SplashWindow" Icon="/Assets/avalonia-logo.ico"
+        Title="ROM Repository Manager" SystemDecorations="BorderOnly" WindowStartupLocation="CenterScreen" Width="250"
+        Height="120">
+    <Design.DataContext>
+        <vm:SplashWindowViewModel />
+    </Design.DataContext>
+    <!-- Icons from KDE's Breeze-->
+    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" Orientation="Vertical" Margin="5">
+        <TextBlock Text="{Binding LoadingText}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top" />
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingSettingsOk}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-checked.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingSettingsError}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-error.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingSettingsUnknown}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-question.svg" />
+                </Image.Source>
+            </Image>
+            <TextBlock Text="{Binding LoadingSettingsText}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingDatabaseOk}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-checked.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingDatabaseError}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-error.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding LoadingDatabaseUnknown}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-question.svg" />
+                </Image.Source>
+            </Image>
+            <TextBlock Text="{Binding LoadingDatabaseText}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding MigratingDatabaseOk}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-checked.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding MigratingDatabaseError}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-error.svg" />
+                </Image.Source>
+            </Image>
+            <Image MaxWidth="24" MaxHeight="24" IsVisible="{Binding MigratingDatabaseUnknown}">
+                <Image.Source>
+                    <svg:SvgImage Source="/Assets/emblem-question.svg" />
+                </Image.Source>
+            </Image>
+            <TextBlock Text="{Binding MigratingDatabaseText}" VerticalAlignment="Center" />
+        </StackPanel>
+        <Button Command="{Binding ExitCommand}" IsVisible="{Binding ExitVisible}" HorizontalAlignment="Right">
+            <TextBlock Text="{Binding ExitButtonText}" />
+        </Button>
+    </StackPanel>
+</Window>
