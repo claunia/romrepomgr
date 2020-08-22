@@ -28,6 +28,10 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<string>("Sha256").HasColumnType("TEXT").HasMaxLength(64);
 
+                b.Property<string>("Sha384").HasColumnType("TEXT").HasMaxLength(96);
+
+                b.Property<string>("Sha512").HasColumnType("TEXT").HasMaxLength(128);
+
                 b.Property<ulong>("Size").HasColumnType("INTEGER");
 
                 b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
@@ -39,6 +43,10 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Sha1");
 
                 b.HasIndex("Sha256");
+
+                b.HasIndex("Sha384");
+
+                b.HasIndex("Sha512");
 
                 b.HasIndex("Size");
 

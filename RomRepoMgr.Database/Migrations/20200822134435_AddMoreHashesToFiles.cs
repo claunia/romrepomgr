@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 // RomRepoMgr - ROM repository manager
 // ----------------------------------------------------------------------------
 //
@@ -23,25 +23,32 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Migrations
 {
-    public class DbFile : BaseModel<ulong>
+    public partial class AddMoreHashesToFiles : Migration
     {
-        [Required]
-        public ulong Size { get; set; }
-        [StringLength(8, MinimumLength = 8)]
-        public string Crc32 { get; set; }
-        [StringLength(32, MinimumLength = 32)]
-        public string Md5 { get; set; }
-        [StringLength(40, MinimumLength = 40)]
-        public string Sha1 { get; set; }
-        [StringLength(64, MinimumLength = 64)]
-        public string Sha256 { get; set; }
-        [StringLength(96, MinimumLength = 96)]
-        public string Sha384 { get; set; }
-        [StringLength(128, MinimumLength = 128)]
-        public string Sha512 { get; set; }
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>("Sha384", "Files", maxLength: 96, nullable: true);
+
+            migrationBuilder.AddColumn<string>("Sha512", "Files", maxLength: 128, nullable: true);
+
+            migrationBuilder.CreateIndex("IX_Files_Sha384", "Files", "Sha384");
+
+            migrationBuilder.CreateIndex("IX_Files_Sha512", "Files", "Sha512");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex("IX_Files_Sha384", "Files");
+
+            migrationBuilder.DropIndex("IX_Files_Sha512", "Files");
+
+            migrationBuilder.DropColumn("Sha384", "Files");
+
+            migrationBuilder.DropColumn("Sha512", "Files");
+        }
     }
 }

@@ -76,6 +76,10 @@ namespace RomRepoMgr.Database
 
                 entity.HasIndex(e => e.Sha256);
 
+                entity.HasIndex(e => e.Sha384);
+
+                entity.HasIndex(e => e.Sha512);
+
                 entity.HasIndex(e => e.Size);
             });
 
