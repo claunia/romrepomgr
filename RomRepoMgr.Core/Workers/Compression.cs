@@ -1,8 +1,35 @@
+/******************************************************************************
+// RomRepoMgr - ROM repository manager
+// ----------------------------------------------------------------------------
+//
+// Author(s)      : Natalia Portillo <claunia@claunia.com>
+//
+// --[ License ] --------------------------------------------------------------
+//
+//     This program is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU General Public License as
+//     published by the Free Software Foundation, either version 3 of the
+//     License, or (at your option) any later version.
+//
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+//
+//     You should have received a copy of the GNU General Public License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// ----------------------------------------------------------------------------
+// Copyright © 2017-2020 Natalia Portillo
+*******************************************************************************/
+
 using System;
+using System.Diagnostics;
 using System.IO;
 using RomRepoMgr.Core.EventArgs;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
+using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.Core.Workers
 {
@@ -12,6 +39,8 @@ namespace RomRepoMgr.Core.Workers
 
         public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
         public event EventHandler<ProgressEventArgs>       SetProgress;
+        public event EventHandler<MessageEventArgs>        FinishedWithText;
+        public event EventHandler<ErrorEventArgs>          FailedWithText;
 
         public void CompressFile(string source, string destination)
         {
@@ -52,6 +81,142 @@ namespace RomRepoMgr.Core.Workers
             inFs.Close();
             zStream.Close();
             outFs.Dispose();
+        }
+
+        public void CheckUnar(string unArPath)
+        {
+            if(string.IsNullOrWhiteSpace(unArPath))
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "unar path is not set."
+                });
+
+                return;
+            }
+
+            string unarFolder   = Path.GetDirectoryName(unArPath);
+            string extension    = Path.GetExtension(unArPath);
+            string unarfilename = Path.GetFileNameWithoutExtension(unArPath);
+            string lsarfilename = unarfilename.Replace("unar", "lsar");
+            string unarPath     = Path.Combine(unarFolder, unarfilename + extension);
+            string lsarPath     = Path.Combine(unarFolder, lsarfilename + extension);
+
+            if(!File.Exists(unarPath))
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = $"Cannot find unar executable at {unarPath}."
+                });
+
+                return;
+            }
+
+            if(!File.Exists(lsarPath))
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "Cannot find lsar executable."
+                });
+
+                return;
+            }
+
+            string unarOut, lsarOut;
+
+            try
+            {
+                var unarProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName               = unarPath,
+                        CreateNoWindow         = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute        = false
+                    }
+                };
+
+                unarProcess.Start();
+                unarProcess.WaitForExit();
+                unarOut = unarProcess.StandardOutput.ReadToEnd();
+            }
+            catch
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "Cannot run unar."
+                });
+
+                return;
+            }
+
+            try
+            {
+                var lsarProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName               = lsarPath,
+                        CreateNoWindow         = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute        = false
+                    }
+                };
+
+                lsarProcess.Start();
+                lsarProcess.WaitForExit();
+                lsarOut = lsarProcess.StandardOutput.ReadToEnd();
+            }
+            catch
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "Cannot run lsar."
+                });
+
+                return;
+            }
+
+            if(!unarOut.StartsWith("unar ", StringComparison.CurrentCulture))
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "Not the correct unar executable"
+                });
+
+                return;
+            }
+
+            if(!lsarOut.StartsWith("lsar ", StringComparison.CurrentCulture))
+            {
+                FailedWithText?.Invoke(this, new ErrorEventArgs
+                {
+                    Message = "Not the correct lsar executable"
+                });
+
+                return;
+            }
+
+            var versionProcess = new Process
+            {
+                StartInfo =
+                {
+                    FileName               = unarPath,
+                    CreateNoWindow         = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute        = false,
+                    Arguments              = "-v"
+                }
+            };
+
+            versionProcess.Start();
+            versionProcess.WaitForExit();
+
+            FinishedWithText?.Invoke(this, new MessageEventArgs
+            {
+                Message = versionProcess.StandardOutput.ReadToEnd().TrimEnd('\n')
+            });
         }
     }
 }

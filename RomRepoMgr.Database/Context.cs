@@ -57,6 +57,8 @@ namespace RomRepoMgr.Database
         public DbSet<Machine>       Machines        { get; set; }
         public DbSet<FileByMachine> FilesByMachines { get; set; }
 
+        public static void ReplaceSingleton(string dbPath) => _singleton = Create(dbPath);
+
         public static Context Create(string dbPath)
         {
             var optionsBuilder = new DbContextOptionsBuilder();

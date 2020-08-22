@@ -1,0 +1,106 @@
+﻿<!--
+// /***************************************************************************
+// RomRepoMgr - ROM repository manager
+// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+//
+// Author(s)      : Natalia Portillo <claunia@claunia.com>
+//
+// ‐‐[ License ] ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+//
+//     This program is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU General public License as
+//     published by the Free Software Foundation, either version 3 of the
+//     License, or (at your option) any later version.
+//
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General public License for more details.
+//
+//     You should have received a copy of the GNU General public License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+// Copyright © 2020 Natalia Portillo
+// ****************************************************************************/
+-->
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
+        d:DesignHeight="450" Width="480" Height="320" x:Class="RomRepoMgr.Views.SettingsDialog"
+        Icon="/Assets/avalonia-logo.ico" CanResize="False" Title="{Binding Title}">
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+    <Border Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding DatabaseLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding DatabasePath}" IsReadOnly="True" Padding="5" />
+                <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding DatabaseCommand}" Padding="5">
+                    <TextBlock Text="{Binding ChooseLabel}" />
+                </Button>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding RepositoryLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding RepositoryPath}" IsReadOnly="True" Padding="5" />
+                <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding RepositoryCommand}" Padding="5">
+                    <TextBlock Text="{Binding ChooseLabel}" />
+                </Button>
+            </Grid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding TemporaryLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding TemporaryPath}" IsReadOnly="True" Padding="5" />
+                <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding TemporaryCommand}" Padding="5">
+                    <TextBlock Text="{Binding ChooseLabel}" />
+                </Button>
+            </Grid>
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding UnArPathLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding UnArPath}" IsReadOnly="True" Padding="5" />
+                <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding UnArCommand}" Padding="5">
+                    <TextBlock Text="{Binding ChooseLabel}" />
+                </Button>
+            </Grid>
+            <TextBlock Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding UnArVersion}"
+                       FontWeight="Bold" />
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding SaveCommand}">
+                    <TextBlock Text="{Binding SaveLabel}" />
+                </Button>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding CloseCommand}">
+                    <TextBlock Text="{Binding CloseLabel}" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

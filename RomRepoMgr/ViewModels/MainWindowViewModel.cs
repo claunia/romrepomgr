@@ -75,9 +75,9 @@ namespace RomRepoMgr.ViewModels
 
         internal async void ExecuteSettingsCommand()
         {
-            /*var dialog = new SettingsDialog();
-            dialog.DataContext = new SettingsViewModel(dialog, false);
-            await dialog.ShowDialog(_view);*/
+            var dialog = new SettingsDialog();
+            dialog.DataContext = new SettingsViewModel(dialog);
+            await dialog.ShowDialog(_view);
         }
 
         internal void ExecuteExitCommand() =>
