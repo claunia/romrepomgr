@@ -9,6 +9,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem Header="_Import DAT" Command="{Binding ImportDatCommand}" /> <Separator />
                 <MenuItem Header="_Settings" IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding SettingsCommand}" />
                 <Separator />

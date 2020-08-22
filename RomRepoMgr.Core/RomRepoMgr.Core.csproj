@@ -8,4 +8,8 @@
       <PackageReference Include="System.Security.Principal.Windows" Version="4.5.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SabreTools\SabreTools.Library\SabreTools.Library.csproj" />
+    </ItemGroup>
+
 </Project>

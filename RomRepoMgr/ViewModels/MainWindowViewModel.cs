@@ -23,6 +23,7 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia;
@@ -40,11 +41,12 @@ namespace RomRepoMgr.ViewModels
 
         public MainWindowViewModel(MainWindow view)
         {
-            _view           = view;
-            ExitCommand     = ReactiveCommand.Create(ExecuteExitCommand);
-            SettingsCommand = ReactiveCommand.Create(ExecuteSettingsCommand);
-            AboutCommand    = ReactiveCommand.Create(ExecuteAboutCommand);
-            RomSets         = new ObservableCollection<RomSetModel>();
+            _view            = view;
+            ExitCommand      = ReactiveCommand.Create(ExecuteExitCommand);
+            SettingsCommand  = ReactiveCommand.Create(ExecuteSettingsCommand);
+            AboutCommand     = ReactiveCommand.Create(ExecuteAboutCommand);
+            ImportDatCommand = ReactiveCommand.Create(ExecuteImportDatCommand);
+            RomSets          = new ObservableCollection<RomSetModel>();
         }
 
         public ObservableCollection<RomSetModel> RomSets            { get; }
@@ -57,9 +59,10 @@ namespace RomRepoMgr.ViewModels
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
                                                     IClassicDesktopStyleApplicationLifetime)?.MainWindow);
 
-        public ReactiveCommand<Unit, Unit> AboutCommand    { get; }
-        public ReactiveCommand<Unit, Unit> ExitCommand     { get; }
-        public ReactiveCommand<Unit, Unit> SettingsCommand { get; }
+        public ReactiveCommand<Unit, Unit> AboutCommand     { get; }
+        public ReactiveCommand<Unit, Unit> ExitCommand      { get; }
+        public ReactiveCommand<Unit, Unit> SettingsCommand  { get; }
+        public ReactiveCommand<Unit, Unit> ImportDatCommand { get; }
 
         internal async void ExecuteSettingsCommand()
         {
@@ -76,6 +79,41 @@ namespace RomRepoMgr.ViewModels
             var dialog = new About();
             dialog.DataContext = new AboutViewModel(dialog);
             dialog.ShowDialog(_view);
+        }
+
+        internal async void ExecuteImportDatCommand()
+        {
+            var dlgOpen = new OpenFileDialog();
+            dlgOpen.AllowMultiple = false;
+            dlgOpen.Title         = "Import DAT file...";
+
+            dlgOpen.Filters.Add(new FileDialogFilter
+            {
+                Extensions = new List<string>
+                {
+                    "*.dat",
+                    "*.xml"
+                },
+                Name = "DAT files"
+            });
+
+            dlgOpen.Filters.Add(new FileDialogFilter
+            {
+                Extensions = new List<string>
+                {
+                    "*.*"
+                },
+                Name = "All files"
+            });
+
+            string[] result = await dlgOpen.ShowAsync(_view);
+
+            if(result?.Length != 1)
+                return;
+
+            var dialog = new ImportDat();
+            dialog.DataContext = new ImportDatViewModel(dialog, result[0]);
+            await dialog.ShowDialog(_view);
         }
     }
 }

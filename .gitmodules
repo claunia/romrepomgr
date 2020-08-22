@@ -1,0 +1,3 @@
+[submodule "SabreTools"]
+	path = SabreTools
+	url = https://github.com/SabreTools/SabreTools

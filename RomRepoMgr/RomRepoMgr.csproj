@@ -23,5 +23,6 @@
     <ItemGroup>
       <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
       <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
+      <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj" />
     </ItemGroup>
 </Project>
