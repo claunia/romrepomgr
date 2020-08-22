@@ -64,11 +64,41 @@ namespace RomRepoMgr
 
             // Create and show main window
             desktop.MainWindow             = new MainWindow();
-            desktop.MainWindow.DataContext = new MainWindowViewModel();
+            desktop.MainWindow.DataContext = new MainWindowViewModel(desktop.MainWindow as MainWindow);
             desktop.MainWindow.Show();
 
             // Now can close when all windows are closed
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+        }
+
+        void OnAboutClicked(object sender, EventArgs args)
+        {
+            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+               !(desktop.MainWindow is MainWindow mainWindow)                            ||
+               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+                return;
+
+            mainWindowViewModel.ExecuteAboutCommand();
+        }
+
+        void OnQuitClicked(object sender, EventArgs args)
+        {
+            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+               !(desktop.MainWindow is MainWindow mainWindow)                            ||
+               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+                return;
+
+            mainWindowViewModel.ExecuteExitCommand();
+        }
+
+        void OnPreferencesClicked(object sender, EventArgs args)
+        {
+            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+               !(desktop.MainWindow is MainWindow mainWindow)                            ||
+               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+                return;
+
+            mainWindowViewModel.ExecuteSettingsCommand();
         }
     }
 }

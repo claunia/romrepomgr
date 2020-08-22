@@ -23,10 +23,51 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System.Reactive;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using ReactiveUI;
+using RomRepoMgr.Views;
+
 namespace RomRepoMgr.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        readonly MainWindow _view;
+
+        public MainWindowViewModel(MainWindow view)
+        {
+            _view           = view;
+            ExitCommand     = ReactiveCommand.Create(ExecuteExitCommand);
+            SettingsCommand = ReactiveCommand.Create(ExecuteSettingsCommand);
+            AboutCommand    = ReactiveCommand.Create(ExecuteAboutCommand);
+        }
+
         public string Greeting => "Hello World!";
+        public bool NativeMenuSupported =>
+            NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
+                                                    IClassicDesktopStyleApplicationLifetime)?.MainWindow);
+
+        public ReactiveCommand<Unit, Unit> AboutCommand    { get; }
+        public ReactiveCommand<Unit, Unit> ExitCommand     { get; }
+        public ReactiveCommand<Unit, Unit> SettingsCommand { get; }
+
+        internal async void ExecuteSettingsCommand()
+        {
+            /*var dialog = new SettingsDialog();
+            dialog.DataContext = new SettingsViewModel(dialog, false);
+            await dialog.ShowDialog(_view);*/
+        }
+
+        internal void ExecuteExitCommand() =>
+            (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();
+
+        internal void ExecuteAboutCommand()
+        {
+            var dialog = new About();
+            dialog.DataContext = new AboutViewModel(dialog);
+            dialog.ShowDialog(_view);
+        }
     }
 }

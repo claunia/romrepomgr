@@ -6,5 +6,19 @@
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Settings" IsVisible="{Binding !NativeMenuSupported}"
+                          Command="{Binding SettingsCommand}" />
+                <Separator />
+                <MenuItem Header="E_xit" IsVisible="{Binding !NativeMenuSupported}" Command="{Binding ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Name="AboutMenuItem" IsVisible="{Binding !NativeMenuSupported}"
+                          Command="{Binding AboutCommand}" />
+            </MenuItem>
+        </Menu>
+        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </DockPanel>
 </Window>
