@@ -29,7 +29,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using RomRepoMgr.Models;
+using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.ViewModels;
 using RomRepoMgr.Views;
 
@@ -56,7 +57,7 @@ namespace RomRepoMgr
             base.OnFrameworkInitializationCompleted();
         }
 
-        void OnGotRomSets(object sender, SplashWindowViewModel.RomSetEventArgs e) => _romSets = e.RomSets;
+        void OnGotRomSets(object sender, RomSetEventArgs e) => _romSets = e.RomSets;
 
         void OnSplashFinished(object sender, EventArgs e)
         {

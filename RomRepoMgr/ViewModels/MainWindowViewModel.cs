@@ -30,7 +30,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using ReactiveUI;
-using RomRepoMgr.Models;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -116,8 +116,9 @@ namespace RomRepoMgr.ViewModels
             if(result?.Length != 1)
                 return;
 
-            var dialog = new ImportDat();
-            dialog.DataContext = new ImportDatViewModel(dialog, result[0]);
+            var dialog             = new ImportDat();
+            var importDatViewModel = new ImportDatViewModel(dialog, result[0]);
+            dialog.DataContext = importDatViewModel;
             await dialog.ShowDialog(_view);
         }
     }

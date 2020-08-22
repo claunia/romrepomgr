@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.DotNet.PlatformAbstractions;
 using ReactiveUI;
-using RomRepoMgr.Models;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels

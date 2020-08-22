@@ -24,7 +24,6 @@
 *******************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -34,8 +33,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
+using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
-using RomRepoMgr.Models;
 
 namespace RomRepoMgr.ViewModels
 {
@@ -352,10 +352,5 @@ namespace RomRepoMgr.ViewModels
         internal event EventHandler WorkFinished;
 
         internal event EventHandler<RomSetEventArgs> GotRomSets;
-
-        public sealed class RomSetEventArgs : EventArgs
-        {
-            public List<RomSetModel> RomSets { get; set; }
-        }
     }
 }
