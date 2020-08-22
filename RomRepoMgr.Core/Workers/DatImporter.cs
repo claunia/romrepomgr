@@ -28,6 +28,8 @@ using System.Diagnostics;
 using System.IO;
 using Aaru.Checksums;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Database;
+using RomRepoMgr.Database.Models;
 using SabreTools.Library.DatFiles;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
@@ -82,6 +84,31 @@ namespace RomRepoMgr.Core.Workers
 
                     return;
                 }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Adding DAT to database..."
+                });
+
+                // TODO: Check if there is a has in database but not in repo
+
+                var romSet = new RomSet
+                {
+                    Author      = datFile.Header.Author,
+                    Comment     = datFile.Header.Comment,
+                    Date        = datFile.Header.Date,
+                    Description = datFile.Header.Description,
+                    Filename    = Path.GetFileName(_datPath),
+                    Homepage    = datFile.Header.Homepage,
+                    Name        = datFile.Header.Name,
+                    Sha384      = datHash,
+                    Version     = datFile.Header.Version,
+                    CreatedOn   = DateTime.UtcNow,
+                    UpdatedOn   = DateTime.UtcNow
+                };
+
+                Context.Singleton.RomSets.Add(romSet);
+                Context.Singleton.SaveChanges();
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {

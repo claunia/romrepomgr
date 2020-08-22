@@ -52,7 +52,8 @@ namespace RomRepoMgr.Database
             }
         }
 
-        public DbSet<DbFile> Files { get; set; }
+        public DbSet<DbFile> Files   { get; set; }
+        public DbSet<RomSet> RomSets { get; set; }
 
         public static Context Create(string dbPath)
         {
@@ -75,6 +76,27 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Sha256);
 
                 entity.HasIndex(e => e.Size);
+            });
+
+            modelBuilder.Entity<RomSet>(entity =>
+            {
+                entity.HasIndex(e => e.Author);
+
+                entity.HasIndex(e => e.Comment);
+
+                entity.HasIndex(e => e.Date);
+
+                entity.HasIndex(e => e.Description);
+
+                entity.HasIndex(e => e.Homepage);
+
+                entity.HasIndex(e => e.Name);
+
+                entity.HasIndex(e => e.Version);
+
+                entity.HasIndex(e => e.Filename);
+
+                entity.HasIndex(e => e.Sha384);
             });
         }
     }

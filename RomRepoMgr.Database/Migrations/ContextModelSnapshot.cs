@@ -20,7 +20,7 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<string>("Crc32").HasColumnType("TEXT").HasMaxLength(8);
 
-                b.Property<DateTime>("CreatedOn").ValueGeneratedOnAdd().HasColumnType("TEXT");
+                b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
 
                 b.Property<string>("Md5").HasColumnType("TEXT").HasMaxLength(32);
 
@@ -30,7 +30,7 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<ulong>("Size").HasColumnType("INTEGER");
 
-                b.Property<DateTime>("UpdatedOn").ValueGeneratedOnAddOrUpdate().HasColumnType("TEXT");
+                b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
 
                 b.HasKey("Id");
 
@@ -43,6 +43,55 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Size");
 
                 b.ToTable("Files");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.RomSet", b =>
+            {
+                b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<string>("Author").HasColumnType("TEXT");
+
+                b.Property<string>("Comment").HasColumnType("TEXT");
+
+                b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
+
+                b.Property<string>("Date").HasColumnType("TEXT");
+
+                b.Property<string>("Description").HasColumnType("TEXT");
+
+                b.Property<string>("Filename").IsRequired().HasColumnType("TEXT");
+
+                b.Property<string>("Homepage").HasColumnType("TEXT");
+
+                b.Property<string>("Name").HasColumnType("TEXT");
+
+                b.Property<string>("Sha384").IsRequired().HasColumnType("TEXT").HasMaxLength(96);
+
+                b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
+
+                b.Property<string>("Version").HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Author");
+
+                b.HasIndex("Comment");
+
+                b.HasIndex("Date");
+
+                b.HasIndex("Description");
+
+                b.HasIndex("Filename");
+
+                b.HasIndex("Homepage");
+
+                b.HasIndex("Name");
+
+                b.HasIndex("Sha384");
+
+                b.HasIndex("Version");
+
+                b.ToTable("RomSets");
             });
             #pragma warning restore 612, 618
         }

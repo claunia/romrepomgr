@@ -23,15 +23,22 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
 {
-    public abstract class BaseModel<TKey>
+    public class RomSet : BaseModel<long>
     {
-        public TKey Id { get; set; }
-
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
+        public string Author      { get; set; }
+        public string Comment     { get; set; }
+        public string Date        { get; set; }
+        public string Description { get; set; }
+        public string Homepage    { get; set; }
+        public string Name        { get; set; }
+        public string Version     { get; set; }
+        [Required]
+        public string Filename { get; set; }
+        [Required, StringLength(96, MinimumLength = 96)]
+        public string Sha384 { get; set; }
     }
 }

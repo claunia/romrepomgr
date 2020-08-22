@@ -29,7 +29,6 @@ namespace RomRepoMgr.Database.Migrations
                         .HasMaxLength(8);
 
                     b.Property<DateTime>("CreatedOn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Md5")
@@ -48,7 +47,6 @@ namespace RomRepoMgr.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedOn")
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
