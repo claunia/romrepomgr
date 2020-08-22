@@ -24,8 +24,10 @@
 *******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Aaru.Checksums;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
@@ -138,6 +140,59 @@ namespace RomRepoMgr.Core.Workers
                 datCompress.SetProgress       += SetProgress;
                 datCompress.SetProgressBounds += SetProgressBounds;
                 datCompress.CompressFile(_datPath, compressedDatPath);
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Getting machine (game) names..."
+                });
+
+                List<string> machineNames =
+                    (from value in datFile.Items.Values from item in value select item.Machine.Name).Distinct().
+                    ToList();
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Adding machines (games)..."
+                });
+
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = machineNames.Count
+                });
+
+                int                         position = 0;
+                Dictionary<string, Machine> machines = new Dictionary<string, Machine>();
+
+                foreach(string name in machineNames)
+                {
+                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = position
+                    });
+
+                    var machine = new Machine
+                    {
+                        Name      = name,
+                        RomSet    = romSet,
+                        CreatedOn = DateTime.UtcNow,
+                        UpdatedOn = DateTime.UtcNow
+                    };
+
+                    machines[name] = machine;
+
+                    Context.Singleton.Machines.Add(machine);
+                    position++;
+                }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Saving changes to database..."
+                });
+
+                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                Context.Singleton.SaveChanges();
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
             }

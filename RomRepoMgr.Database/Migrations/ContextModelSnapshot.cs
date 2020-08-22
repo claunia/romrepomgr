@@ -45,6 +45,27 @@ namespace RomRepoMgr.Database.Migrations
                 b.ToTable("Files");
             });
 
+            modelBuilder.Entity("RomRepoMgr.Database.Models.Machine", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
+
+                b.Property<string>("Name").IsRequired().HasColumnType("TEXT");
+
+                b.Property<long>("RomSetId").HasColumnType("INTEGER");
+
+                b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Name");
+
+                b.HasIndex("RomSetId");
+
+                b.ToTable("Machines");
+            });
+
             modelBuilder.Entity("RomRepoMgr.Database.Models.RomSet", b =>
             {
                 b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
@@ -92,6 +113,12 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Version");
 
                 b.ToTable("RomSets");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.Machine", b =>
+            {
+                b.HasOne("RomRepoMgr.Database.Models.RomSet", "RomSet").WithMany("Machines").HasForeignKey("RomSetId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
             });
             #pragma warning restore 612, 618
         }
