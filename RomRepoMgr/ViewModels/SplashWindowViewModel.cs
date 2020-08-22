@@ -23,9 +23,12 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using ReactiveUI;
 
 namespace RomRepoMgr.ViewModels
@@ -168,6 +171,36 @@ namespace RomRepoMgr.ViewModels
             LoadingDatabaseText   = "Loading database...";
             MigratingDatabaseText = "Migrating database...";
             ExitButtonText        = "Exit";
+        }
+
+        internal void OnOpened() => Dispatcher.UIThread.Post(LoadSettings);
+
+        void LoadSettings() => Task.Run(() =>
+        {
+            try
+            {
+                Settings.Settings.LoadSettings();
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedLoadingSettings);
+            }
+
+            Dispatcher.UIThread.Post(LoadDatabase);
+        });
+
+        void FailedLoadingSettings()
+        {
+            LoadingSettingsUnknown = false;
+            LoadingSettingsError   = true;
+            ExitVisible            = true;
+        }
+
+        void LoadDatabase()
+        {
+            LoadingSettingsUnknown = false;
+            LoadingSettingsOk      = true;
         }
     }
 }

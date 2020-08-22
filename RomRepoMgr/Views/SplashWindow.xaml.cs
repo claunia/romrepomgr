@@ -23,8 +23,10 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views
 {
@@ -33,5 +35,11 @@ namespace RomRepoMgr.Views
         public SplashWindow() => InitializeComponent();
 
         void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+        protected override void OnOpened(EventArgs e)
+        {
+            base.OnOpened(e);
+            (DataContext as SplashWindowViewModel)?.OnOpened();
+        }
     }
 }
