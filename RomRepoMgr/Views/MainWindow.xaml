@@ -16,6 +16,9 @@
                 <Separator />
                 <MenuItem Header="E_xit" IsVisible="{Binding !NativeMenuSupported}" Command="{Binding ExitCommand}" />
             </MenuItem>
+            <MenuItem Header="_ROMs">
+                <MenuItem Header="_Import folder" Command="{Binding ImportRomFolderCommand}" /> <Separator />
+            </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Name="AboutMenuItem" IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding AboutCommand}" />

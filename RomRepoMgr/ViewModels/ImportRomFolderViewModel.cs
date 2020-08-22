@@ -25,30 +25,23 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using System.Reactive;
-using System.Threading.Tasks;
 using Avalonia.Threading;
 using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
-using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
-using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.ViewModels
 {
-    public sealed class ImportDatFolderViewModel : ViewModelBase
+    public sealed class ImportRomFolderViewModel : ViewModelBase
     {
-        readonly ImportDatFolder _view;
-        bool                     _allFilesChecked;
+        readonly ImportRomFolder _view;
         bool                     _canClose;
         bool                     _canStart;
-        string[]                 _datFiles;
         bool                     _isImporting;
         bool                     _isReady;
-        int                      _listPosition;
+        bool                     _knownOnlyChecked;
         bool                     _progress2IsIndeterminate;
         double                   _progress2Maximum;
         double                   _progress2Minimum;
@@ -59,44 +52,46 @@ namespace RomRepoMgr.ViewModels
         double                   _progressMinimum;
         double                   _progressValue;
         bool                     _progressVisible;
-        bool                     _recursiveChecked;
+        bool                     _recurseArchivesChecked;
+        bool                     _removeFilesChecked;
         string                   _status2Message;
         string                   _statusMessage;
 
-        public ImportDatFolderViewModel(ImportDatFolder view, string folderPath)
+        public ImportRomFolderViewModel(ImportRomFolder view, string folderPath)
         {
-            _view             = view;
-            FolderPath        = folderPath;
-            _allFilesChecked  = false;
-            _recursiveChecked = true;
-            ImportResults     = new ObservableCollection<ImportDatFolderItem>();
-            CloseCommand      = ReactiveCommand.Create(ExecuteCloseCommand);
-            StartCommand      = ReactiveCommand.Create(ExecuteStartCommand);
+            _view                   = view;
+            FolderPath              = folderPath;
+            _removeFilesChecked     = false;
+            _knownOnlyChecked       = true;
+            _recurseArchivesChecked = false;
+            ImportResults           = new ObservableCollection<ImportRomFolderItem>();
+            CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
+            StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
+            _isReady                = true;
         }
 
-        public string PathLabel      => "Path:";
-        public string FolderPath     { get; }
-        public string AllFilesLabel  => "Check all files.";
-        public string RecursiveLabel => "Recurse subfolders.";
+        public string PathLabel            => "Path:";
+        public string FolderPath           { get; }
+        public string RemoveFilesLabel     => "Remove files after import successful.";
+        public string KnownOnlyLabel       => "Only import known files.";
+        public string RecurseArchivesLabel => "Try to detect archives and import their contents.";
 
-        public bool AllFilesChecked
+        public bool RemoveFilesChecked
         {
-            get => _allFilesChecked;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _allFilesChecked, value);
-                RefreshFiles();
-            }
+            get => _removeFilesChecked;
+            set => this.RaiseAndSetIfChanged(ref _removeFilesChecked, value);
         }
 
-        public bool RecursiveChecked
+        public bool KnownOnlyChecked
         {
-            get => _recursiveChecked;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _recursiveChecked, value);
-                RefreshFiles();
-            }
+            get => _knownOnlyChecked;
+            set => this.RaiseAndSetIfChanged(ref _knownOnlyChecked, value);
+        }
+
+        public bool RecurseArchivesChecked
+        {
+            get => _recurseArchivesChecked;
+            set => this.RaiseAndSetIfChanged(ref _recurseArchivesChecked, value);
         }
 
         public bool IsReady
@@ -184,9 +179,9 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Import DAT files from folder...";
+        public string Title => "Import ROM files from folder...";
 
-        public ObservableCollection<ImportDatFolderItem> ImportResults       { get; }
+        public ObservableCollection<ImportRomFolderItem> ImportResults       { get; }
         public string                                    ResultFilenameLabel => "Filename";
         public string                                    ResultStatusLabel   => "Status";
         public string                                    CloseLabel          => "Close";
@@ -207,106 +202,11 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> CloseCommand { get; }
         public ReactiveCommand<Unit, Unit> StartCommand { get; }
 
-        internal void OnOpened() => RefreshFiles();
-
-        void RefreshFiles() => Task.Run(() =>
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                IsReady                 = false;
-                ProgressVisible         = true;
-                Progress2Visible        = false;
-                ProgressIsIndeterminate = true;
-                StatusMessage           = "Searching for files...";
-            });
-
-            if(_allFilesChecked)
-            {
-                _datFiles = Directory.GetFiles(FolderPath, "*.*",
-                                               _recursiveChecked ? SearchOption.AllDirectories
-                                                   : SearchOption.TopDirectoryOnly);
-            }
-            else
-            {
-                string[] dats = Directory.GetFiles(FolderPath, "*.dat",
-                                                   _recursiveChecked ? SearchOption.AllDirectories
-                                                       : SearchOption.TopDirectoryOnly);
-
-                string[] xmls = Directory.GetFiles(FolderPath, "*.xml",
-                                                   _recursiveChecked ? SearchOption.AllDirectories
-                                                       : SearchOption.TopDirectoryOnly);
-
-                _datFiles = dats.Concat(xmls).ToArray();
-            }
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                IsReady         = true;
-                ProgressVisible = false;
-                StatusMessage   = string.Format("Found {0} files...", _datFiles.Length);
-                CanClose        = true;
-                CanStart        = true;
-            });
-        });
-
         void ExecuteCloseCommand() => _view.Close();
 
-        void ExecuteStartCommand()
-        {
-            _listPosition           = 0;
-            ProgressMinimum         = 0;
-            ProgressMaximum         = _datFiles.Length;
-            ProgressValue           = 0;
-            ProgressIsIndeterminate = false;
-            ProgressVisible         = true;
-            Progress2Visible        = true;
-            CanClose                = false;
-            CanStart                = false;
-            IsReady                 = false;
-            IsImporting             = true;
+        void ExecuteStartCommand() {}
 
-            Import();
-        }
-
-        void Import()
-        {
-            if(_listPosition >= _datFiles.Length)
-            {
-                Progress2Visible = true;
-                ProgressVisible  = true;
-                StatusMessage    = "Finished";
-                CanClose         = true;
-                CanStart         = false;
-                IsReady          = true;
-
-                return;
-            }
-
-            StatusMessage = string.Format("Importing {0}...", Path.GetFileName(_datFiles[_listPosition]));
-            ProgressValue = _listPosition;
-
-            var _worker = new DatImporter(_datFiles[_listPosition]);
-            _worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
-            _worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
-            _worker.SetMessage               += OnWorkerOnSetMessage;
-            _worker.SetProgress              += OnWorkerOnSetProgress;
-            _worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
-            _worker.WorkFinished             += OnWorkerOnWorkFinished;
-            _worker.RomSetAdded              += RomSetAdded;
-            Task.Run(_worker.Import);
-        }
-
-        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
-        {
-            ImportResults.Add(new ImportDatFolderItem
-            {
-                Filename = Path.GetFileName(_datFiles[_listPosition]),
-                Status   = "OK"
-            });
-
-            _listPosition++;
-            Import();
-        });
+        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() => {});
 
         void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
@@ -324,22 +224,10 @@ namespace RomRepoMgr.ViewModels
         void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
             Dispatcher.UIThread.Post(() => Progress2IsIndeterminate = true);
 
-        void OnWorkerOnErrorOccurred(object sender, ErrorEventArgs args) => Dispatcher.UIThread.Post(() =>
-        {
-            ImportResults.Add(new ImportDatFolderItem
-            {
-                Filename = Path.GetFileName(_datFiles[_listPosition]),
-                Status   = args.Message
-            });
-
-            _listPosition++;
-            Import();
-        });
-
-        public event EventHandler<RomSetEventArgs> RomSetAdded;
+        void OnWorkerOnErrorOccurred(object sender, ErrorEventArgs args) => Dispatcher.UIThread.Post(() => {});
     }
 
-    public sealed class ImportDatFolderItem
+    public sealed class ImportRomFolderItem
     {
         public string Filename { get; set; }
         public string Status   { get; set; }

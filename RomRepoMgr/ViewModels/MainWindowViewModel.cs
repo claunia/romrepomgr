@@ -49,6 +49,7 @@ namespace RomRepoMgr.ViewModels
             AboutCommand           = ReactiveCommand.Create(ExecuteAboutCommand);
             ImportDatCommand       = ReactiveCommand.Create(ExecuteImportDatCommand);
             ImportDatFolderCommand = ReactiveCommand.Create(ExecuteImportDatFolderCommand);
+            ImportRomFolderCommand = ReactiveCommand.Create(ExecuteImportRomFolderCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -72,6 +73,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> SettingsCommand        { get; }
         public ReactiveCommand<Unit, Unit> ImportDatCommand       { get; }
         public ReactiveCommand<Unit, Unit> ImportDatFolderCommand { get; }
+        public ReactiveCommand<Unit, Unit> ImportRomFolderCommand { get; }
 
         internal async void ExecuteSettingsCommand()
         {
@@ -150,6 +152,24 @@ namespace RomRepoMgr.ViewModels
             var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result);
             importDatFolderViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
             dialog.DataContext                   =  importDatFolderViewModel;
+            await dialog.ShowDialog(_view);
+        }
+
+        internal async void ExecuteImportRomFolderCommand()
+        {
+            var dlgOpen = new OpenFolderDialog
+            {
+                Title = "Import ROMs from folder..."
+            };
+
+            string result = await dlgOpen.ShowAsync(_view);
+
+            if(result == null)
+                return;
+
+            var dialog                   = new ImportRomFolder();
+            var importRomFolderViewModel = new ImportRomFolderViewModel(dialog, result);
+            dialog.DataContext = importRomFolderViewModel;
             await dialog.ShowDialog(_view);
         }
     }
