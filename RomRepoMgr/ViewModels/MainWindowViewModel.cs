@@ -23,11 +23,13 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using ReactiveUI;
+using RomRepoMgr.Models;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -42,7 +44,13 @@ namespace RomRepoMgr.ViewModels
             ExitCommand     = ReactiveCommand.Create(ExecuteExitCommand);
             SettingsCommand = ReactiveCommand.Create(ExecuteSettingsCommand);
             AboutCommand    = ReactiveCommand.Create(ExecuteAboutCommand);
+            RomSets         = new ObservableCollection<RomSetModel>();
         }
+
+        public ObservableCollection<RomSetModel> RomSets            { get; }
+        public string                            RomSetLabel        => "ROM sets";
+        public string                            RomSetNameLabel    => "Name";
+        public string                            RomSetVersionLabel => "Version";
 
         public string Greeting => "Hello World!";
         public bool NativeMenuSupported =>

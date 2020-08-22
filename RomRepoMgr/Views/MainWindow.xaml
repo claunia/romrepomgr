@@ -19,6 +19,20 @@
                           Command="{Binding AboutCommand}" />
             </MenuItem>
         </Menu>
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{Binding RomSetLabel}" />
+                </TabItem.Header>
+                <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{Binding RomSetNameLabel}" Binding="{Binding Name}" Width="Auto"
+                                            IsReadOnly="True" />
+                        <DataGridTextColumn Header="{Binding RomSetVersionLabel}" Binding="{Binding Version}"
+                                            Width="Auto" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>
