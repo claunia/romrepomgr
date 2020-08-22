@@ -1,0 +1,92 @@
+﻿<!--
+// /***************************************************************************
+// RomRepoMgr - ROM repository manager
+// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+//
+// Author(s)      : Natalia Portillo <claunia@claunia.com>
+//
+// ‐‐[ License ] ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+//
+//     This program is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU General public License as
+//     published by the Free Software Foundation, either version 3 of the
+//     License, or (at your option) any later version.
+//
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General public License for more details.
+//
+//     You should have received a copy of the GNU General public License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+// Copyright © 2020 Natalia Portillo
+// ****************************************************************************/
+-->
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
+        d:DesignHeight="450" Width="480" Height="360" x:Class="RomRepoMgr.Views.ImportDatFolder"
+        Icon="/Assets/avalonia-logo.ico" CanResize="False" Title="{Binding Title}" WindowStartupLocation="CenterOwner">
+    <Design.DataContext>
+        <vm:ImportDatFolderViewModel />
+    </Design.DataContext>
+    <Border Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" /> <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <TextBlock Text="{Binding PathLabel}" FontWeight="Bold" /> <TextBlock Text="{Binding FolderPath}" />
+            </StackPanel>
+            <CheckBox Grid.Row="1" IsChecked="{Binding AllFilesChecked}" IsEnabled="{Binding IsReady}">
+                <CheckBox.Content>
+                    <TextBlock Text="{Binding AllFilesLabel}" />
+                </CheckBox.Content>
+            </CheckBox>
+            <CheckBox Grid.Row="2" IsChecked="{Binding RecursiveChecked}" IsEnabled="{Binding IsReady}">
+                <CheckBox.Content>
+                    <TextBlock Text="{Binding RecursiveLabel}" />
+                </CheckBox.Content>
+            </CheckBox>
+            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontWeight="Bold" HorizontalAlignment="Center" />
+            <ProgressBar Grid.Row="4" Minimum="{Binding ProgressMinimum}" Maximum="{Binding ProgressMaximum}"
+                         Value="{Binding ProgressValue}" IsIndeterminate="{Binding ProgressIsIndeterminate}"
+                         IsVisible="{Binding ProgressVisible}" />
+            <StackPanel Grid.Row="5" IsVisible="{Binding Progress2Visible}">
+                <TextBlock Text="{Binding Status2Message}" />
+                <ProgressBar Minimum="{Binding Progress2Minimum}" Maximum="{Binding Progress2Maximum}"
+                             Value="{Binding Progress2Value}" IsIndeterminate="{Binding Progress2IsIndeterminate}" />
+            </StackPanel>
+            <DataGrid Grid.Row="6" Items="{Binding ImportResults}" HorizontalScrollBarVisibility="Visible"
+                      IsVisible="{Binding IsImporting}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Filename}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding ResultFilenameLabel}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Status}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding ResultStatusLabel}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Grid.Row="7" Orientation="Horizontal" IsVisible="{Binding IsReady}" HorizontalAlignment="Right">
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanClose}"
+                        Command="{Binding CloseCommand}">
+                    <TextBlock Text="{Binding CloseLabel}" />
+                </Button>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanStart}"
+                        Command="{Binding StartCommand}">
+                    <TextBlock Text="{Binding StartLabel}" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

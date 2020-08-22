@@ -43,12 +43,13 @@ namespace RomRepoMgr.ViewModels
 
         public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
         {
-            _view            = view;
-            ExitCommand      = ReactiveCommand.Create(ExecuteExitCommand);
-            SettingsCommand  = ReactiveCommand.Create(ExecuteSettingsCommand);
-            AboutCommand     = ReactiveCommand.Create(ExecuteAboutCommand);
-            ImportDatCommand = ReactiveCommand.Create(ExecuteImportDatCommand);
-            RomSets          = new ObservableCollection<RomSetModel>(romSets);
+            _view                  = view;
+            ExitCommand            = ReactiveCommand.Create(ExecuteExitCommand);
+            SettingsCommand        = ReactiveCommand.Create(ExecuteSettingsCommand);
+            AboutCommand           = ReactiveCommand.Create(ExecuteAboutCommand);
+            ImportDatCommand       = ReactiveCommand.Create(ExecuteImportDatCommand);
+            ImportDatFolderCommand = ReactiveCommand.Create(ExecuteImportDatFolderCommand);
+            RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
         public ObservableCollection<RomSetModel> RomSets                { get; }
@@ -66,10 +67,11 @@ namespace RomRepoMgr.ViewModels
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
                                                     IClassicDesktopStyleApplicationLifetime)?.MainWindow);
 
-        public ReactiveCommand<Unit, Unit> AboutCommand     { get; }
-        public ReactiveCommand<Unit, Unit> ExitCommand      { get; }
-        public ReactiveCommand<Unit, Unit> SettingsCommand  { get; }
-        public ReactiveCommand<Unit, Unit> ImportDatCommand { get; }
+        public ReactiveCommand<Unit, Unit> AboutCommand           { get; }
+        public ReactiveCommand<Unit, Unit> ExitCommand            { get; }
+        public ReactiveCommand<Unit, Unit> SettingsCommand        { get; }
+        public ReactiveCommand<Unit, Unit> ImportDatCommand       { get; }
+        public ReactiveCommand<Unit, Unit> ImportDatFolderCommand { get; }
 
         internal async void ExecuteSettingsCommand()
         {
@@ -131,5 +133,24 @@ namespace RomRepoMgr.ViewModels
         {
             RomSets.Add(e.RomSet);
         });
+
+        internal async void ExecuteImportDatFolderCommand()
+        {
+            var dlgOpen = new OpenFolderDialog
+            {
+                Title = "Import DATs from folder..."
+            };
+
+            string result = await dlgOpen.ShowAsync(_view);
+
+            if(result == null)
+                return;
+
+            var dialog                   = new ImportDatFolder();
+            var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result);
+            importDatFolderViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
+            dialog.DataContext                   =  importDatFolderViewModel;
+            await dialog.ShowDialog(_view);
+        }
     }
 }
