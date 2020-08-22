@@ -154,8 +154,11 @@ namespace RomRepoMgr.ViewModels
 
         internal void OnOpened()
         {
-            ProgressVisible = true;
+            ProgressVisible     =  true;
+            _worker.RomSetAdded += RomSetAdded;
             Task.Run(_worker.Import);
         }
+
+        public event EventHandler<RomSetEventArgs> RomSetAdded;
     }
 }

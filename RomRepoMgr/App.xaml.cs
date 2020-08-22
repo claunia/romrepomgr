@@ -57,7 +57,7 @@ namespace RomRepoMgr
             base.OnFrameworkInitializationCompleted();
         }
 
-        void OnGotRomSets(object sender, RomSetEventArgs e) => _romSets = e.RomSets;
+        void OnGotRomSets(object sender, RomSetsEventArgs e) => _romSets = e.RomSets;
 
         void OnSplashFinished(object sender, EventArgs e)
         {

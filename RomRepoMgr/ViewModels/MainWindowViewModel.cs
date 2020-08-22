@@ -29,7 +29,9 @@ using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using ReactiveUI;
+using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Views;
 
@@ -88,9 +90,11 @@ namespace RomRepoMgr.ViewModels
 
         internal async void ExecuteImportDatCommand()
         {
-            var dlgOpen = new OpenFileDialog();
-            dlgOpen.AllowMultiple = false;
-            dlgOpen.Title         = "Import DAT file...";
+            var dlgOpen = new OpenFileDialog
+            {
+                AllowMultiple = false,
+                Title         = "Import DAT file..."
+            };
 
             dlgOpen.Filters.Add(new FileDialogFilter
             {
@@ -118,8 +122,14 @@ namespace RomRepoMgr.ViewModels
 
             var dialog             = new ImportDat();
             var importDatViewModel = new ImportDatViewModel(dialog, result[0]);
-            dialog.DataContext = importDatViewModel;
+            importDatViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
+            dialog.DataContext             =  importDatViewModel;
             await dialog.ShowDialog(_view);
         }
+
+        void ImportDatViewModelOnRomSetAdded(object sender, RomSetEventArgs e) => Dispatcher.UIThread.Post(() =>
+        {
+            RomSets.Add(e.RomSet);
+        });
     }
 }

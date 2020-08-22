@@ -23,13 +23,12 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System.Collections.Generic;
 using RomRepoMgr.Core.Models;
 
 namespace RomRepoMgr.Core.EventArgs
 {
-    public sealed class RomSetsEventArgs : System.EventArgs
+    public sealed class RomSetEventArgs : System.EventArgs
     {
-        public List<RomSetModel> RomSets { get; set; }
+        public RomSetModel RomSet { get; set; }
     }
 }

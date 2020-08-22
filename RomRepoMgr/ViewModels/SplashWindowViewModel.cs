@@ -306,7 +306,7 @@ namespace RomRepoMgr.ViewModels
             {
                 try
                 {
-                    GotRomSets?.Invoke(this, new RomSetEventArgs
+                    GotRomSets?.Invoke(this, new RomSetsEventArgs
                     {
                         RomSets = Context.Singleton.RomSets.OrderBy(r => r.Name).ThenBy(r => r.Version).
                                           ThenBy(r => r.Date).ThenBy(r => r.Description).ThenBy(r => r.Comment).
@@ -351,6 +351,6 @@ namespace RomRepoMgr.ViewModels
 
         internal event EventHandler WorkFinished;
 
-        internal event EventHandler<RomSetEventArgs> GotRomSets;
+        internal event EventHandler<RomSetsEventArgs> GotRomSets;
     }
 }

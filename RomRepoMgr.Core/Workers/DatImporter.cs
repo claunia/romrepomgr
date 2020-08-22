@@ -28,6 +28,7 @@ using System.Diagnostics;
 using System.IO;
 using Aaru.Checksums;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.Library.DatFiles;
@@ -112,6 +113,22 @@ namespace RomRepoMgr.Core.Workers
                 Context.Singleton.RomSets.Add(romSet);
                 Context.Singleton.SaveChanges();
 
+                RomSetAdded?.Invoke(this, new RomSetEventArgs
+                {
+                    RomSet = new RomSetModel
+                    {
+                        Author      = romSet.Author,
+                        Comment     = romSet.Comment,
+                        Date        = romSet.Date,
+                        Description = romSet.Description,
+                        Filename    = romSet.Filename,
+                        Homepage    = romSet.Homepage,
+                        Name        = romSet.Name,
+                        Sha384      = romSet.Sha384,
+                        Version     = romSet.Version
+                    }
+                });
+
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
                     Message = "Compressing DAT file..."
@@ -144,5 +161,6 @@ namespace RomRepoMgr.Core.Workers
         public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
         public event EventHandler<ProgressEventArgs>       SetProgress;
         public event EventHandler<MessageEventArgs>        SetMessage;
+        public event EventHandler<RomSetEventArgs>         RomSetAdded;
     }
 }
