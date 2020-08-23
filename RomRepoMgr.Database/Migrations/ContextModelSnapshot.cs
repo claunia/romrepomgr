@@ -22,6 +22,8 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
 
+                b.Property<bool>("IsInRepo").HasColumnType("INTEGER");
+
                 b.Property<string>("Md5").HasColumnType("TEXT").HasMaxLength(32);
 
                 b.Property<string>("Sha1").HasColumnType("TEXT").HasMaxLength(40);

@@ -45,10 +45,10 @@
             </StackPanel>
             <CheckBox Grid.Row="1" IsChecked="{Binding RemoveFilesChecked}" IsEnabled="{Binding IsReady}">
                 <CheckBox.Content>
-                    <TextBlock Text="{Binding RemoveFilesLabel}" />
+                    <TextBlock Text="{Binding RemoveFilesLabel}" IsEnabled="{Binding RemoveFilesEnabled}" />
                 </CheckBox.Content>
             </CheckBox>
-            <CheckBox Grid.Row="2" IsChecked="{Binding KnownOnlyChecked}" IsEnabled="False">
+            <CheckBox Grid.Row="2" IsChecked="{Binding KnownOnlyChecked}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding KnownOnlyLabel}" />
                 </CheckBox.Content>

@@ -25,11 +25,15 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -54,6 +58,7 @@ namespace RomRepoMgr.ViewModels
         bool                     _progressVisible;
         bool                     _recurseArchivesChecked;
         bool                     _removeFilesChecked;
+        bool                     _removeFilesEnabled;
         string                   _status2Message;
         string                   _statusMessage;
 
@@ -67,7 +72,10 @@ namespace RomRepoMgr.ViewModels
             ImportResults           = new ObservableCollection<ImportRomFolderItem>();
             CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
             StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
-            _isReady                = true;
+            IsReady                 = true;
+            CanStart                = true;
+            CanClose                = true;
+            _removeFilesEnabled     = true;
         }
 
         public string PathLabel            => "Path:";
@@ -88,10 +96,23 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _knownOnlyChecked, value);
         }
 
+        public bool RemoveFilesEnabled
+        {
+            get => _removeFilesEnabled;
+            set => this.RaiseAndSetIfChanged(ref _removeFilesEnabled, value);
+        }
+
         public bool RecurseArchivesChecked
         {
             get => _recurseArchivesChecked;
-            set => this.RaiseAndSetIfChanged(ref _recurseArchivesChecked, value);
+            set
+            {
+                if(value)
+                    RemoveFilesChecked = false;
+
+                RemoveFilesEnabled = !value;
+                this.RaiseAndSetIfChanged(ref _recurseArchivesChecked, value);
+            }
         }
 
         public bool IsReady
@@ -204,9 +225,88 @@ namespace RomRepoMgr.ViewModels
 
         void ExecuteCloseCommand() => _view.Close();
 
-        void ExecuteStartCommand() {}
+        void ExecuteStartCommand()
+        {
+            IsReady                 = false;
+            ProgressVisible         = true;
+            ProgressIsIndeterminate = true;
+            StatusMessage           = "Enumerating files...";
+            IsImporting             = true;
+            CanStart                = false;
+            CanClose                = false;
 
-        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() => {});
+            Task.Run(() =>
+            {
+                var      watch = new Stopwatch();
+                string[] files = Directory.GetFiles(FolderPath, "*", SearchOption.AllDirectories);
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ProgressIsIndeterminate = false;
+                    ProgressMinimum         = 0;
+                    ProgressMaximum         = files.LongLength;
+                    ProgressValue           = 0;
+                    Progress2Visible        = true;
+                });
+
+                var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
+                worker.SetMessage               += OnWorkerOnSetMessage;
+                worker.SetProgress              += OnWorkerOnSetProgress;
+                worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
+
+                long position = 0;
+                watch.Start();
+
+                foreach(string file in files)
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        StatusMessage = string.Format("Importing {0}...", Path.GetFileName(file));
+                        ProgressValue = position;
+                    });
+
+                    bool ret = worker.ImportRom(file);
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if(ret)
+                        {
+                            ImportResults.Add(new ImportRomFolderItem
+                            {
+                                Filename = Path.GetFileName(file),
+                                Status   = "OK"
+                            });
+                        }
+                        else
+                        {
+                            ImportResults.Add(new ImportRomFolderItem
+                            {
+                                Filename = Path.GetFileName(file),
+                                Status   = string.Format("Error: {0}", worker.LastMessage)
+                            });
+                        }
+                    });
+
+                    position++;
+                }
+
+                worker.SaveChanges();
+
+                watch.Stop();
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ProgressVisible  = false;
+                    StatusMessage    = "Finished!";
+                    CanClose         = true;
+                    Progress2Visible = false;
+                    IsReady          = true;
+
+                    Console.WriteLine($"Took {watch.Elapsed.TotalSeconds} seconds");
+                });
+            });
+        }
 
         void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
@@ -223,8 +323,6 @@ namespace RomRepoMgr.ViewModels
 
         void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
             Dispatcher.UIThread.Post(() => Progress2IsIndeterminate = true);
-
-        void OnWorkerOnErrorOccurred(object sender, ErrorEventArgs args) => Dispatcher.UIThread.Post(() => {});
     }
 
     public sealed class ImportRomFolderItem
