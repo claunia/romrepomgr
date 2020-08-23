@@ -25,14 +25,13 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
 
@@ -69,7 +68,7 @@ namespace RomRepoMgr.ViewModels
             _removeFilesChecked     = false;
             _knownOnlyChecked       = true;
             _recurseArchivesChecked = Settings.Settings.UnArUsable;
-            ImportResults           = new ObservableCollection<ImportRomFolderItem>();
+            ImportResults           = new ObservableCollection<ImportRomItem>();
             CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
             StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
             IsReady                 = true;
@@ -203,11 +202,11 @@ namespace RomRepoMgr.ViewModels
         [NotNull]
         public string Title => "Import ROM files from folder...";
 
-        public ObservableCollection<ImportRomFolderItem> ImportResults       { get; }
-        public string                                    ResultFilenameLabel => "Filename";
-        public string                                    ResultStatusLabel   => "Status";
-        public string                                    CloseLabel          => "Close";
-        public string                                    StartLabel          => "Start";
+        public ObservableCollection<ImportRomItem> ImportResults       { get; }
+        public string                              ResultFilenameLabel => "Filename";
+        public string                              ResultStatusLabel   => "Status";
+        public string                              CloseLabel          => "Close";
+        public string                              StartLabel          => "Start";
 
         public bool CanClose
         {
@@ -228,106 +227,68 @@ namespace RomRepoMgr.ViewModels
 
         void ExecuteStartCommand()
         {
-            IsReady                 = false;
-            ProgressVisible         = true;
-            ProgressIsIndeterminate = true;
-            StatusMessage           = "Enumerating files...";
-            IsImporting             = true;
-            CanStart                = false;
-            CanClose                = false;
+            IsReady         = false;
+            ProgressVisible = true;
+            IsImporting     = true;
+            CanStart        = false;
+            CanClose        = false;
 
-            Task.Run(() =>
-            {
-                var      watch = new Stopwatch();
-                string[] files = Directory.GetFiles(FolderPath, "*", SearchOption.AllDirectories);
+            var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+            worker.SetIndeterminateProgress  += OnWorkerOnSetIndeterminateProgress;
+            worker.SetMessage                += OnWorkerOnSetMessage;
+            worker.SetProgress               += OnWorkerOnSetProgress;
+            worker.SetProgressBounds         += OnWorkerOnSetProgressBounds;
+            worker.SetIndeterminateProgress2 += OnWorkerOnSetIndeterminateProgress2;
+            worker.SetMessage2               += OnWorkerOnSetMessage2;
+            worker.SetProgress2              += OnWorkerOnSetProgress2;
+            worker.SetProgressBounds2        += OnWorkerOnSetProgressBounds2;
+            worker.Finished                  += OnWorkerOnFinished;
+            worker.ImportedRom               += OnWorkerOnImportedRom;
 
-                Dispatcher.UIThread.Post(() =>
-                {
-                    ProgressIsIndeterminate = false;
-                    ProgressMinimum         = 0;
-                    ProgressMaximum         = files.LongLength;
-                    ProgressValue           = 0;
-                    Progress2Visible        = true;
-                });
-
-                var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
-                worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
-                worker.SetMessage               += OnWorkerOnSetMessage;
-                worker.SetProgress              += OnWorkerOnSetProgress;
-                worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
-
-                long position = 0;
-                watch.Start();
-
-                foreach(string file in files)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        StatusMessage = string.Format("Importing {0}...", Path.GetFileName(file));
-                        ProgressValue = position;
-                    });
-
-                    bool ret = worker.ImportRom(file);
-
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if(ret)
-                        {
-                            ImportResults.Add(new ImportRomFolderItem
-                            {
-                                Filename = Path.GetFileName(file),
-                                Status   = "OK"
-                            });
-                        }
-                        else
-                        {
-                            ImportResults.Add(new ImportRomFolderItem
-                            {
-                                Filename = Path.GetFileName(file),
-                                Status   = string.Format("Error: {0}", worker.LastMessage)
-                            });
-                        }
-                    });
-
-                    position++;
-                }
-
-                worker.SaveChanges();
-
-                watch.Stop();
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    ProgressVisible  = false;
-                    StatusMessage    = "Finished!";
-                    CanClose         = true;
-                    Progress2Visible = false;
-
-                    Console.WriteLine($"Took {watch.Elapsed.TotalSeconds} seconds");
-                });
-            });
+            Task.Run(() => worker.ProcessPath(FolderPath, true, false));
         }
 
+        void OnWorkerOnImportedRom(object? sender, ImportedRomItemEventArgs args) =>
+            Dispatcher.UIThread.Post(() => ImportResults.Add(args.Item));
+
+        void OnWorkerOnFinished(object? sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+        {
+            ProgressVisible  = false;
+            StatusMessage    = "Finished!";
+            CanClose         = true;
+            Progress2Visible = false;
+        });
+
         void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
+        {
+            ProgressIsIndeterminate = false;
+            ProgressMaximum         = args.Maximum;
+            ProgressMinimum         = args.Minimum;
+        });
+
+        void OnWorkerOnSetProgress(object sender, ProgressEventArgs args) =>
+            Dispatcher.UIThread.Post(() => ProgressValue = args.Value);
+
+        void OnWorkerOnSetMessage(object sender, MessageEventArgs args) =>
+            Dispatcher.UIThread.Post(() => StatusMessage = args.Message);
+
+        void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
+            Dispatcher.UIThread.Post(() => ProgressIsIndeterminate = true);
+
+        void OnWorkerOnSetProgressBounds2(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
             Progress2IsIndeterminate = false;
             Progress2Maximum         = args.Maximum;
             Progress2Minimum         = args.Minimum;
         });
 
-        void OnWorkerOnSetProgress(object sender, ProgressEventArgs args) =>
+        void OnWorkerOnSetProgress2(object sender, ProgressEventArgs args) =>
             Dispatcher.UIThread.Post(() => Progress2Value = args.Value);
 
-        void OnWorkerOnSetMessage(object sender, MessageEventArgs args) =>
+        void OnWorkerOnSetMessage2(object sender, MessageEventArgs args) =>
             Dispatcher.UIThread.Post(() => Status2Message = args.Message);
 
-        void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
+        void OnWorkerOnSetIndeterminateProgress2(object sender, EventArgs args) =>
             Dispatcher.UIThread.Post(() => Progress2IsIndeterminate = true);
-    }
-
-    public sealed class ImportRomFolderItem
-    {
-        public string Filename { get; set; }
-        public string Status   { get; set; }
     }
 }

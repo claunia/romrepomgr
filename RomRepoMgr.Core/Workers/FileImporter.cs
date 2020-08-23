@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors;
@@ -18,21 +19,114 @@ namespace RomRepoMgr.Core.Workers
 
         readonly Dictionary<string, DbFile> _pendingFiles;
 
+        string _lastMessage;
+        long   _position;
+        long   _totalFiles;
+
         public FileImporter(bool onlyKnown, bool deleteAfterImport)
         {
             _pendingFiles      = new Dictionary<string, DbFile>();
             _onlyKnown         = onlyKnown;
             _deleteAfterImport = deleteAfterImport;
+            _position          = 0;
         }
 
-        public string LastMessage { get; private set; }
+        public event EventHandler                           SetIndeterminateProgress2;
+        public event EventHandler<ProgressBoundsEventArgs>  SetProgressBounds2;
+        public event EventHandler<ProgressEventArgs>        SetProgress2;
+        public event EventHandler<MessageEventArgs>         SetMessage2;
+        public event EventHandler                           SetIndeterminateProgress;
+        public event EventHandler<ProgressBoundsEventArgs>  SetProgressBounds;
+        public event EventHandler<ProgressEventArgs>        SetProgress;
+        public event EventHandler<MessageEventArgs>         SetMessage;
+        public event EventHandler                           Finished;
+        public event EventHandler<ImportedRomItemEventArgs> ImportedRom;
 
-        public event EventHandler                          SetIndeterminateProgress;
-        public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
-        public event EventHandler<ProgressEventArgs>       SetProgress;
-        public event EventHandler<MessageEventArgs>        SetMessage;
+        public void ProcessPath(string path, bool rootPath, bool removePathOnFinish)
+        {
+            try
+            {
+                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-        public bool ImportRom(string path)
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = "Enumerating files..."
+                });
+
+                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                _totalFiles += files.LongLength;
+
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = _totalFiles
+                });
+
+                foreach(string file in files)
+                {
+                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = _position
+                    });
+
+                    SetMessage?.Invoke(this, new MessageEventArgs
+                    {
+                        Message = string.Format("Importing {0}...", Path.GetFileName(file))
+                    });
+
+                    bool ret = ImportRom(file);
+
+                    if(ret)
+                    {
+                        ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                        {
+                            Item = new ImportRomItem
+                            {
+                                Filename = Path.GetFileName(file),
+                                Status   = "OK"
+                            }
+                        });
+                    }
+                    else
+                    {
+                        ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                        {
+                            Item = new ImportRomItem
+                            {
+                                Filename = Path.GetFileName(file),
+                                Status   = string.Format("Error: {0}", _lastMessage)
+                            }
+                        });
+                    }
+
+                    _position++;
+                }
+
+                if(removePathOnFinish)
+                {
+                    SetMessage?.Invoke(this, new MessageEventArgs
+                    {
+                        Message = "Removing temporary path..."
+                    });
+
+                    Directory.Delete(path, true);
+                }
+
+                if(!rootPath)
+                    return;
+
+                SaveChanges();
+                Finished?.Invoke(this, System.EventArgs.Empty);
+            }
+            catch(Exception)
+            {
+                // TODO: Send error back
+                if(rootPath)
+                    Finished?.Invoke(this, System.EventArgs.Empty);
+            }
+        }
+
+        bool ImportRom(string path)
         {
             try
             {
@@ -40,7 +134,7 @@ namespace RomRepoMgr.Core.Workers
 
                 byte[] dataBuffer;
 
-                SetMessage?.Invoke(this, new MessageEventArgs
+                SetMessage2?.Invoke(this, new MessageEventArgs
                 {
                     Message = "Hashing file..."
                 });
@@ -49,7 +143,7 @@ namespace RomRepoMgr.Core.Workers
 
                 if(inFs.Length > BUFFER_SIZE)
                 {
-                    SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                    SetProgressBounds2?.Invoke(this, new ProgressBoundsEventArgs
                     {
                         Minimum = 0,
                         Maximum = inFs.Length
@@ -60,7 +154,7 @@ namespace RomRepoMgr.Core.Workers
 
                     for(offset = 0; offset < inFs.Length - remainder; offset += (int)BUFFER_SIZE)
                     {
-                        SetProgress?.Invoke(this, new ProgressEventArgs
+                        SetProgress2?.Invoke(this, new ProgressEventArgs
                         {
                             Value = offset
                         });
@@ -70,7 +164,7 @@ namespace RomRepoMgr.Core.Workers
                         checksumWorker.Update(dataBuffer);
                     }
 
-                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    SetProgress2?.Invoke(this, new ProgressEventArgs
                     {
                         Value = offset
                     });
@@ -81,7 +175,7 @@ namespace RomRepoMgr.Core.Workers
                 }
                 else
                 {
-                    SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+                    SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
                     dataBuffer = new byte[inFs.Length];
                     inFs.Read(dataBuffer, 0, (int)inFs.Length);
                     checksumWorker.Update(dataBuffer);
@@ -112,7 +206,7 @@ namespace RomRepoMgr.Core.Workers
                 {
                     if(_onlyKnown)
                     {
-                        LastMessage = "Unknown file.";
+                        _lastMessage = "Unknown file.";
 
                         return false;
                     }
@@ -232,13 +326,13 @@ namespace RomRepoMgr.Core.Workers
                 Stream zStream = null;
                 zStream = new LZipStream(outFs, CompressionMode.Compress);
 
-                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                SetProgressBounds2?.Invoke(this, new ProgressBoundsEventArgs
                 {
                     Minimum = 0,
                     Maximum = inFs.Length
                 });
 
-                SetMessage?.Invoke(this, new MessageEventArgs
+                SetMessage2?.Invoke(this, new MessageEventArgs
                 {
                     Message = "Compressing file..."
                 });
@@ -247,7 +341,7 @@ namespace RomRepoMgr.Core.Workers
 
                 while(inFs.Position + BUFFER_SIZE <= inFs.Length)
                 {
-                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    SetProgress2?.Invoke(this, new ProgressEventArgs
                     {
                         Value = inFs.Position
                     });
@@ -258,7 +352,7 @@ namespace RomRepoMgr.Core.Workers
 
                 buffer = new byte[inFs.Length - inFs.Position];
 
-                SetProgress?.Invoke(this, new ProgressEventArgs
+                SetProgress2?.Invoke(this, new ProgressEventArgs
                 {
                     Value = inFs.Position
                 });
@@ -266,9 +360,9 @@ namespace RomRepoMgr.Core.Workers
                 inFs.Read(buffer, 0, buffer.Length);
                 zStream.Write(buffer, 0, buffer.Length);
 
-                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+                SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
 
-                SetMessage?.Invoke(this, new MessageEventArgs
+                SetMessage2?.Invoke(this, new MessageEventArgs
                 {
                     Message = "Finishing..."
                 });
@@ -290,17 +384,17 @@ namespace RomRepoMgr.Core.Workers
             }
             catch(Exception e)
             {
-                LastMessage = "Unhandled exception when importing file.";
+                _lastMessage = "Unhandled exception when importing file.";
 
                 return false;
             }
         }
 
-        public void SaveChanges()
+        void SaveChanges()
         {
-            SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+            SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
 
-            SetMessage?.Invoke(this, new MessageEventArgs
+            SetMessage2?.Invoke(this, new MessageEventArgs
             {
                 Message = "Saving changes to database..."
             });
