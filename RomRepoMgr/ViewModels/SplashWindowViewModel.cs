@@ -35,12 +35,17 @@ using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
+using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
 
 namespace RomRepoMgr.ViewModels
 {
     public sealed class SplashWindowViewModel : ViewModelBase
     {
+        bool   _checkingUnArError;
+        bool   _checkingUnArOk;
+        string _checkingUnArText;
+        bool   _checkingUnArUnknown;
         string _exitButtonText;
         bool   _exitVisible;
         bool   _loadingDatabaseError;
@@ -48,7 +53,6 @@ namespace RomRepoMgr.ViewModels
         string _loadingDatabaseText;
         bool   _loadingDatabaseUnknown;
         bool   _loadingRomSetsError;
-
         bool   _loadingRomSetsOk;
         string _loadingRomSetsText;
         bool   _loadingRomSetsUnknown;
@@ -71,6 +75,9 @@ namespace RomRepoMgr.ViewModels
             LoadingSettingsOk        = false;
             LoadingSettingsError     = false;
             LoadingSettingsUnknown   = true;
+            CheckingUnArOk           = false;
+            CheckingUnArError        = false;
+            CheckingUnArUnknown      = true;
             LoadingDatabaseOk        = false;
             LoadingDatabaseError     = false;
             LoadingDatabaseUnknown   = true;
@@ -113,6 +120,30 @@ namespace RomRepoMgr.ViewModels
         {
             get => _loadingSettingsUnknown;
             set => this.RaiseAndSetIfChanged(ref _loadingSettingsUnknown, value);
+        }
+
+        public string CheckingUnArText
+        {
+            get => _checkingUnArText;
+            set => this.RaiseAndSetIfChanged(ref _checkingUnArText, value);
+        }
+
+        public bool CheckingUnArOk
+        {
+            get => _checkingUnArOk;
+            set => this.RaiseAndSetIfChanged(ref _checkingUnArOk, value);
+        }
+
+        public bool CheckingUnArError
+        {
+            get => _checkingUnArError;
+            set => this.RaiseAndSetIfChanged(ref _checkingUnArError, value);
+        }
+
+        public bool CheckingUnArUnknown
+        {
+            get => _checkingUnArUnknown;
+            set => this.RaiseAndSetIfChanged(ref _checkingUnArUnknown, value);
         }
 
         public string LoadingDatabaseText
@@ -206,6 +237,7 @@ namespace RomRepoMgr.ViewModels
         {
             LoadingText           = "ROM Repository Manager";
             LoadingSettingsText   = "Loading settings...";
+            CheckingUnArText      = "Checking The Unarchiver...";
             LoadingDatabaseText   = "Loading database...";
             MigratingDatabaseText = "Migrating database...";
             LoadingRomSetsText    = "Loading ROM sets...";
@@ -220,7 +252,7 @@ namespace RomRepoMgr.ViewModels
             {
                 Settings.Settings.LoadSettings();
 
-                Dispatcher.UIThread.Post(LoadDatabase);
+                Dispatcher.UIThread.Post(CheckUnar);
             }
             catch(Exception e)
             {
@@ -236,10 +268,36 @@ namespace RomRepoMgr.ViewModels
             ExitVisible            = true;
         }
 
-        void LoadDatabase()
+        void CheckUnar() => Task.Run(() =>
         {
             LoadingSettingsUnknown = false;
             LoadingSettingsOk      = true;
+
+            try
+            {
+                var worker = new Compression();
+                Settings.Settings.UnArUsable = worker.CheckUnar(Settings.Settings.Current.UnArchiverPath);
+
+                Dispatcher.UIThread.Post(LoadDatabase);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedCheckUnar);
+            }
+        });
+
+        void FailedCheckUnar()
+        {
+            CheckingUnArUnknown = false;
+            CheckingUnArError   = true;
+            ExitVisible         = true;
+        }
+
+        void LoadDatabase()
+        {
+            CheckingUnArUnknown = false;
+            CheckingUnArOk      = true;
 
             Task.Run(() =>
             {

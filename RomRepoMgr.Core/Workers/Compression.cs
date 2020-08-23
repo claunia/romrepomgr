@@ -83,7 +83,7 @@ namespace RomRepoMgr.Core.Workers
             outFs.Dispose();
         }
 
-        public void CheckUnar(string unArPath)
+        public bool CheckUnar(string unArPath)
         {
             if(string.IsNullOrWhiteSpace(unArPath))
             {
@@ -92,7 +92,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "unar path is not set."
                 });
 
-                return;
+                return false;
             }
 
             string unarFolder   = Path.GetDirectoryName(unArPath);
@@ -109,7 +109,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = $"Cannot find unar executable at {unarPath}."
                 });
 
-                return;
+                return false;
             }
 
             if(!File.Exists(lsarPath))
@@ -119,7 +119,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Cannot find lsar executable."
                 });
 
-                return;
+                return false;
             }
 
             string unarOut, lsarOut;
@@ -148,7 +148,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Cannot run unar."
                 });
 
-                return;
+                return false;
             }
 
             try
@@ -175,7 +175,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Cannot run lsar."
                 });
 
-                return;
+                return false;
             }
 
             if(!unarOut.StartsWith("unar ", StringComparison.CurrentCulture))
@@ -185,7 +185,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Not the correct unar executable"
                 });
 
-                return;
+                return false;
             }
 
             if(!lsarOut.StartsWith("lsar ", StringComparison.CurrentCulture))
@@ -195,7 +195,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = "Not the correct lsar executable"
                 });
 
-                return;
+                return false;
             }
 
             var versionProcess = new Process
@@ -217,6 +217,8 @@ namespace RomRepoMgr.Core.Workers
             {
                 Message = versionProcess.StandardOutput.ReadToEnd().TrimEnd('\n')
             });
+
+            return true;
         }
     }
 }

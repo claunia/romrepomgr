@@ -68,21 +68,22 @@ namespace RomRepoMgr.ViewModels
             FolderPath              = folderPath;
             _removeFilesChecked     = false;
             _knownOnlyChecked       = true;
-            _recurseArchivesChecked = false;
+            _recurseArchivesChecked = Settings.Settings.UnArUsable;
             ImportResults           = new ObservableCollection<ImportRomFolderItem>();
             CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
             StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
             IsReady                 = true;
             CanStart                = true;
             CanClose                = true;
-            _removeFilesEnabled     = true;
+            _removeFilesEnabled     = false;
         }
 
-        public string PathLabel            => "Path:";
-        public string FolderPath           { get; }
-        public string RemoveFilesLabel     => "Remove files after import successful.";
-        public string KnownOnlyLabel       => "Only import known files.";
-        public string RecurseArchivesLabel => "Try to detect archives and import their contents.";
+        public string PathLabel              => "Path:";
+        public string FolderPath             { get; }
+        public string RemoveFilesLabel       => "Remove files after import successful.";
+        public string KnownOnlyLabel         => "Only import known files.";
+        public string RecurseArchivesLabel   => "Try to detect archives and import their contents.";
+        public bool   RecurseArchivesEnabled => Settings.Settings.UnArUsable;
 
         public bool RemoveFilesChecked
         {
@@ -301,7 +302,6 @@ namespace RomRepoMgr.ViewModels
                     StatusMessage    = "Finished!";
                     CanClose         = true;
                     Progress2Visible = false;
-                    IsReady          = true;
 
                     Console.WriteLine($"Took {watch.Elapsed.TotalSeconds} seconds");
                 });

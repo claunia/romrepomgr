@@ -48,6 +48,7 @@ namespace RomRepoMgr.Settings
         const string XDG_CONFIG_HOME_RESOLVED = ".config";
         /// <summary>Current statistcs</summary>
         public static SetSettings Current;
+        public static bool UnArUsable { get; set; }
 
         /// <summary>Loads settings</summary>
         public static void LoadSettings()

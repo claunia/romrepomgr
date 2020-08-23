@@ -320,7 +320,10 @@ namespace RomRepoMgr.ViewModels
                 Settings.Settings.Current.TemporaryFolder = TemporaryPath;
 
             if(_unArChanged)
+            {
                 Settings.Settings.Current.UnArchiverPath = UnArPath;
+                Settings.Settings.UnArUsable             = true;
+            }
 
             if(_databaseChanged   ||
                _repositoryChanged ||
