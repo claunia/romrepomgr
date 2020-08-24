@@ -83,6 +83,19 @@ namespace RomRepoMgr.Core.Workers
             outFs.Dispose();
         }
 
+        public void DecompressFile(string source, string destination)
+        {
+            var    inFs    = new FileStream(source, FileMode.Open, FileAccess.Read);
+            var    outFs   = new FileStream(destination, FileMode.Create, FileAccess.Write);
+            Stream zStream = new LZipStream(inFs, CompressionMode.Decompress);
+
+            zStream.CopyTo(outFs);
+
+            outFs.Close();
+            zStream.Close();
+            inFs.Close();
+        }
+
         public bool CheckUnar(string unArPath)
         {
             if(string.IsNullOrWhiteSpace(unArPath))

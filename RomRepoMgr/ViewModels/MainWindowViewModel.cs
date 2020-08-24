@@ -57,6 +57,7 @@ namespace RomRepoMgr.ViewModels
             ImportRomFolderCommand = ReactiveCommand.Create(ExecuteImportRomFolderCommand);
             DeleteRomSetCommand    = ReactiveCommand.Create(ExecuteDeleteRomSetCommand);
             EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
+            ExportDatCommand       = ReactiveCommand.Create(ExecuteExportDatCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -75,7 +76,6 @@ namespace RomRepoMgr.ViewModels
         public string                            RomSetHaveRomsLabel           => "Have";
         public string                            RomSetMissRomsLabel           => "Miss";
 
-        public string Greeting => "Hello World!";
         public bool NativeMenuSupported =>
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
                                                     IClassicDesktopStyleApplicationLifetime)?.MainWindow);
@@ -88,6 +88,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> ImportRomFolderCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteRomSetCommand    { get; }
         public ReactiveCommand<Unit, Unit> EditRomSetCommand      { get; }
+        public ReactiveCommand<Unit, Unit> ExportDatCommand       { get; }
 
         public RomSetModel SelectedRomSet
         {
@@ -219,6 +220,9 @@ namespace RomRepoMgr.ViewModels
 
         void ExecuteEditRomSetCommand()
         {
+            if(SelectedRomSet == null)
+                return;
+
             var window    = new EditDat();
             var viewModel = new EditDatViewModel(window, SelectedRomSet);
 
@@ -236,6 +240,27 @@ namespace RomRepoMgr.ViewModels
             window.DataContext = viewModel;
 
             window.Show();
+        }
+
+        async void ExecuteExportDatCommand()
+        {
+            if(SelectedRomSet == null)
+                return;
+
+            var dlgSave = new SaveFileDialog
+            {
+                InitialFileName = SelectedRomSet.Filename
+            };
+
+            string result = await dlgSave.ShowAsync(_view);
+
+            if(result == null)
+                return;
+
+            var dialog    = new ExportDat();
+            var viewModel = new ExportDatViewModel(dialog, SelectedRomSet.Sha384, result);
+            dialog.DataContext = viewModel;
+            await dialog.ShowDialog(_view);
         }
     }
 }
