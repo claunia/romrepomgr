@@ -370,6 +370,7 @@ namespace RomRepoMgr.ViewModels
                                           ThenBy(r => r.Date).ThenBy(r => r.Description).ThenBy(r => r.Comment).
                                           ThenBy(r => r.Filename).Select(r => new RomSetModel
                                           {
+                                              Id            = r.Id,
                                               Author        = r.Author,
                                               Comment       = r.Comment,
                                               Date          = r.Date,

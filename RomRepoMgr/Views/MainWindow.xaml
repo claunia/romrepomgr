@@ -19,6 +19,10 @@
             <MenuItem Header="_ROMs">
                 <MenuItem Header="_Import folder" Command="{Binding ImportRomFolderCommand}" /> <Separator />
             </MenuItem>
+            <MenuItem Header="ROM _sets"
+                      IsEnabled="{Binding SelectedRomSet, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <MenuItem Header="_Delete" Command="{Binding DeleteRomSetCommand}" /> <Separator />
+            </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Name="AboutMenuItem" IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding AboutCommand}" />
@@ -29,7 +33,8 @@
                 <TabItem.Header>
                     <TextBlock Text="{Binding RomSetLabel}" />
                 </TabItem.Header>
-                <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible">
+                <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible"
+                          SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding Name}" Width="Auto" IsReadOnly="True">
                             <DataGridTextColumn.Header>

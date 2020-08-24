@@ -30,6 +30,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
@@ -41,6 +43,8 @@ namespace RomRepoMgr.ViewModels
     {
         readonly MainWindow _view;
 
+        RomSetModel _selectedRomSet;
+
         public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
         {
             _view                  = view;
@@ -50,6 +54,7 @@ namespace RomRepoMgr.ViewModels
             ImportDatCommand       = ReactiveCommand.Create(ExecuteImportDatCommand);
             ImportDatFolderCommand = ReactiveCommand.Create(ExecuteImportDatFolderCommand);
             ImportRomFolderCommand = ReactiveCommand.Create(ExecuteImportRomFolderCommand);
+            DeleteRomSetCommand    = ReactiveCommand.Create(ExecuteDeleteRomSetCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -79,6 +84,13 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> ImportDatCommand       { get; }
         public ReactiveCommand<Unit, Unit> ImportDatFolderCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportRomFolderCommand { get; }
+        public ReactiveCommand<Unit, Unit> DeleteRomSetCommand    { get; }
+
+        public RomSetModel SelectedRomSet
+        {
+            get => _selectedRomSet;
+            set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
+        }
 
         internal async void ExecuteSettingsCommand()
         {
@@ -176,6 +188,30 @@ namespace RomRepoMgr.ViewModels
             var importRomFolderViewModel = new ImportRomFolderViewModel(dialog, result);
             dialog.DataContext = importRomFolderViewModel;
             await dialog.ShowDialog(_view);
+        }
+
+        async void ExecuteDeleteRomSetCommand()
+        {
+            if(SelectedRomSet == null)
+                return;
+
+            ButtonResult result = await MessageBoxManager.GetMessageBoxStandardWindow("Delete ROM set",
+                                                              string.
+                                                                  Format("Are you sure you want to delete the ROM set {0}?",
+                                                                         SelectedRomSet.Name), ButtonEnum.YesNo,
+                                                              Icon.Database).
+                                                          ShowDialog(_view);
+
+            if(result == ButtonResult.No)
+                return;
+
+            var dialog             = new RemoveDat();
+            var removeDatViewModel = new RemoveDatViewModel(dialog, SelectedRomSet.Id);
+            dialog.DataContext = removeDatViewModel;
+            await dialog.ShowDialog(_view);
+
+            RomSets.Remove(SelectedRomSet);
+            SelectedRomSet = null;
         }
     }
 }

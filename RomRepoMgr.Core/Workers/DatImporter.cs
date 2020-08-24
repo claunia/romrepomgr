@@ -464,6 +464,7 @@ namespace RomRepoMgr.Core.Workers
                 {
                     RomSet = new RomSetModel
                     {
+                        Id                 = romSet.Id,
                         Author             = romSet.Author,
                         Comment            = romSet.Comment,
                         Date               = romSet.Date,

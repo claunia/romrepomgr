@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 // RomRepoMgr - ROM repository manager
 // ----------------------------------------------------------------------------
 //
@@ -23,25 +23,23 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-namespace RomRepoMgr.Core.Models
+using System;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+using RomRepoMgr.ViewModels;
+
+namespace RomRepoMgr.Views
 {
-    public class RomSetModel
+    public sealed class RemoveDat : Window
     {
-        public string Author             { get; set; }
-        public string Comment            { get; set; }
-        public string Date               { get; set; }
-        public string Description        { get; set; }
-        public string Homepage           { get; set; }
-        public string Name               { get; set; }
-        public string Version            { get; set; }
-        public string Filename           { get; set; }
-        public string Sha384             { get; set; }
-        public long   TotalMachines      { get; set; }
-        public long   CompleteMachines   { get; set; }
-        public long   IncompleteMachines { get; set; }
-        public long   TotalRoms          { get; set; }
-        public long   HaveRoms           { get; set; }
-        public long   MissRoms           { get; set; }
-        public long   Id                 { get; set; }
+        public RemoveDat() => InitializeComponent();
+
+        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+        protected override void OnOpened(EventArgs e)
+        {
+            base.OnOpened(e);
+            (DataContext as RemoveDatViewModel)?.OnOpened();
+        }
     }
 }
