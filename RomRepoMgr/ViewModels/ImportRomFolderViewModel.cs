@@ -227,11 +227,12 @@ namespace RomRepoMgr.ViewModels
 
         void ExecuteStartCommand()
         {
-            IsReady         = false;
-            ProgressVisible = true;
-            IsImporting     = true;
-            CanStart        = false;
-            CanClose        = false;
+            IsReady          = false;
+            ProgressVisible  = true;
+            IsImporting      = true;
+            CanStart         = false;
+            CanClose         = false;
+            Progress2Visible = true;
 
             var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
             worker.SetIndeterminateProgress  += OnWorkerOnSetIndeterminateProgress;
@@ -245,7 +246,7 @@ namespace RomRepoMgr.ViewModels
             worker.Finished                  += OnWorkerOnFinished;
             worker.ImportedRom               += OnWorkerOnImportedRom;
 
-            Task.Run(() => worker.ProcessPath(FolderPath, true, false));
+            Task.Run(() => worker.ProcessPath(FolderPath, true, RecurseArchivesChecked));
         }
 
         void OnWorkerOnImportedRom(object? sender, ImportedRomItemEventArgs args) =>

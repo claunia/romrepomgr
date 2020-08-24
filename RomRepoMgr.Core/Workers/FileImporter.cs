@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
@@ -42,7 +44,7 @@ namespace RomRepoMgr.Core.Workers
         public event EventHandler                           Finished;
         public event EventHandler<ImportedRomItemEventArgs> ImportedRom;
 
-        public void ProcessPath(string path, bool rootPath, bool removePathOnFinish)
+        public void ProcessPath(string path, bool rootPath, bool processArchives)
         {
             try
             {
@@ -64,52 +66,117 @@ namespace RomRepoMgr.Core.Workers
 
                 foreach(string file in files)
                 {
-                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    try
                     {
-                        Value = _position
-                    });
+                        SetProgress?.Invoke(this, new ProgressEventArgs
+                        {
+                            Value = _position
+                        });
 
-                    SetMessage?.Invoke(this, new MessageEventArgs
-                    {
-                        Message = string.Format("Importing {0}...", Path.GetFileName(file))
-                    });
+                        SetMessage?.Invoke(this, new MessageEventArgs
+                        {
+                            Message = string.Format("Importing {0}...", Path.GetFileName(file))
+                        });
 
-                    bool ret = ImportRom(file);
+                        string archiveFormat = null;
+                        long   archiveFiles  = 0;
 
-                    if(ret)
+                        if(processArchives)
+                        {
+                            SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+                            SetMessage2?.Invoke(this, new MessageEventArgs
+                            {
+                                Message = "Checking if file is an archive..."
+                            });
+
+                            archiveFormat = GetArchiveFormat(file, out archiveFiles);
+                        }
+
+                        if(archiveFormat == null)
+                        {
+                            bool ret = ImportRom(file);
+
+                            if(ret)
+                            {
+                                ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = "OK"
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = string.Format("Error: {0}", _lastMessage)
+                                    }
+                                });
+                            }
+                        }
+                        else
+                        {
+                            if(!Directory.Exists(Settings.Settings.Current.TemporaryFolder))
+                                Directory.CreateDirectory(Settings.Settings.Current.TemporaryFolder);
+
+                            string tmpFolder =
+                                Path.Combine(Settings.Settings.Current.TemporaryFolder, Path.GetRandomFileName());
+
+                            Directory.CreateDirectory(tmpFolder);
+
+                            SetProgressBounds2?.Invoke(this, new ProgressBoundsEventArgs
+                            {
+                                Minimum = 0,
+                                Maximum = archiveFiles
+                            });
+
+                            SetMessage?.Invoke(this, new MessageEventArgs
+                            {
+                                Message = "Extracting archive contents..."
+                            });
+
+                            ExtractArchive(file, tmpFolder);
+
+                            ProcessPath(tmpFolder, false, true);
+
+                            SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+                            SetMessage2?.Invoke(this, new MessageEventArgs
+                            {
+                                Message = "Removing temporary path..."
+                            });
+
+                            Directory.Delete(tmpFolder, true);
+
+                            ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                            {
+                                Item = new ImportRomItem
+                                {
+                                    Filename = Path.GetFileName(file),
+                                    Status   = "Extracted contents"
+                                }
+                            });
+                        }
+
+                        _position++;
+                    }
+                    catch(Exception)
                     {
                         ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
                         {
                             Item = new ImportRomItem
                             {
                                 Filename = Path.GetFileName(file),
-                                Status   = "OK"
+                                Status   = "Unhandled exception occured"
                             }
                         });
                     }
-                    else
-                    {
-                        ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
-                        {
-                            Item = new ImportRomItem
-                            {
-                                Filename = Path.GetFileName(file),
-                                Status   = string.Format("Error: {0}", _lastMessage)
-                            }
-                        });
-                    }
-
-                    _position++;
-                }
-
-                if(removePathOnFinish)
-                {
-                    SetMessage?.Invoke(this, new MessageEventArgs
-                    {
-                        Message = "Removing temporary path..."
-                    });
-
-                    Directory.Delete(path, true);
                 }
 
                 if(!rootPath)
@@ -400,6 +467,116 @@ namespace RomRepoMgr.Core.Workers
             });
 
             Context.Singleton.SaveChanges();
+        }
+
+        string GetArchiveFormat(string path, out long counter)
+        {
+            counter = 0;
+
+            if(!File.Exists(path))
+                return null;
+
+            try
+            {
+                string unarFolder   = Path.GetDirectoryName(Settings.Settings.Current.UnArchiverPath);
+                string extension    = Path.GetExtension(Settings.Settings.Current.UnArchiverPath);
+                string unarfilename = Path.GetFileNameWithoutExtension(Settings.Settings.Current.UnArchiverPath);
+                string lsarfilename = unarfilename?.Replace("unar", "lsar");
+                string lsarPath     = Path.Combine(unarFolder, lsarfilename + extension);
+
+                var lsarProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName               = lsarPath,
+                        CreateNoWindow         = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute        = false,
+                        ArgumentList =
+                        {
+                            "-j",
+                            path
+                        }
+                    }
+                };
+
+                lsarProcess.Start();
+                string lsarOutput = lsarProcess.StandardOutput.ReadToEnd();
+                lsarProcess.WaitForExit();
+                string format   = null;
+                var    jsReader = new JsonTextReader(new StringReader(lsarOutput));
+
+                while(jsReader.Read())
+                    switch(jsReader.TokenType)
+                    {
+                        case JsonToken.PropertyName
+                            when jsReader.Value != null && jsReader.Value.ToString() == "XADFileName":
+                            counter++;
+
+                            break;
+                        case JsonToken.PropertyName
+                            when jsReader.Value != null && jsReader.Value.ToString() == "lsarFormatName":
+                            jsReader.Read();
+
+                            if(jsReader.TokenType == JsonToken.String &&
+                               jsReader.Value     != null)
+                                format = jsReader.Value.ToString();
+
+                            break;
+                    }
+
+                return counter == 0 ? null : format;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+        }
+
+        void ExtractArchive(string archivePath, string outPath)
+        {
+            var unarProcess = new Process
+            {
+                StartInfo =
+                {
+                    FileName               = Settings.Settings.Current.UnArchiverPath,
+                    CreateNoWindow         = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute        = false,
+                    ArgumentList =
+                    {
+                        "-o",
+                        outPath,
+                        "-r",
+                        "-D",
+                        "-k",
+                        "hidden",
+                        archivePath
+                    }
+                }
+            };
+
+            long counter = 0;
+
+            unarProcess.OutputDataReceived += (sender, e) =>
+            {
+                counter++;
+
+                SetMessage2?.Invoke(this, new MessageEventArgs
+                {
+                    Message = e.Data
+                });
+
+                SetProgress2?.Invoke(this, new ProgressEventArgs
+                {
+                    Value = counter
+                });
+            };
+
+            unarProcess.Start();
+            unarProcess.BeginOutputReadLine();
+            unarProcess.WaitForExit();
+            unarProcess.Close();
         }
     }
 }
