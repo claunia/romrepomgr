@@ -58,6 +58,7 @@ namespace RomRepoMgr.ViewModels
             DeleteRomSetCommand    = ReactiveCommand.Create(ExecuteDeleteRomSetCommand);
             EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
             ExportDatCommand       = ReactiveCommand.Create(ExecuteExportDatCommand);
+            ExportRomsCommand      = ReactiveCommand.Create(ExecuteExportRomsCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -89,6 +90,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> DeleteRomSetCommand    { get; }
         public ReactiveCommand<Unit, Unit> EditRomSetCommand      { get; }
         public ReactiveCommand<Unit, Unit> ExportDatCommand       { get; }
+        public ReactiveCommand<Unit, Unit> ExportRomsCommand      { get; }
 
         public RomSetModel SelectedRomSet
         {
@@ -259,6 +261,24 @@ namespace RomRepoMgr.ViewModels
 
             var dialog    = new ExportDat();
             var viewModel = new ExportDatViewModel(dialog, SelectedRomSet.Sha384, result);
+            dialog.DataContext = viewModel;
+            await dialog.ShowDialog(_view);
+        }
+
+        async void ExecuteExportRomsCommand()
+        {
+            var dlgOpen = new OpenFolderDialog
+            {
+                Title = "Export ROMs to folder..."
+            };
+
+            string result = await dlgOpen.ShowAsync(_view);
+
+            if(result == null)
+                return;
+
+            var dialog    = new ExportRoms();
+            var viewModel = new ExportRomsViewModel(dialog, result, SelectedRomSet.Id);
             dialog.DataContext = viewModel;
             await dialog.ShowDialog(_view);
         }
