@@ -53,15 +53,20 @@ namespace RomRepoMgr.ViewModels
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
-        public ObservableCollection<RomSetModel> RomSets                { get; }
-        public string                            RomSetLabel            => "ROM sets";
-        public string                            RomSetNameLabel        => "Name";
-        public string                            RomSetVersionLabel     => "Version";
-        public string                            RomSetAuthorLabel      => "Author";
-        public string                            RomSetDateLabel        => "Date";
-        public string                            RomSetDescriptionLabel => "Description";
-        public string                            RomSetCommentLabel     => "Comment";
-        public string                            RomSetHomepageLabel    => "Homepage";
+        public ObservableCollection<RomSetModel> RomSets                       { get; }
+        public string                            RomSetLabel                   => "ROM sets";
+        public string                            RomSetNameLabel               => "Name";
+        public string                            RomSetVersionLabel            => "Version";
+        public string                            RomSetAuthorLabel             => "Author";
+        public string                            RomSetDateLabel               => "Date";
+        public string                            RomSetDescriptionLabel        => "Description";
+        public string                            RomSetCommentLabel            => "Comment";
+        public string                            RomSetTotalMachinesLabel      => "Games";
+        public string                            RomSetCompleteMachinesLabel   => "Complete";
+        public string                            RomSetIncompleteMachinesLabel => "Incomplete";
+        public string                            RomSetTotalRomsLabel          => "ROMs";
+        public string                            RomSetHaveRomsLabel           => "Have";
+        public string                            RomSetMissRomsLabel           => "Miss";
 
         public string Greeting => "Hello World!";
         public bool NativeMenuSupported =>

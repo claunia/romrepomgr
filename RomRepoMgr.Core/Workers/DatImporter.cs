@@ -114,22 +114,6 @@ namespace RomRepoMgr.Core.Workers
                 Context.Singleton.RomSets.Add(romSet);
                 Context.Singleton.SaveChanges();
 
-                RomSetAdded?.Invoke(this, new RomSetEventArgs
-                {
-                    RomSet = new RomSetModel
-                    {
-                        Author      = romSet.Author,
-                        Comment     = romSet.Comment,
-                        Date        = romSet.Date,
-                        Description = romSet.Description,
-                        Filename    = romSet.Filename,
-                        Homepage    = romSet.Homepage,
-                        Name        = romSet.Name,
-                        Sha384      = romSet.Sha384,
-                        Version     = romSet.Version
-                    }
-                });
-
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
                     Message = "Compressing DAT file..."
@@ -473,6 +457,30 @@ namespace RomRepoMgr.Core.Workers
                 });
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
+
+                romSet = Context.Singleton.RomSets.Find(romSet.Id);
+
+                RomSetAdded?.Invoke(this, new RomSetEventArgs
+                {
+                    RomSet = new RomSetModel
+                    {
+                        Author             = romSet.Author,
+                        Comment            = romSet.Comment,
+                        Date               = romSet.Date,
+                        Description        = romSet.Description,
+                        Filename           = romSet.Filename,
+                        Homepage           = romSet.Homepage,
+                        Name               = romSet.Name,
+                        Sha384             = romSet.Sha384,
+                        Version            = romSet.Version,
+                        TotalMachines      = romSet.Machines.Count,
+                        CompleteMachines   = romSet.Machines.Count(m => m.Files.All(f => f.File.IsInRepo)),
+                        IncompleteMachines = romSet.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo)),
+                        TotalRoms          = romSet.Machines.Sum(m => m.Files.Count),
+                        HaveRoms           = romSet.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)),
+                        MissRoms           = romSet.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo))
+                    }
+                });
             }
             catch(Exception e)
             {

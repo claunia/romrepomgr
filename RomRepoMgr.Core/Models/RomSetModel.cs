@@ -27,14 +27,20 @@ namespace RomRepoMgr.Core.Models
 {
     public class RomSetModel
     {
-        public string Author      { get; set; }
-        public string Comment     { get; set; }
-        public string Date        { get; set; }
-        public string Description { get; set; }
-        public string Homepage    { get; set; }
-        public string Name        { get; set; }
-        public string Version     { get; set; }
-        public string Filename    { get; set; }
-        public string Sha384      { get; set; }
+        public string Author             { get; set; }
+        public string Comment            { get; set; }
+        public string Date               { get; set; }
+        public string Description        { get; set; }
+        public string Homepage           { get; set; }
+        public string Name               { get; set; }
+        public string Version            { get; set; }
+        public string Filename           { get; set; }
+        public string Sha384             { get; set; }
+        public long   TotalMachines      { get; set; }
+        public long   CompleteMachines   { get; set; }
+        public long   IncompleteMachines { get; set; }
+        public long   TotalRoms          { get; set; }
+        public long   HaveRoms           { get; set; }
+        public long   MissRoms           { get; set; }
     }
 }

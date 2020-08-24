@@ -25,6 +25,7 @@
 
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RomRepoMgr.Database.Models;
 
 namespace RomRepoMgr.Database
@@ -62,7 +63,12 @@ namespace RomRepoMgr.Database
         public static Context Create(string dbPath)
         {
             var optionsBuilder = new DbContextOptionsBuilder();
-            optionsBuilder.UseLazyLoadingProxies().UseSqlite($"Data Source={dbPath}");
+
+            optionsBuilder.UseLazyLoadingProxies()
+                       #if DEBUG
+                          .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
+                       #endif
+                          .UseSqlite($"Data Source={dbPath}");
 
             return new Context(optionsBuilder.Options);
         }

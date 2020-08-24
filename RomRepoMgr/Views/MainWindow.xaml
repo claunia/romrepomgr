@@ -66,6 +66,36 @@
                                 <TextBlock Text="{Binding RomSetHomepageLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding TotalMachines}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetTotalMachinesLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding CompleteMachines}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetCompleteMachinesLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding IncompleteMachines}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetIncompleteMachinesLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding TotalRoms}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetTotalRomsLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding HaveRoms}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetHaveRomsLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding MissRoms}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetMissRomsLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
