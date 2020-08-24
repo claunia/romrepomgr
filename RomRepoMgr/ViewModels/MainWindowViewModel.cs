@@ -25,6 +25,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
@@ -55,6 +56,7 @@ namespace RomRepoMgr.ViewModels
             ImportDatFolderCommand = ReactiveCommand.Create(ExecuteImportDatFolderCommand);
             ImportRomFolderCommand = ReactiveCommand.Create(ExecuteImportRomFolderCommand);
             DeleteRomSetCommand    = ReactiveCommand.Create(ExecuteDeleteRomSetCommand);
+            EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -85,6 +87,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> ImportDatFolderCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportRomFolderCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteRomSetCommand    { get; }
+        public ReactiveCommand<Unit, Unit> EditRomSetCommand      { get; }
 
         public RomSetModel SelectedRomSet
         {
@@ -212,6 +215,27 @@ namespace RomRepoMgr.ViewModels
 
             RomSets.Remove(SelectedRomSet);
             SelectedRomSet = null;
+        }
+
+        void ExecuteEditRomSetCommand()
+        {
+            var window    = new EditDat();
+            var viewModel = new EditDatViewModel(window, SelectedRomSet);
+
+            viewModel.RomSetModified += (sender, args) =>
+            {
+                RomSetModel old = RomSets.FirstOrDefault(r => r.Id == args.RomSet.Id);
+
+                if(old == null)
+                    return;
+
+                RomSets.Remove(old);
+                RomSets.Add(args.RomSet);
+            };
+
+            window.DataContext = viewModel;
+
+            window.Show();
         }
     }
 }
