@@ -16,6 +16,9 @@
                 <Separator />
                 <MenuItem Header="E_xit" IsVisible="{Binding !NativeMenuSupported}" Command="{Binding ExitCommand}" />
             </MenuItem>
+            <MenuItem Header="File_system">
+                <MenuItem Header="_Mount" Command="{Binding MountCommand}" /> <Separator />
+            </MenuItem>
             <MenuItem Header="_ROMs">
                 <MenuItem Header="_Import folder" Command="{Binding ImportRomFolderCommand}" /> <Separator />
             </MenuItem>

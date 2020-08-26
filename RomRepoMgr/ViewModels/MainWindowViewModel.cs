@@ -35,6 +35,7 @@ using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Filesystem;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Views;
 
@@ -59,6 +60,7 @@ namespace RomRepoMgr.ViewModels
             EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
             ExportDatCommand       = ReactiveCommand.Create(ExecuteExportDatCommand);
             ExportRomsCommand      = ReactiveCommand.Create(ExecuteExportRomsCommand);
+            MountCommand           = ReactiveCommand.Create(ExecuteMountCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -91,6 +93,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> EditRomSetCommand      { get; }
         public ReactiveCommand<Unit, Unit> ExportDatCommand       { get; }
         public ReactiveCommand<Unit, Unit> ExportRomsCommand      { get; }
+        public ReactiveCommand<Unit, Unit> MountCommand           { get; }
 
         public RomSetModel SelectedRomSet
         {
@@ -281,6 +284,29 @@ namespace RomRepoMgr.ViewModels
             var viewModel = new ExportRomsViewModel(dialog, result, SelectedRomSet.Id);
             dialog.DataContext = viewModel;
             await dialog.ShowDialog(_view);
+        }
+
+        async void ExecuteMountCommand()
+        {
+            // TODO: Detect if Windows or *NIX
+            // TODO: Detect if libraries are available
+
+            var dlgOpen = new OpenFolderDialog
+            {
+                Title = "Select mount point..."
+            };
+
+            string result = await dlgOpen.ShowAsync(_view);
+
+            if(result == null)
+                return;
+
+            var fs = new Fuse
+            {
+                MountPoint = result
+            };
+
+            fs.Start();
         }
     }
 }
