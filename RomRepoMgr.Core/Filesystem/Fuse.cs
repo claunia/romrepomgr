@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Mono.Fuse.NETStandard;
 using Mono.Unix.Native;
 using RomRepoMgr.Database;
@@ -39,6 +40,46 @@ namespace RomRepoMgr.Core.Filesystem
             _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
             Name                 = "romrepombgrfs";
         }
+
+        public static bool IsAvailable
+        {
+            get
+            {
+                try
+                {
+                    IntPtr fuse = dlopen("libfuse.so.2", 2);
+
+                    if(fuse == IntPtr.Zero)
+                        return false;
+
+                    dlclose(fuse);
+
+                    IntPtr helper = dlopen("libMonoFuseHelper.so", 2);
+
+                    if(helper == IntPtr.Zero)
+                    {
+                        helper = dlopen("./libMonoFuseHelper.so", 2);
+
+                        if(helper == IntPtr.Zero)
+                            return false;
+                    }
+
+                    dlclose(helper);
+
+                    return true;
+                }
+                catch(Exception e)
+                {
+                    return false;
+                }
+            }
+        }
+
+        [DllImport("libdl")]
+        static extern IntPtr dlopen(string filename, int flags);
+
+        [DllImport("libdl")]
+        static extern int dlclose(IntPtr handle);
 
         protected override void Dispose(bool disposing)
         {

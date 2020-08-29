@@ -101,6 +101,8 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
         }
 
+        public bool IsVfsAvailable => Fuse.IsAvailable;
+
         internal async void ExecuteSettingsCommand()
         {
             var dialog = new SettingsDialog();
@@ -288,9 +290,6 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteMountCommand()
         {
-            // TODO: Detect if Windows or *NIX
-            // TODO: Detect if libraries are available
-
             var dlgOpen = new OpenFolderDialog
             {
                 Title = "Select mount point..."

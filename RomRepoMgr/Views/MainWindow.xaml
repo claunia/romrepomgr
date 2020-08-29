@@ -16,7 +16,7 @@
                 <Separator />
                 <MenuItem Header="E_xit" IsVisible="{Binding !NativeMenuSupported}" Command="{Binding ExitCommand}" />
             </MenuItem>
-            <MenuItem Header="File_system">
+            <MenuItem Header="File_system" IsEnabled="{Binding IsVfsAvailable}">
                 <MenuItem Header="_Mount" Command="{Binding MountCommand}" /> <Separator />
             </MenuItem>
             <MenuItem Header="_ROMs">
