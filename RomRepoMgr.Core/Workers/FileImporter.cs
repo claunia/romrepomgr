@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using RomRepoMgr.Core.Aaru;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
@@ -91,6 +92,11 @@ namespace RomRepoMgr.Core.Workers
                             });
 
                             archiveFormat = GetArchiveFormat(file, out archiveFiles);
+
+                            // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
+                            if(archiveFormat != null &&
+                               FAT.Identify(file))
+                                archiveFormat = null;
                         }
 
                         if(archiveFormat == null)
