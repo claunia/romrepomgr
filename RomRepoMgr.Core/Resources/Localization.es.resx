@@ -1,0 +1,158 @@
+﻿<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddingDatToDatabase" xml:space="preserve">
+    <value>Añadiendo DAT a la base de datos...</value>
+  </data>
+  <data name="AddingMachines" xml:space="preserve">
+    <value>Añadiendo máquinas (juegos)</value>
+  </data>
+  <data name="AddingRoms" xml:space="preserve">
+    <value>Añadiendo ROMs...</value>
+  </data>
+  <data name="Assertion_failed" xml:space="preserve">
+    <value>Aserción fallida</value>
+  </data>
+  <data name="Base32_Invalid_format" xml:space="preserve">
+    <value>El texto especificado no tiene un formato Base32 válido porque el caracter "{0}" no existe en el alfabeto Base32</value>
+  </data>
+  <data name="Base32_Not_enought_data" xml:space="preserve">
+    <value>El texto especificado no tiene un formato Base32 válido porque no tiene datos suficientes para completar una ristra de bytes</value>
+  </data>
+  <data name="CannotFindHashInRepository" xml:space="preserve">
+    <value>No se puede encontrar el archivo con hash {0} en el repositorio</value>
+  </data>
+  <data name="CannotFindLsAr" xml:space="preserve">
+    <value>No se puede encontrar el ejecutable lsar.</value>
+  </data>
+  <data name="CannotFindUnArAtPath" xml:space="preserve">
+    <value>No se puede encontrar el ejecutable unar en {0}.</value>
+  </data>
+  <data name="CannotFindZipEntryInDictionary" xml:space="preserve">
+    <value>No se puede encontrar la entrada zip solicitada en el diccionari de hashes</value>
+  </data>
+  <data name="CannotRunLsAr" xml:space="preserve">
+    <value>No se puede ejecutar lsar.</value>
+  </data>
+  <data name="CannotRunUnAr" xml:space="preserve">
+    <value>No se puede ejecutar unar.</value>
+  </data>
+  <data name="Cannot_seek_after_end" xml:space="preserve">
+    <value>No se puede posicionar antes del comienzo.</value>
+  </data>
+  <data name="Cannot_seek_before_start" xml:space="preserve">
+    <value>No se puede posicionar después del comienzo.</value>
+  </data>
+  <data name="CheckingIfFIleIsAnArchive" xml:space="preserve">
+    <value>Comprobando si el fichero es un archivo comprimido...</value>
+  </data>
+  <data name="Compressing" xml:space="preserve">
+    <value>Comprimiendo {0}...</value>
+  </data>
+  <data name="CompressingDatFile" xml:space="preserve">
+    <value>Comprimiendo archivo DAT...</value>
+  </data>
+  <data name="CompressingFile" xml:space="preserve">
+    <value>Comprimiendo archivo...</value>
+  </data>
+  <data name="CouldNotFindRomSetInDatabase" xml:space="preserve">
+    <value>No se pudo encontrar el set de ROMs en la base de datos.</value>
+  </data>
+  <data name="DatabaseFileExistsMsgBoxTitle" xml:space="preserve">
+    <value>El archivo existe</value>
+  </data>
+  <data name="DatAlreadyInDatabase" xml:space="preserve">
+    <value>El archivo DAT ya está en la base de datos, no importaré duplicados.</value>
+  </data>
+  <data name="EnumeratingFiles" xml:space="preserve">
+    <value>Enumerando archivos...</value>
+  </data>
+  <data name="ErrorWithMessage" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="ExportingRoms" xml:space="preserve">
+    <value>Exportando ROMs...</value>
+  </data>
+  <data name="ExtractedContents" xml:space="preserve">
+    <value>Contenidos extraídos</value>
+  </data>
+  <data name="ExtractingArchive" xml:space="preserve">
+    <value>Extrayendo contenidos del archivo...</value>
+  </data>
+  <data name="Finished" xml:space="preserve">
+    <value>Terminado</value>
+  </data>
+  <data name="Finishing" xml:space="preserve">
+    <value>Terminando...</value>
+  </data>
+  <data name="FoundRomWithoutMachine" xml:space="preserve">
+    <value>Se encontró una ROM sin máquina, esto no debería pasar.</value>
+  </data>
+  <data name="GettingMachineNames" xml:space="preserve">
+    <value>Obteniendo nombre de las máquinas (juegos)...</value>
+  </data>
+  <data name="HashingDatFile" xml:space="preserve">
+    <value>Calculando hash del archivo DAT...</value>
+  </data>
+  <data name="HashingFile" xml:space="preserve">
+    <value>Calculando hash del archivo...</value>
+  </data>
+  <data name="Importing" xml:space="preserve">
+    <value>Importando {0}...</value>
+  </data>
+  <data name="NotCorrectLsAr" xml:space="preserve">
+    <value>No es el ejecutable correcto de lsar</value>
+  </data>
+  <data name="NotCorrectUnAr" xml:space="preserve">
+    <value>No es el ejecutable corrector de unar</value>
+  </data>
+  <data name="Not_yet_implemented" xml:space="preserve">
+    <value>Aún no implementado.</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ParsinDatFile" xml:space="preserve">
+    <value>Analizando archivo DAT...</value>
+  </data>
+  <data name="RemovingTemporaryPath" xml:space="preserve">
+    <value>Eliminando ruta remporal...</value>
+  </data>
+  <data name="RetrievingRomsAndDisks" xml:space="preserve">
+    <value>Recuperando ROMs y discos...</value>
+  </data>
+  <data name="RetrievingRomSetFromDatabase" xml:space="preserve">
+    <value>Recuperando set de ROMs de la base de datos...</value>
+  </data>
+  <data name="SavingChangesToDatabase" xml:space="preserve">
+    <value>Guardando cambios en la base de datos...</value>
+  </data>
+  <data name="Spamsum_Input_exceeds_data" xml:space="preserve">
+    <value>La entrada excede los tipos de datos.</value>
+  </data>
+  <data name="Spamsum_no_binary" xml:space="preserve">
+    <value>SpamSum no posee una representación binaria.</value>
+  </data>
+  <data name="UnArPathNotSet" xml:space="preserve">
+    <value>La ruta a unar no está establecida.</value>
+  </data>
+  <data name="UnhandledException" xml:space="preserve">
+    <value>Ocurrió una excepción no controlada.</value>
+  </data>
+  <data name="UnhandledExceptionWhenImporting" xml:space="preserve">
+    <value>Excepción no controlada al importar archivo.</value>
+  </data>
+  <data name="UnknownFile" xml:space="preserve">
+    <value>Archivo desconocido.</value>
+  </data>
+</root>

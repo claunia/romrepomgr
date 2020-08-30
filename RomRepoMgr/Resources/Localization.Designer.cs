@@ -216,7 +216,7 @@ namespace RomRepoMgr.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occurred trying to delete the chosen..
+        ///   Looks up a localized string similar to An error occurred trying to delete the chosen file..
         /// </summary>
         internal static string DatabaseFileCannotDeleteCaption {
             get {

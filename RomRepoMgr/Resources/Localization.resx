@@ -299,7 +299,7 @@ Do you want to delete the file?</value>
     <value>Could not delete file</value>
   </data>
   <data name="DatabaseFileCannotDeleteCaption" xml:space="preserve">
-    <value>An error occurred trying to delete the chosen.</value>
+    <value>An error occurred trying to delete the chosen file.</value>
   </data>
   <data name="ImportDatFileDialogTitle" xml:space="preserve">
     <value>Import DAT file...</value>
