@@ -33,6 +33,7 @@ using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -77,11 +78,11 @@ namespace RomRepoMgr.ViewModels
             _removeFilesEnabled     = false;
         }
 
-        public string PathLabel              => "Path:";
+        public string PathLabel              => Localization.PathLabel;
         public string FolderPath             { get; }
-        public string RemoveFilesLabel       => "Remove files after import successful.";
-        public string KnownOnlyLabel         => "Only import known files.";
-        public string RecurseArchivesLabel   => "Try to detect archives and import their contents.";
+        public string RemoveFilesLabel       => Localization.RemoveFilesLabel;
+        public string KnownOnlyLabel         => Localization.KnownOnlyLabel;
+        public string RecurseArchivesLabel   => Localization.RecurseArchivesLabel;
         public bool   RecurseArchivesEnabled => Settings.Settings.UnArUsable;
 
         public bool RemoveFilesChecked
@@ -200,13 +201,13 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Import ROM files from folder...";
+        public string Title => Localization.ImportRomFolderTitle;
 
         public ObservableCollection<ImportRomItem> ImportResults       { get; }
-        public string                              ResultFilenameLabel => "Filename";
-        public string                              ResultStatusLabel   => "Status";
-        public string                              CloseLabel          => "Close";
-        public string                              StartLabel          => "Start";
+        public string                              ResultFilenameLabel => Localization.ResultFilenameLabel;
+        public string                              ResultStatusLabel   => Localization.ResultStatusLabel;
+        public string                              CloseLabel          => Localization.CloseLabel;
+        public string                              StartLabel          => Localization.StartLabel;
 
         public bool CanClose
         {
@@ -249,13 +250,13 @@ namespace RomRepoMgr.ViewModels
             Task.Run(() => worker.ProcessPath(FolderPath, true, RecurseArchivesChecked));
         }
 
-        void OnWorkerOnImportedRom(object? sender, ImportedRomItemEventArgs args) =>
+        void OnWorkerOnImportedRom(object sender, ImportedRomItemEventArgs args) =>
             Dispatcher.UIThread.Post(() => ImportResults.Add(args.Item));
 
-        void OnWorkerOnFinished(object? sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+        void OnWorkerOnFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
         {
             ProgressVisible  = false;
-            StatusMessage    = "Finished!";
+            StatusMessage    = Localization.Finished;
             CanClose         = true;
             Progress2Visible = false;
         });

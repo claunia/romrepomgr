@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using RomRepoMgr.Core.Aaru;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
+using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors;
@@ -53,7 +54,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Enumerating files..."
+                    Message = Localization.EnumeratingFiles
                 });
 
                 string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
@@ -76,7 +77,7 @@ namespace RomRepoMgr.Core.Workers
 
                         SetMessage?.Invoke(this, new MessageEventArgs
                         {
-                            Message = string.Format("Importing {0}...", Path.GetFileName(file))
+                            Message = string.Format(Localization.Importing, Path.GetFileName(file))
                         });
 
                         string archiveFormat = null;
@@ -88,7 +89,7 @@ namespace RomRepoMgr.Core.Workers
 
                             SetMessage2?.Invoke(this, new MessageEventArgs
                             {
-                                Message = "Checking if file is an archive..."
+                                Message = Localization.CheckingIfFIleIsAnArchive
                             });
 
                             archiveFormat = GetArchiveFormat(file, out archiveFiles);
@@ -110,7 +111,7 @@ namespace RomRepoMgr.Core.Workers
                                     Item = new ImportRomItem
                                     {
                                         Filename = Path.GetFileName(file),
-                                        Status   = "OK"
+                                        Status   = Localization.OK
                                     }
                                 });
                             }
@@ -121,7 +122,7 @@ namespace RomRepoMgr.Core.Workers
                                     Item = new ImportRomItem
                                     {
                                         Filename = Path.GetFileName(file),
-                                        Status   = string.Format("Error: {0}", _lastMessage)
+                                        Status   = string.Format(Localization.ErrorWithMessage, _lastMessage)
                                     }
                                 });
                             }
@@ -144,7 +145,7 @@ namespace RomRepoMgr.Core.Workers
 
                             SetMessage?.Invoke(this, new MessageEventArgs
                             {
-                                Message = "Extracting archive contents..."
+                                Message = Localization.ExtractingArchive
                             });
 
                             ExtractArchive(file, tmpFolder);
@@ -155,7 +156,7 @@ namespace RomRepoMgr.Core.Workers
 
                             SetMessage2?.Invoke(this, new MessageEventArgs
                             {
-                                Message = "Removing temporary path..."
+                                Message = Localization.RemovingTemporaryPath
                             });
 
                             Directory.Delete(tmpFolder, true);
@@ -165,7 +166,7 @@ namespace RomRepoMgr.Core.Workers
                                 Item = new ImportRomItem
                                 {
                                     Filename = Path.GetFileName(file),
-                                    Status   = "Extracted contents"
+                                    Status   = Localization.ExtractedContents
                                 }
                             });
                         }
@@ -179,7 +180,7 @@ namespace RomRepoMgr.Core.Workers
                             Item = new ImportRomItem
                             {
                                 Filename = Path.GetFileName(file),
-                                Status   = "Unhandled exception occured"
+                                Status   = Localization.UnhandledException
                             }
                         });
                     }
@@ -209,7 +210,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage2?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Hashing file..."
+                    Message = Localization.HashingFile
                 });
 
                 var checksumWorker = new Checksum();
@@ -279,7 +280,7 @@ namespace RomRepoMgr.Core.Workers
                 {
                     if(_onlyKnown)
                     {
-                        _lastMessage = "Unknown file.";
+                        _lastMessage = Localization.UnknownFile;
 
                         return false;
                     }
@@ -407,7 +408,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage2?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Compressing file..."
+                    Message = Localization.CompressingFile
                 });
 
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -437,7 +438,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage2?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Finishing..."
+                    Message = Localization.Finishing
                 });
 
                 inFs.Close();
@@ -457,7 +458,7 @@ namespace RomRepoMgr.Core.Workers
             }
             catch(Exception e)
             {
-                _lastMessage = "Unhandled exception when importing file.";
+                _lastMessage = Localization.UnhandledExceptionWhenImporting;
 
                 return false;
             }
@@ -469,7 +470,7 @@ namespace RomRepoMgr.Core.Workers
 
             SetMessage2?.Invoke(this, new MessageEventArgs
             {
-                Message = "Saving changes to database..."
+                Message = Localization.SavingChangesToDatabase
             });
 
             Context.Singleton.SaveChanges();
@@ -486,9 +487,9 @@ namespace RomRepoMgr.Core.Workers
             {
                 string unarFolder   = Path.GetDirectoryName(Settings.Settings.Current.UnArchiverPath);
                 string extension    = Path.GetExtension(Settings.Settings.Current.UnArchiverPath);
-                string unarfilename = Path.GetFileNameWithoutExtension(Settings.Settings.Current.UnArchiverPath);
-                string lsarfilename = unarfilename?.Replace("unar", "lsar");
-                string lsarPath     = Path.Combine(unarFolder, lsarfilename + extension);
+                string unarFilename = Path.GetFileNameWithoutExtension(Settings.Settings.Current.UnArchiverPath);
+                string lsarFilename = unarFilename?.Replace("unar", "lsar");
+                string lsarPath     = Path.Combine(unarFolder, lsarFilename + extension);
 
                 var lsarProcess = new Process
                 {

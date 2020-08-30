@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,6 +16,21 @@
       <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
       <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
       <ProjectReference Include="..\SabreTools\SabreTools.Library\SabreTools.Library.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\Localization.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\Localization.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Language.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

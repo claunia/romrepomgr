@@ -34,6 +34,7 @@ using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
@@ -74,10 +75,10 @@ namespace RomRepoMgr.ViewModels
             StartCommand      = ReactiveCommand.Create(ExecuteStartCommand);
         }
 
-        public string PathLabel      => "Path:";
+        public string PathLabel      => Localization.PathLabel;
         public string FolderPath     { get; }
-        public string AllFilesLabel  => "Check all files.";
-        public string RecursiveLabel => "Recurse subfolders.";
+        public string AllFilesLabel  => Localization.AllFilesLabel;
+        public string RecursiveLabel => Localization.RecursiveLabel;
 
         public bool AllFilesChecked
         {
@@ -184,13 +185,13 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Import DAT files from folder...";
+        public string Title => Localization.ImportDatFolderTitle;
 
         public ObservableCollection<ImportDatFolderItem> ImportResults       { get; }
-        public string                                    ResultFilenameLabel => "Filename";
-        public string                                    ResultStatusLabel   => "Status";
-        public string                                    CloseLabel          => "Close";
-        public string                                    StartLabel          => "Start";
+        public string                                    ResultFilenameLabel => Localization.ResultFilenameLabel;
+        public string                                    ResultStatusLabel   => Localization.ResultStatusLabel;
+        public string                                    CloseLabel          => Localization.CloseLabel;
+        public string                                    StartLabel          => Localization.StartLabel;
 
         public bool CanClose
         {
@@ -217,7 +218,7 @@ namespace RomRepoMgr.ViewModels
                 ProgressVisible         = true;
                 Progress2Visible        = false;
                 ProgressIsIndeterminate = true;
-                StatusMessage           = "Searching for files...";
+                StatusMessage           = Localization.SearchingForFiles;
             });
 
             if(_allFilesChecked)
@@ -243,7 +244,7 @@ namespace RomRepoMgr.ViewModels
             {
                 IsReady         = true;
                 ProgressVisible = false;
-                StatusMessage   = string.Format("Found {0} files...", _datFiles.Length);
+                StatusMessage   = string.Format(Localization.FoundFiles, _datFiles.Length);
                 CanClose        = true;
                 CanStart        = true;
             });
@@ -274,7 +275,7 @@ namespace RomRepoMgr.ViewModels
             {
                 Progress2Visible = true;
                 ProgressVisible  = true;
-                StatusMessage    = "Finished";
+                StatusMessage    = Localization.Finished;
                 CanClose         = true;
                 CanStart         = false;
                 IsReady          = true;
@@ -282,7 +283,7 @@ namespace RomRepoMgr.ViewModels
                 return;
             }
 
-            StatusMessage = string.Format("Importing {0}...", Path.GetFileName(_datFiles[_listPosition]));
+            StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
             ProgressValue = _listPosition;
 
             var _worker = new DatImporter(_datFiles[_listPosition]);
@@ -301,7 +302,7 @@ namespace RomRepoMgr.ViewModels
             ImportResults.Add(new ImportDatFolderItem
             {
                 Filename = Path.GetFileName(_datFiles[_listPosition]),
-                Status   = "OK"
+                Status   = Localization.OK
             });
 
             _listPosition++;

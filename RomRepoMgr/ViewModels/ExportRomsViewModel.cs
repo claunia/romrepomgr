@@ -31,6 +31,7 @@ using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -69,7 +70,7 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string PathLabel => "Path:";
+        public string PathLabel => Localization.PathLabel;
         public string FolderPath { get; }
 
         public bool ProgressVisible
@@ -181,9 +182,9 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Exporting ROM files to folder...";
+        public string Title => Localization.ExportRomsTitle;
         [NotNull]
-        public string CloseLabel => "Close";
+        public string CloseLabel => Localization.CloseLabel;
 
         public bool CanClose
         {

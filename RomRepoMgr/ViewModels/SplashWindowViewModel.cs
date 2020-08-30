@@ -37,40 +37,32 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
+using RomRepoMgr.Resources;
 
 namespace RomRepoMgr.ViewModels
 {
     public sealed class SplashWindowViewModel : ViewModelBase
     {
-        bool   _checkingUnArError;
-        bool   _checkingUnArOk;
-        string _checkingUnArText;
-        bool   _checkingUnArUnknown;
-        string _exitButtonText;
-        bool   _exitVisible;
-        bool   _loadingDatabaseError;
-        bool   _loadingDatabaseOk;
-        string _loadingDatabaseText;
-        bool   _loadingDatabaseUnknown;
-        bool   _loadingRomSetsError;
-        bool   _loadingRomSetsOk;
-        string _loadingRomSetsText;
-        bool   _loadingRomSetsUnknown;
-        bool   _loadingSettingsError;
-        bool   _loadingSettingsOk;
-        string _loadingSettingsText;
-        bool   _loadingSettingsUnknown;
-        string _loadingText;
-        bool   _migratingDatabaseError;
-        bool   _migratingDatabaseOk;
-        string _migratingDatabaseText;
-        bool   _migratingDatabaseUnknown;
+        bool _checkingUnArError;
+        bool _checkingUnArOk;
+        bool _checkingUnArUnknown;
+        bool _exitVisible;
+        bool _loadingDatabaseError;
+        bool _loadingDatabaseOk;
+        bool _loadingDatabaseUnknown;
+        bool _loadingRomSetsError;
+        bool _loadingRomSetsOk;
+        bool _loadingRomSetsUnknown;
+        bool _loadingSettingsError;
+        bool _loadingSettingsOk;
+        bool _loadingSettingsUnknown;
+        bool _migratingDatabaseError;
+        bool _migratingDatabaseOk;
+        bool _migratingDatabaseUnknown;
 
         public SplashWindowViewModel()
         {
             ExitCommand = ReactiveCommand.Create(ExecuteExitCommand);
-
-            LoadStrings();
 
             LoadingSettingsOk        = false;
             LoadingSettingsError     = false;
@@ -92,18 +84,6 @@ namespace RomRepoMgr.ViewModels
 
         public ReactiveCommand<Unit, Unit> ExitCommand { get; }
 
-        public string LoadingText
-        {
-            get => _loadingText;
-            set => this.RaiseAndSetIfChanged(ref _loadingText, value);
-        }
-
-        public string LoadingSettingsText
-        {
-            get => _loadingSettingsText;
-            set => this.RaiseAndSetIfChanged(ref _loadingSettingsText, value);
-        }
-
         public bool LoadingSettingsOk
         {
             get => _loadingSettingsOk;
@@ -120,12 +100,6 @@ namespace RomRepoMgr.ViewModels
         {
             get => _loadingSettingsUnknown;
             set => this.RaiseAndSetIfChanged(ref _loadingSettingsUnknown, value);
-        }
-
-        public string CheckingUnArText
-        {
-            get => _checkingUnArText;
-            set => this.RaiseAndSetIfChanged(ref _checkingUnArText, value);
         }
 
         public bool CheckingUnArOk
@@ -146,12 +120,6 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _checkingUnArUnknown, value);
         }
 
-        public string LoadingDatabaseText
-        {
-            get => _loadingDatabaseText;
-            set => this.RaiseAndSetIfChanged(ref _loadingDatabaseText, value);
-        }
-
         public bool LoadingDatabaseOk
         {
             get => _loadingDatabaseOk;
@@ -168,12 +136,6 @@ namespace RomRepoMgr.ViewModels
         {
             get => _loadingDatabaseUnknown;
             set => this.RaiseAndSetIfChanged(ref _loadingDatabaseUnknown, value);
-        }
-
-        public string MigratingDatabaseText
-        {
-            get => _migratingDatabaseText;
-            set => this.RaiseAndSetIfChanged(ref _migratingDatabaseText, value);
         }
 
         public bool MigratingDatabaseOk
@@ -200,12 +162,6 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _exitVisible, value);
         }
 
-        public string ExitButtonText
-        {
-            get => _exitButtonText;
-            set => this.RaiseAndSetIfChanged(ref _exitButtonText, value);
-        }
-
         public bool LoadingRomSetsOk
         {
             get => _loadingRomSetsOk;
@@ -224,25 +180,16 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
         }
 
-        public string LoadingRomSetsText
-        {
-            get => _loadingRomSetsText;
-            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsText, value);
-        }
+        public string LoadingText           => "ROM Repository Manager";
+        public string LoadingSettingsText   => Localization.LoadingSettingsText;
+        public string CheckingUnArText      => Localization.CheckingUnArText;
+        public string LoadingDatabaseText   => Localization.LoadingDatabaseText;
+        public string MigratingDatabaseText => Localization.MigratingDatabaseText;
+        public string LoadingRomSetsText    => Localization.LoadingRomSetsText;
+        public string ExitButtonText        => Localization.ExitButtonText;
 
-        internal void ExecuteExitCommand() =>
+        void ExecuteExitCommand() =>
             (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();
-
-        void LoadStrings()
-        {
-            LoadingText           = "ROM Repository Manager";
-            LoadingSettingsText   = "Loading settings...";
-            CheckingUnArText      = "Checking The Unarchiver...";
-            LoadingDatabaseText   = "Loading database...";
-            MigratingDatabaseText = "Migrating database...";
-            LoadingRomSetsText    = "Loading ROM sets...";
-            ExitButtonText        = "Exit";
-        }
 
         internal void OnOpened() => Dispatcher.UIThread.Post(LoadSettings);
 
@@ -252,7 +199,7 @@ namespace RomRepoMgr.ViewModels
             {
                 Settings.Settings.LoadSettings();
 
-                Dispatcher.UIThread.Post(CheckUnar);
+                Dispatcher.UIThread.Post(CheckUnAr);
             }
             catch(Exception e)
             {
@@ -268,7 +215,7 @@ namespace RomRepoMgr.ViewModels
             ExitVisible            = true;
         }
 
-        void CheckUnar() => Task.Run(() =>
+        void CheckUnAr() => Task.Run(() =>
         {
             LoadingSettingsUnknown = false;
             LoadingSettingsOk      = true;
@@ -276,18 +223,18 @@ namespace RomRepoMgr.ViewModels
             try
             {
                 var worker = new Compression();
-                Settings.Settings.UnArUsable = worker.CheckUnar(Settings.Settings.Current.UnArchiverPath);
+                Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
 
                 Dispatcher.UIThread.Post(LoadDatabase);
             }
             catch(Exception e)
             {
                 // TODO: Log error
-                Dispatcher.UIThread.Post(FailedCheckUnar);
+                Dispatcher.UIThread.Post(FailedCheckUnAr);
             }
         });
 
-        void FailedCheckUnar()
+        void FailedCheckUnAr()
         {
             CheckingUnArUnknown = false;
             CheckingUnArError   = true;

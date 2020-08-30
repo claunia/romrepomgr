@@ -34,6 +34,7 @@ using JetBrains.Annotations;
 using Microsoft.DotNet.PlatformAbstractions;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -82,13 +83,13 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string AboutLabel => "About";
+        public string AboutLabel => Localization.AboutLabel;
         [NotNull]
-        public string LibrariesLabel => "Libraries";
+        public string LibrariesLabel => Localization.LibrariesLabel;
         [NotNull]
-        public string AuthorsLabel => "Authors";
+        public string AuthorsLabel => Localization.AuthorsLabel;
         [NotNull]
-        public string Title => "About ROM Repository Manager";
+        public string Title => Localization.AboutTitle;
         [NotNull]
         public string SoftwareName => "RomRepoMgr";
         [NotNull]
@@ -98,17 +99,15 @@ namespace RomRepoMgr.ViewModels
         [NotNull]
         public string Website => "https://www.claunia.com";
         [NotNull]
-        public string License => "License: GNU General Public License Version 3";
+        public string License => Localization.LicenseLabel;
         [NotNull]
-        public string CloseLabel => "Close";
+        public string CloseLabel => Localization.CloseLabel;
         [NotNull]
-        public string AssembliesLibraryText => "Library";
+        public string AssembliesLibraryText => Localization.AssembliesLibraryText;
         [NotNull]
-        public string AssembliesVersionText => "Version";
+        public string AssembliesVersionText => Localization.AssembliesVersionText;
         [NotNull]
-        public string Authors => @"Developers:
-    Natalia Portillo
-";
+        public string Authors => Localization.AuthorsText;
         public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
         public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
         public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }

@@ -41,6 +41,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using RomRepoMgr.Settings.Resources;
 
 namespace Aaru.CommonTypes.Interop
 {
@@ -119,7 +120,7 @@ namespace Aaru.CommonTypes.Interop
             int error = uname(out utsname unixname);
 
             if(error != 0)
-                throw new Exception($"Unhandled exception calling uname: {Marshal.GetLastWin32Error()}");
+                throw new Exception(string.Format(Localization.Unhandled_exception_uname, Marshal.GetLastWin32Error()));
 
             switch(unixname.sysname)
             {
@@ -142,7 +143,8 @@ namespace Aaru.CommonTypes.Interop
                     {
                         Marshal.FreeHGlobal(pLen);
 
-                        throw new Exception($"Unhandled exception calling uname: {Marshal.GetLastWin32Error()}");
+                        throw new Exception(string.Format(Localization.Unhandled_exception_uname,
+                                                          Marshal.GetLastWin32Error()));
                     }
 
                     int    length = Marshal.ReadInt32(pLen);
@@ -154,7 +156,8 @@ namespace Aaru.CommonTypes.Interop
                         Marshal.FreeHGlobal(pStr);
                         Marshal.FreeHGlobal(pLen);
 
-                        throw new Exception($"Unhandled exception calling uname: {Marshal.GetLastWin32Error()}");
+                        throw new Exception(string.Format(Localization.Unhandled_exception_uname,
+                                                          Marshal.GetLastWin32Error()));
                     }
 
                     string machine = Marshal.PtrToStringAnsi(pStr);

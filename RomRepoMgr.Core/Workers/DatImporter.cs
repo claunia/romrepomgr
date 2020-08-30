@@ -31,6 +31,7 @@ using System.Linq;
 using Aaru.Checksums;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
+using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.Library.DatFiles;
@@ -60,14 +61,14 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Parsing DAT file..."
+                    Message = Localization.ParsinDatFile
                 });
 
                 var datFile = DatFile.CreateAndParse(_datPath);
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Hashing DAT file..."
+                    Message = Localization.HashingDatFile
                 });
 
                 string datHash = Sha384Context.File(_datPath, out byte[] datHashBinary);
@@ -83,7 +84,7 @@ namespace RomRepoMgr.Core.Workers
                 {
                     ErrorOccurred?.Invoke(this, new ErrorEventArgs
                     {
-                        Message = "DAT file is already in database, not importing duplicates."
+                        Message = Localization.DatAlreadyInDatabase
                     });
 
                     return;
@@ -91,7 +92,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Adding DAT to database..."
+                    Message = Localization.AddingDatToDatabase
                 });
 
                 // TODO: Check if there is a hash in database but not in repo
@@ -116,7 +117,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Compressing DAT file..."
+                    Message = Localization.CompressingDatFile
                 });
 
                 var datCompress = new Compression();
@@ -126,7 +127,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Getting machine (game) names..."
+                    Message = Localization.GettingMachineNames
                 });
 
                 List<string> machineNames =
@@ -135,7 +136,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Adding machines (games)..."
+                    Message = Localization.AddingMachines
                 });
 
                 SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
@@ -170,7 +171,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Saving changes to database..."
+                    Message = Localization.SavingChangesToDatabase
                 });
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
@@ -179,7 +180,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Retrieving ROMs and disks..."
+                    Message = Localization.RetrievingRomsAndDisks
                 });
 
                 List<Rom>  roms  = new List<Rom>();
@@ -211,7 +212,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Adding ROMs..."
+                    Message = Localization.AddingRoms
                 });
 
                 position = 0;
@@ -237,7 +238,7 @@ namespace RomRepoMgr.Core.Workers
                     {
                         ErrorOccurred?.Invoke(this, new ErrorEventArgs
                         {
-                            Message = "Found a ROM with an unknown machine, this should not happen."
+                            Message = Localization.FoundRomWithoutMachine
                         });
 
                         return;
@@ -437,7 +438,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Saving changes to database..."
+                    Message = Localization.SavingChangesToDatabase
                 });
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
@@ -490,7 +491,7 @@ namespace RomRepoMgr.Core.Workers
 
                 ErrorOccurred?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Unhandled exception occurred."
+                    Message = Localization.UnhandledException
                 });
             }
         }

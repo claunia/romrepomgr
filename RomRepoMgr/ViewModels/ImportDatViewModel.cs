@@ -31,6 +31,7 @@ using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -66,7 +67,7 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Importing DAT file...";
+        public string Title => Localization.ImportDatTitle;
 
         public string StatusMessage
         {
@@ -122,12 +123,12 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _canClose, value);
         }
 
-        public string                      CloseLabel   => "Close";
+        public string                      CloseLabel   => Localization.CloseLabel;
         public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
         void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
         {
-            StatusMessage   = "Finished";
+            StatusMessage   = Localization.Finished;
             ProgressVisible = false;
             CanClose        = true;
         });

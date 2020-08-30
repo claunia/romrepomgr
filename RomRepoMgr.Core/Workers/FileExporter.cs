@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Ionic.Zip;
 using Ionic.Zlib;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors.LZMA;
@@ -45,7 +46,7 @@ namespace RomRepoMgr.Core.Workers
         {
             SetMessage?.Invoke(this, new MessageEventArgs
             {
-                Message = "Retrieving ROM set from database."
+                Message = Localization.RetrievingRomSetFromDatabase
             });
 
             RomSet romSet = Context.Singleton.RomSets.Find(_romSetId);
@@ -54,7 +55,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Could not ROM set in database."
+                    Message = Localization.CouldNotFindRomSetInDatabase
                 });
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
@@ -64,7 +65,7 @@ namespace RomRepoMgr.Core.Workers
 
             SetMessage?.Invoke(this, new MessageEventArgs
             {
-                Message = "Exporting ROMs..."
+                Message = Localization.ExportingRoms
             });
 
             _machines = Context.Singleton.Machines.Where(m => m.RomSet.Id == _romSetId).ToArray();
@@ -90,7 +91,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Finished!"
+                    Message = Localization.Finished
                 });
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
@@ -172,7 +173,7 @@ namespace RomRepoMgr.Core.Workers
         {
             if(!_filesByMachine.TryGetValue(entryName, out FileByMachine fileByMachine))
                 if(!_filesByMachine.TryGetValue(entryName.Replace('/', '\\'), out fileByMachine))
-                    throw new ArgumentException("Cannot find requested zip entry in hashes dictionary");
+                    throw new ArgumentException(Localization.CannotFindZipEntryInDictionary);
 
             DbFile file = fileByMachine.File;
 
@@ -213,7 +214,7 @@ namespace RomRepoMgr.Core.Workers
                                            sha384B32[4].ToString(), sha384B32 + ".lz");
 
             if(!File.Exists(repoPath))
-                throw new ArgumentException($"Cannot find file with hash {file.Sha256} in the repository");
+                throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository, file.Sha256));
 
             var inFs = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
 
@@ -237,13 +238,13 @@ namespace RomRepoMgr.Core.Workers
 
                 if(!_filesByMachine.TryGetValue(e.CurrentEntry.FileName, out FileByMachine fileByMachine))
                     if(!_filesByMachine.TryGetValue(e.CurrentEntry.FileName.Replace('/', '\\'), out fileByMachine))
-                        throw new ArgumentException("Cannot find requested zip entry in hashes dictionary");
+                        throw new ArgumentException(Localization.CannotFindZipEntryInDictionary);
 
                 DbFile currentFile = fileByMachine.File;
 
                 SetMessage3?.Invoke(this, new MessageEventArgs
                 {
-                    Message = string.Format("Compressing {0}...", e.CurrentEntry.FileName)
+                    Message = string.Format(Localization.Compressing, e.CurrentEntry.FileName)
                 });
 
                 SetProgress3Bounds?.Invoke(this, new ProgressBoundsEventArgs

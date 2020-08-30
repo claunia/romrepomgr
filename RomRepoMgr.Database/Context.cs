@@ -27,6 +27,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RomRepoMgr.Database.Models;
+using RomRepoMgr.Database.Resources;
 
 namespace RomRepoMgr.Database
 {
@@ -45,7 +46,7 @@ namespace RomRepoMgr.Database
 
                 if(Settings.Settings.Current?.DatabasePath is null)
                     throw new ArgumentNullException(nameof(Settings.Settings.Current.DatabasePath),
-                                                    "Settings are not initialized!");
+                                                    Localization.Settings_not_initialized);
 
                 _singleton = Create(Settings.Settings.Current.DatabasePath);
 

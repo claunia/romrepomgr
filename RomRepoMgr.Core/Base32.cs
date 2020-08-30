@@ -6,6 +6,7 @@
 
 using System;
 using System.Text;
+using RomRepoMgr.Core.Resources;
 
 namespace RomRepoMgr.Core
 {
@@ -130,8 +131,7 @@ namespace RomRepoMgr.Core
 
             // Check the size
             if(outputBytes.Length == 0)
-                throw new
-                    ArgumentException("Specified string is not valid Base32 format because it doesn't have enough data to construct a complete byte array");
+                throw new ArgumentException(Localization.Base32_Not_enought_data);
 
             // Position in the string
             int base32Position = 0;
@@ -154,10 +154,8 @@ namespace RomRepoMgr.Core
 
                 // Check if found
                 if(currentBase32Byte < 0)
-                    throw new
-                        ArgumentException(string.
-                                              Format("Specified string is not valid Base32 format because character \"{0}\" does not exist in Base32 alphabet",
-                                                     base32String[base32Position]));
+                    throw new ArgumentException(string.Format(Localization.Base32_Invalid_format,
+                                                              base32String[base32Position]));
 
                 // Calculate the number of bits we can extract out of current input character to fill missing bits in the output byte
                 int bitsAvailableInByte =

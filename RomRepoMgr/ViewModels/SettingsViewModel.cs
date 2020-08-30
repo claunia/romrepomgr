@@ -29,6 +29,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using JetBrains.Annotations;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
@@ -75,16 +77,16 @@ namespace RomRepoMgr.ViewModels
             UnArPath       = Settings.Settings.Current.UnArchiverPath;
 
             if(!string.IsNullOrWhiteSpace(UnArPath))
-                CheckUnar();
+                CheckUnAr();
         }
 
-        public string ChooseLabel     => "Choose...";
-        public string Title           => "Settings";
-        public string CloseLabel      => "Close";
-        public string DatabaseLabel   => "Database file";
-        public string RepositoryLabel => "Repository folder";
-        public string TemporaryLabel  => "Temporary folder";
-        public string UnArPathLabel   => "Path to UnAr";
+        public string ChooseLabel     => Localization.ChooseLabel;
+        public string Title           => Localization.SettingsTitle;
+        public string CloseLabel      => Localization.CloseLabel;
+        public string DatabaseLabel   => Localization.DatabaseFileLabel;
+        public string RepositoryLabel => Localization.RepositoryFolderLabel;
+        public string TemporaryLabel  => Localization.TemporaryFolderLabel;
+        public string UnArPathLabel   => Localization.UnArPathLabel;
 
         public ReactiveCommand<Unit, Unit> UnArCommand       { get; }
         public ReactiveCommand<Unit, Unit> TemporaryCommand  { get; }
@@ -137,30 +139,31 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _unArVersion, value);
         }
 
-        public string SaveLabel => "Save";
+        public string SaveLabel => Localization.SaveLabel;
 
-        void CheckUnar()
+        void CheckUnAr()
         {
             var worker = new Compression();
 
-            worker.FinishedWithText += CheckUnarFinished;
-            worker.FailedWithText   += CheckUnarFailed;
+            worker.FinishedWithText += CheckUnArFinished;
+            worker.FailedWithText   += CheckUnArFailed;
 
-            Task.Run(() => worker.CheckUnar(UnArPath));
+            Task.Run(() => worker.CheckUnAr(UnArPath));
         }
 
-        async void CheckUnarFailed(object sender, ErrorEventArgs args)
+        async void CheckUnArFailed(object sender, [NotNull] ErrorEventArgs args)
         {
             UnArVersion = "";
             UnArPath    = "";
 
-            await MessageBoxManager.GetMessageBoxStandardWindow("Error", $"{args.Message}", ButtonEnum.Ok, Icon.Error).
-                                    ShowDialog(_view);
+            await MessageBoxManager.
+                  GetMessageBoxStandardWindow(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error).
+                  ShowDialog(_view);
         }
 
-        void CheckUnarFinished(object? sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
+        void CheckUnArFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
-            UnArVersion  = string.Format("The Unarchiver version {0}", args.Message);
+            UnArVersion  = string.Format(Localization.TheUnarchiverVersionLabel, args.Message);
             _unArChanged = true;
         });
 
@@ -168,9 +171,11 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteUnArCommand()
         {
-            var dlgFile = new OpenFileDialog();
-            dlgFile.Title         = "Choose UnArchiver executable";
-            dlgFile.AllowMultiple = false;
+            var dlgFile = new OpenFileDialog
+            {
+                Title         = Localization.ChooseUnArExecutable,
+                AllowMultiple = false
+            };
 
             if(!string.IsNullOrWhiteSpace(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)))
                 dlgFile.Directory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
@@ -181,13 +186,15 @@ namespace RomRepoMgr.ViewModels
                 return;
 
             UnArPath = result[0];
-            CheckUnar();
+            CheckUnAr();
         }
 
         async void ExecuteTemporaryCommand()
         {
-            var dlgFolder = new OpenFolderDialog();
-            dlgFolder.Title = "Choose temporary folder";
+            var dlgFolder = new OpenFolderDialog
+            {
+                Title = Localization.ChooseTemporaryFolder
+            };
 
             string result = await dlgFolder.ShowAsync(_view);
 
@@ -199,8 +206,10 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteRepositoryCommand()
         {
-            var dlgFolder = new OpenFolderDialog();
-            dlgFolder.Title = "Choose repository folder";
+            var dlgFolder = new OpenFolderDialog
+            {
+                Title = Localization.ChooseRepositoryFolder
+            };
 
             string result = await dlgFolder.ShowAsync(_view);
 
@@ -212,10 +221,12 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteDatabaseCommand()
         {
-            var dlgFile = new SaveFileDialog();
-            dlgFile.InitialFileName = "romrepo.db";
-            dlgFile.Directory       = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlgFile.Title           = "Choose database to open /create";
+            var dlgFile = new SaveFileDialog
+            {
+                InitialFileName = "romrepo.db",
+                Directory       = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Title           = Localization.ChooseDatabaseFile
+            };
 
             string result = await dlgFile.ShowAsync(_view);
 
@@ -225,8 +236,8 @@ namespace RomRepoMgr.ViewModels
             if(File.Exists(result))
             {
                 ButtonResult btnResult = await MessageBoxManager.
-                                               GetMessageBoxStandardWindow("File exists",
-                                                                           "Do you want to try to open the existing file as a database?",
+                                               GetMessageBoxStandardWindow(Localization.DatabaseFileExistsMsgBoxTitle,
+                                                                           Localization.DatabaseFileTryOpenCaption,
                                                                            ButtonEnum.YesNo, Icon.Database).
                                                ShowDialog(_view);
 
@@ -240,8 +251,9 @@ namespace RomRepoMgr.ViewModels
                     catch(Exception)
                     {
                         btnResult = await MessageBoxManager.
-                                          GetMessageBoxStandardWindow("Could not use database",
-                                                                      "An error occurred trying to use the chosen file as a database.\nDo you want to delete the file?",
+                                          GetMessageBoxStandardWindow(Localization.DatabaseFileUnusableMsgBoxTitle,
+                                                                      Localization.
+                                                                          DatabaseFileUnusableDeleteMsgBoxCaption,
                                                                       ButtonEnum.YesNo, Icon.Error).ShowDialog(_view);
 
                         if(btnResult == ButtonResult.No)
@@ -254,8 +266,8 @@ namespace RomRepoMgr.ViewModels
                         catch(Exception)
                         {
                             await MessageBoxManager.
-                                  GetMessageBoxStandardWindow("Could not delete file",
-                                                              "An error occurred trying to delete the chosen.",
+                                  GetMessageBoxStandardWindow(Localization.DatabaseFileCannotDeleteTitle,
+                                                              Localization.DatabaseFileCannotDeleteCaption,
                                                               ButtonEnum.Ok, Icon.Error).ShowDialog(_view);
 
                             return;
@@ -265,7 +277,8 @@ namespace RomRepoMgr.ViewModels
                 else
                 {
                     btnResult = await MessageBoxManager.
-                                      GetMessageBoxStandardWindow("File exists", "Do you want to delete the file?",
+                                      GetMessageBoxStandardWindow(Localization.DatabaseFileExistsMsgBoxTitle,
+                                                                  Localization.DatabaseFileDeleteCaption,
                                                                   ButtonEnum.YesNo, Icon.Error).ShowDialog(_view);
 
                     if(btnResult == ButtonResult.No)
@@ -278,9 +291,9 @@ namespace RomRepoMgr.ViewModels
                     catch(Exception)
                     {
                         await MessageBoxManager.
-                              GetMessageBoxStandardWindow("Could not delete file",
-                                                          "An error occurred trying to delete the chosen.",
-                                                          ButtonEnum.Ok, Icon.Error).ShowDialog(_view);
+                              GetMessageBoxStandardWindow(Localization.DatabaseFileCannotDeleteTitle,
+                                                          Localization.DatabaseFileCannotDeleteCaption, ButtonEnum.Ok,
+                                                          Icon.Error).ShowDialog(_view);
 
                         return;
                     }
@@ -295,9 +308,9 @@ namespace RomRepoMgr.ViewModels
             catch(Exception)
             {
                 await MessageBoxManager.
-                      GetMessageBoxStandardWindow("Could not use database",
-                                                  "An error occurred trying to use the chosen file as a database.",
-                                                  ButtonEnum.Ok, Icon.Error).ShowDialog(_view);
+                      GetMessageBoxStandardWindow(Localization.DatabaseFileUnusableMsgBoxTitle,
+                                                  Localization.DatabaseFileUnusableMsgBoxCaption, ButtonEnum.Ok,
+                                                  Icon.Error).ShowDialog(_view);
 
                 return;
             }

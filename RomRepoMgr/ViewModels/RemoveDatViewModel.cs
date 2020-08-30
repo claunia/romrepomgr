@@ -31,6 +31,7 @@ using ReactiveUI;
 using RomRepoMgr.Core;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -48,7 +49,7 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Removing ROM set...";
+        public string Title => Localization.RemoveDatTitle;
 
         public string StatusMessage
         {
@@ -58,22 +59,22 @@ namespace RomRepoMgr.ViewModels
 
         internal void OnOpened() => Task.Run(() =>
         {
-            Dispatcher.UIThread.Post(() => StatusMessage = "Retrieving ROM set from database...");
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RetrievingRomSetFromDatabase);
 
             RomSet romSet = Context.Singleton.RomSets.Find(_romSetId);
 
             if(romSet == null)
                 return;
 
-            Dispatcher.UIThread.Post(() => StatusMessage = "Removing ROM set from database...");
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingRomSetFromDatabase);
 
             Context.Singleton.RomSets.Remove(romSet);
 
-            Dispatcher.UIThread.Post(() => StatusMessage = "Saving changes to database...");
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.SavingChangesToDatabase);
 
             Context.Singleton.SaveChanges();
 
-            Dispatcher.UIThread.Post(() => StatusMessage = "Removing DAT file from repo...");
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingDatFileFromRepo);
 
             byte[] sha384Bytes = new byte[48];
             string sha384      = romSet.Sha384;

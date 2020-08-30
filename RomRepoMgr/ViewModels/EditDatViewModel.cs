@@ -30,22 +30,22 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
 {
     public class EditDatViewModel : ViewModelBase
     {
-        readonly EditDat _view;
-        string           _author;
-        string           _comment;
-        string           _date;
-        string           _description;
-        string           _homepage;
-
+        readonly RomSetModel _romSet;
+        readonly EditDat     _view;
+        string               _author;
+        string               _comment;
+        string               _date;
+        string               _description;
+        string               _homepage;
         bool                 _modified;
         string               _name;
-        readonly RomSetModel _romSet;
         string               _version;
 
         public EditDatViewModel(EditDat view, RomSetModel romSet)
@@ -64,23 +64,23 @@ namespace RomRepoMgr.ViewModels
             CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
         }
 
-        public string NameLabel               => "Name";
-        public string VersionLabel            => "Version";
-        public string AuthorLabel             => "Author";
-        public string CommentLabel            => "Comment";
-        public string DateLabel               => "Date";
-        public string DescriptionLabel        => "Description";
-        public string HomepageLabel           => "Homepage";
-        public string TotalMachinesLabel      => "Total games";
-        public string CompleteMachinesLabel   => "Complete games";
-        public string IncompleteMachinesLabel => "Incomplete games";
-        public string TotalRomsLabel          => "Total ROMs";
-        public string HaveRomsLabel           => "Have ROMs";
-        public string MissRomsLabel           => "Missing ROMs";
-        public string Title                   => "Edit DAT";
-        public string SaveLabel               => "Save";
-        public string CancelLabel             => "Cancel";
-        public string CloseLabel              => "Close";
+        public string NameLabel               => Localization.RomSetNameLabel;
+        public string VersionLabel            => Localization.RomSetVersionLabel;
+        public string AuthorLabel             => Localization.RomSetAuthorLabel;
+        public string CommentLabel            => Localization.RomSetCommentLabel;
+        public string DateLabel               => Localization.RomSetDateLabel;
+        public string DescriptionLabel        => Localization.RomSetDescriptionLabel;
+        public string HomepageLabel           => Localization.HomepageLabel;
+        public string TotalMachinesLabel      => Localization.TotalMachinesLabel;
+        public string CompleteMachinesLabel   => Localization.CompleteMachinesLabel;
+        public string IncompleteMachinesLabel => Localization.IncompleteMachinesLabel;
+        public string TotalRomsLabel          => Localization.TotalRomsLabel;
+        public string HaveRomsLabel           => Localization.HaveRomsLabel;
+        public string MissRomsLabel           => Localization.MissRomsLabel;
+        public string Title                   => Localization.EditDatTitle;
+        public string SaveLabel               => Localization.SaveLabel;
+        public string CancelLabel             => Localization.CancelLabel;
+        public string CloseLabel              => Localization.CloseLabel;
 
         public ReactiveCommand<Unit, Unit> SaveCommand        { get; }
         public ReactiveCommand<Unit, Unit> CancelCommand      { get; }

@@ -37,6 +37,7 @@ using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Filesystem;
 using RomRepoMgr.Core.Models;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels
@@ -64,20 +65,37 @@ namespace RomRepoMgr.ViewModels
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
-        public ObservableCollection<RomSetModel> RomSets                       { get; }
-        public string                            RomSetLabel                   => "ROM sets";
-        public string                            RomSetNameLabel               => "Name";
-        public string                            RomSetVersionLabel            => "Version";
-        public string                            RomSetAuthorLabel             => "Author";
-        public string                            RomSetDateLabel               => "Date";
-        public string                            RomSetDescriptionLabel        => "Description";
-        public string                            RomSetCommentLabel            => "Comment";
-        public string                            RomSetTotalMachinesLabel      => "Games";
-        public string                            RomSetCompleteMachinesLabel   => "Complete";
-        public string                            RomSetIncompleteMachinesLabel => "Incomplete";
-        public string                            RomSetTotalRomsLabel          => "ROMs";
-        public string                            RomSetHaveRomsLabel           => "Have";
-        public string                            RomSetMissRomsLabel           => "Miss";
+        public ObservableCollection<RomSetModel> RomSets { get; }
+        public string RomSetLabel => Localization.RomSets;
+        public string RomSetNameLabel => Localization.RomSetNameLabel;
+        public string RomSetVersionLabel => Localization.RomSetVersionLabel;
+        public string RomSetAuthorLabel => Localization.RomSetAuthorLabel;
+        public string RomSetDateLabel => Localization.RomSetDateLabel;
+        public string RomSetDescriptionLabel => Localization.RomSetDescriptionLabel;
+        public string RomSetCommentLabel => Localization.RomSetCommentLabel;
+        public string RomSetTotalMachinesLabel => Localization.RomSetTotalMachinesLabel;
+        public string RomSetCompleteMachinesLabel => Localization.RomSetCompleteMachinesLabel;
+        public string RomSetIncompleteMachinesLabel => Localization.RomSetIncompleteMachinesLabel;
+        public string RomSetTotalRomsLabel => Localization.RomSetTotalRomsLabel;
+        public string RomSetHaveRomsLabel => Localization.RomSetHaveRomsLabel;
+        public string RomSetMissRomsLabel => Localization.RomSetMissRomsLabel;
+        public bool IsVfsAvailable => Fuse.IsAvailable;
+        public string FileMenuText => Localization.FileMenuText;
+        public string FileMenuImportDatFileText => Localization.FileMenuImportDatFileText;
+        public string FileMenuImportDatFolderText => Localization.FileMenuImportDatFolderText;
+        public string FileMenuSettingsText => Localization.FileMenuSettingsText;
+        public string FileMenuExitText => Localization.FileMenuExitText;
+        public string FilesystemMenuText => Localization.FilesystemMenuText;
+        public string FilesystemMenuMountText => Localization.FilesystemMenuMountText;
+        public string RomsMenuText => Localization.RomsMenuText;
+        public string RomsMenuImportText => Localization.RomsMenuImportText;
+        public string RomSetsMenuText => Localization.RomSetsMenuText;
+        public string RomSetsMenuSaveRomsText => Localization.RomSetsMenuSaveRomsText;
+        public string RomSetsMenuSaveDatText => Localization.RomSetsMenuSaveDatText;
+        public string RomSetsMenuEditText => Localization.RomSetsMenuEditText;
+        public string RomSetsMenuDeleteText => Localization.RomSetsMenuDeleteText;
+        public string HelpMenuText => Localization.HelpMenuText;
+        public string HelpMenuAboutText => Localization.HelpMenuAboutText;
 
         public bool NativeMenuSupported =>
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
@@ -101,8 +119,6 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
         }
 
-        public bool IsVfsAvailable => Fuse.IsAvailable;
-
         internal async void ExecuteSettingsCommand()
         {
             var dialog = new SettingsDialog();
@@ -120,12 +136,12 @@ namespace RomRepoMgr.ViewModels
             dialog.ShowDialog(_view);
         }
 
-        internal async void ExecuteImportDatCommand()
+        async void ExecuteImportDatCommand()
         {
             var dlgOpen = new OpenFileDialog
             {
                 AllowMultiple = false,
-                Title         = "Import DAT file..."
+                Title         = Localization.ImportDatFileDialogTitle
             };
 
             dlgOpen.Filters.Add(new FileDialogFilter
@@ -135,7 +151,7 @@ namespace RomRepoMgr.ViewModels
                     "*.dat",
                     "*.xml"
                 },
-                Name = "DAT files"
+                Name = Localization.DatFilesDialogLabel
             });
 
             dlgOpen.Filters.Add(new FileDialogFilter
@@ -144,7 +160,7 @@ namespace RomRepoMgr.ViewModels
                 {
                     "*.*"
                 },
-                Name = "All files"
+                Name = Localization.AllFilesDialogLabel
             });
 
             string[] result = await dlgOpen.ShowAsync(_view);
@@ -159,16 +175,14 @@ namespace RomRepoMgr.ViewModels
             await dialog.ShowDialog(_view);
         }
 
-        void ImportDatViewModelOnRomSetAdded(object sender, RomSetEventArgs e) => Dispatcher.UIThread.Post(() =>
-        {
-            RomSets.Add(e.RomSet);
-        });
+        void ImportDatViewModelOnRomSetAdded(object sender, RomSetEventArgs e) =>
+            Dispatcher.UIThread.Post(() => RomSets.Add(e.RomSet));
 
-        internal async void ExecuteImportDatFolderCommand()
+        async void ExecuteImportDatFolderCommand()
         {
             var dlgOpen = new OpenFolderDialog
             {
-                Title = "Import DATs from folder..."
+                Title = Localization.ImportDatFolderDialogTitle
             };
 
             string result = await dlgOpen.ShowAsync(_view);
@@ -183,11 +197,11 @@ namespace RomRepoMgr.ViewModels
             await dialog.ShowDialog(_view);
         }
 
-        internal async void ExecuteImportRomFolderCommand()
+        async void ExecuteImportRomFolderCommand()
         {
             var dlgOpen = new OpenFolderDialog
             {
-                Title = "Import ROMs from folder..."
+                Title = Localization.ImportRomsFolderDialogTitle
             };
 
             string result = await dlgOpen.ShowAsync(_view);
@@ -206,12 +220,12 @@ namespace RomRepoMgr.ViewModels
             if(SelectedRomSet == null)
                 return;
 
-            ButtonResult result = await MessageBoxManager.GetMessageBoxStandardWindow("Delete ROM set",
-                                                              string.
-                                                                  Format("Are you sure you want to delete the ROM set {0}?",
-                                                                         SelectedRomSet.Name), ButtonEnum.YesNo,
-                                                              Icon.Database).
-                                                          ShowDialog(_view);
+            ButtonResult result = await MessageBoxManager.
+                                        GetMessageBoxStandardWindow(Localization.DeleteRomSetMsgBoxTitle,
+                                                                    string.
+                                                                        Format(Localization.DeleteRomSetMsgBoxCaption,
+                                                                               SelectedRomSet.Name), ButtonEnum.YesNo,
+                                                                    Icon.Database).ShowDialog(_view);
 
             if(result == ButtonResult.No)
                 return;
@@ -274,7 +288,7 @@ namespace RomRepoMgr.ViewModels
         {
             var dlgOpen = new OpenFolderDialog
             {
-                Title = "Export ROMs to folder..."
+                Title = Localization.ExportRomsDialogTitle
             };
 
             string result = await dlgOpen.ShowAsync(_view);
@@ -292,7 +306,7 @@ namespace RomRepoMgr.ViewModels
         {
             var dlgOpen = new OpenFolderDialog
             {
-                Title = "Select mount point..."
+                Title = Localization.SelectMountPointDialogTitle
             };
 
             string result = await dlgOpen.ShowAsync(_view);

@@ -32,6 +32,7 @@ using ReactiveUI;
 using RomRepoMgr.Core;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
@@ -63,7 +64,7 @@ namespace RomRepoMgr.ViewModels
         }
 
         [NotNull]
-        public string Title => "Exporting DAT file...";
+        public string Title => Localization.ExportDatTitle;
 
         public string StatusMessage
         {
@@ -95,12 +96,12 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _canClose, value);
         }
 
-        public string                      CloseLabel   => "Close";
+        public string                      CloseLabel   => Localization.CloseLabel;
         public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
         void OnWorkerOnFinishedWithText(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
-            StatusMessage   = "Finished";
+            StatusMessage   = Localization.Finished;
             ProgressVisible = false;
             CanClose        = true;
         });
@@ -118,7 +119,7 @@ namespace RomRepoMgr.ViewModels
         internal void OnOpened()
         {
             ProgressVisible = true;
-            StatusMessage   = "Decompressing DAT file...";
+            StatusMessage   = Localization.DecompressingDat;
 
             byte[] sha384Bytes = new byte[48];
             string sha384      = _datHash;
@@ -153,10 +154,7 @@ namespace RomRepoMgr.ViewModels
             if(!File.Exists(compressedDatPath))
                 _view.Close();
 
-            Task.Run(() =>
-            {
-                _worker.DecompressFile(compressedDatPath, _outPath);
-            });
+            Task.Run(() => _worker.DecompressFile(compressedDatPath, _outPath));
         }
     }
 }

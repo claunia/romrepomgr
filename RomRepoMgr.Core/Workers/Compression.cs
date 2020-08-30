@@ -27,6 +27,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using RomRepoMgr.Core.EventArgs;
+using RomRepoMgr.Core.Resources;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
@@ -96,13 +97,13 @@ namespace RomRepoMgr.Core.Workers
             inFs.Close();
         }
 
-        public bool CheckUnar(string unArPath)
+        public bool CheckUnAr(string unArPath)
         {
             if(string.IsNullOrWhiteSpace(unArPath))
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "unar path is not set."
+                    Message = Localization.UnArPathNotSet
                 });
 
                 return false;
@@ -119,7 +120,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = $"Cannot find unar executable at {unarPath}."
+                    Message = string.Format(Localization.CannotFindUnArAtPath, unarPath)
                 });
 
                 return false;
@@ -129,7 +130,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Cannot find lsar executable."
+                    Message = Localization.CannotFindLsAr
                 });
 
                 return false;
@@ -158,7 +159,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Cannot run unar."
+                    Message = Localization.CannotRunUnAr
                 });
 
                 return false;
@@ -185,7 +186,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Cannot run lsar."
+                    Message = Localization.CannotRunLsAr
                 });
 
                 return false;
@@ -195,7 +196,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Not the correct unar executable"
+                    Message = Localization.NotCorrectUnAr
                 });
 
                 return false;
@@ -205,7 +206,7 @@ namespace RomRepoMgr.Core.Workers
             {
                 FailedWithText?.Invoke(this, new ErrorEventArgs
                 {
-                    Message = "Not the correct lsar executable"
+                    Message = Localization.NotCorrectLsAr
                 });
 
                 return false;

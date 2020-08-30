@@ -43,6 +43,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Aaru.CommonTypes.Interfaces;
+using RomRepoMgr.Core.Resources;
 
 namespace Aaru.Checksums
 {
@@ -109,7 +110,7 @@ namespace Aaru.Checksums
 
         /// <inheritdoc />
         /// <summary>Returns a byte array of the hash value.</summary>
-        public byte[] Final() => throw new NotImplementedException("SpamSum does not have a binary representation.");
+        public byte[] Final() => throw new NotImplementedException(Localization.Spamsum_no_binary);
 
         /// <inheritdoc />
         /// <summary>Returns a base64 representation of the hash value.</summary>
@@ -172,7 +173,7 @@ namespace Aaru.Checksums
                 return;
 
             if(_self.Bhend == 0) // assert
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             uint obh = _self.Bhend - 1;
             uint nbh = _self.Bhend;
@@ -188,7 +189,7 @@ namespace Aaru.Checksums
         void fuzzy_try_reduce_blockhash()
         {
             if(_self.Bhstart >= _self.Bhend)
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             if(_self.Bhend - _self.Bhstart < 2)
                 /* Need at least two working hashes. */
@@ -276,7 +277,7 @@ namespace Aaru.Checksums
 
             /* Verify that our elimination was not overeager. */
             if(!(bi == 0 || ((ulong)SSDEEP_BS(bi) / 2) * SPAMSUM_LENGTH < _self.TotalSize))
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             int resultOff = 0;
 
@@ -286,7 +287,7 @@ namespace Aaru.Checksums
                 ++bi;
 
                 if(bi >= NUM_BLOCKHASHES)
-                    throw new OverflowException("The input exceeds data types.");
+                    throw new OverflowException(Localization.Spamsum_Input_exceeds_data);
             }
 
             /* Adapt blocksize guess to actual digest length. */
@@ -299,17 +300,17 @@ namespace Aaru.Checksums
 
             if(bi                > 0 &&
                _self.Bh[bi].Dlen < SPAMSUM_LENGTH / 2)
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             sb.AppendFormat("{0}:", SSDEEP_BS(bi));
             int i = Encoding.ASCII.GetBytes(sb.ToString()).Length;
 
             if(i <= 0)
                 /* Maybe snprintf has set errno here? */
-                throw new OverflowException("The input exceeds data types.");
+                throw new OverflowException(Localization.Spamsum_Input_exceeds_data);
 
             if(i >= remain)
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             remain -= i;
 
@@ -320,7 +321,7 @@ namespace Aaru.Checksums
             i = (int)_self.Bh[bi].Dlen;
 
             if(i > remain)
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             Array.Copy(_self.Bh[bi].Digest, 0, result, resultOff, i);
             resultOff += i;
@@ -329,7 +330,7 @@ namespace Aaru.Checksums
             if(h != 0)
             {
                 if(remain <= 0)
-                    throw new Exception("Assertion failed");
+                    throw new Exception(Localization.Assertion_failed);
 
                 result[resultOff] = _b64[_self.Bh[bi].H % 64];
 
@@ -345,7 +346,7 @@ namespace Aaru.Checksums
             else if(_self.Bh[bi].Digest[i] != 0)
             {
                 if(remain <= 0)
-                    throw new Exception("Assertion failed");
+                    throw new Exception(Localization.Assertion_failed);
 
                 result[resultOff] = _self.Bh[bi].Digest[i];
 
@@ -360,7 +361,7 @@ namespace Aaru.Checksums
             }
 
             if(remain <= 0)
-                throw new Exception("Assertion failed");
+                throw new Exception(Localization.Assertion_failed);
 
             result[resultOff++] = 0x3A; // ':'
             --remain;
@@ -371,7 +372,7 @@ namespace Aaru.Checksums
                 i = (int)_self.Bh[bi].Dlen;
 
                 if(i > remain)
-                    throw new Exception("Assertion failed");
+                    throw new Exception(Localization.Assertion_failed);
 
                 Array.Copy(_self.Bh[bi].Digest, 0, result, resultOff, i);
                 resultOff += i;
@@ -380,7 +381,7 @@ namespace Aaru.Checksums
                 if(h != 0)
                 {
                     if(remain <= 0)
-                        throw new Exception("Assertion failed");
+                        throw new Exception(Localization.Assertion_failed);
 
                     h                 = _self.Bh[bi].Halfh;
                     result[resultOff] = _b64[h % 64];
@@ -401,7 +402,7 @@ namespace Aaru.Checksums
                     if(i != 0)
                     {
                         if(remain <= 0)
-                            throw new Exception("Assertion failed");
+                            throw new Exception(Localization.Assertion_failed);
 
                         result[resultOff] = (byte)i;
 
@@ -419,10 +420,10 @@ namespace Aaru.Checksums
             else if(h != 0)
             {
                 if(_self.Bh[bi].Dlen != 0)
-                    throw new Exception("Assertion failed");
+                    throw new Exception(Localization.Assertion_failed);
 
                 if(remain <= 0)
-                    throw new Exception("Assertion failed");
+                    throw new Exception(Localization.Assertion_failed);
 
                 result[resultOff++] = _b64[_self.Bh[bi].H % 64];
                 /* No need to bother with FUZZY_FLAG_ELIMSEQ, because this
@@ -435,14 +436,13 @@ namespace Aaru.Checksums
 
         /// <summary>Gets the hash of a file</summary>
         /// <param name="filename">File path.</param>
-        public static byte[] File(string filename) =>
-            throw new NotImplementedException("SpamSum does not have a binary representation.");
+        public static byte[] File(string filename) => throw new NotImplementedException(Localization.Spamsum_no_binary);
 
         /// <summary>Gets the hash of a file in hexadecimal and as a byte array.</summary>
         /// <param name="filename">File path.</param>
         /// <param name="hash">Byte array of the hash value.</param>
         public static string File(string filename, out byte[] hash) =>
-            throw new NotImplementedException("Not yet implemented.");
+            throw new NotImplementedException(Localization.Not_yet_implemented);
 
         /// <summary>Gets the hash of the specified data buffer.</summary>
         /// <param name="data">Data buffer.</param>

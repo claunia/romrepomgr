@@ -8,30 +8,37 @@
     </Design.DataContext>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Header="_Import DAT file" Command="{Binding ImportDatCommand}" /> <Separator />
-                <MenuItem Header="_Import DAT folder" Command="{Binding ImportDatFolderCommand}" /> <Separator />
-                <MenuItem Header="_Settings" IsVisible="{Binding !NativeMenuSupported}"
+            <MenuItem Header="{Binding FileMenuText}">
+                <MenuItem Header="{Binding FileMenuImportDatFileText}" Command="{Binding ImportDatCommand}" />
+                <Separator />
+                <MenuItem Header="{Binding FileMenuImportDatFolderText}" Command="{Binding ImportDatFolderCommand}" />
+                <Separator />
+                <MenuItem Header="{Binding FileMenuSettingsText}" IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding SettingsCommand}" />
                 <Separator />
-                <MenuItem Header="E_xit" IsVisible="{Binding !NativeMenuSupported}" Command="{Binding ExitCommand}" />
+                <MenuItem Header="{Binding FileMenuExitText}" IsVisible="{Binding !NativeMenuSupported}"
+                          Command="{Binding ExitCommand}" />
             </MenuItem>
-            <MenuItem Header="File_system" IsEnabled="{Binding IsVfsAvailable}">
-                <MenuItem Header="_Mount" Command="{Binding MountCommand}" /> <Separator />
+            <MenuItem Header="{Binding FilesystemMenuText}" IsEnabled="{Binding IsVfsAvailable}">
+                <MenuItem Header="{Binding FilesystemMenuMountText}" Command="{Binding MountCommand}" /> <Separator />
             </MenuItem>
-            <MenuItem Header="_ROMs">
-                <MenuItem Header="_Import folder" Command="{Binding ImportRomFolderCommand}" /> <Separator />
+            <MenuItem Header="{Binding RomsMenuText}">
+                <MenuItem Header="{Binding RomsMenuImportText}" Command="{Binding ImportRomFolderCommand}" />
+                <Separator />
             </MenuItem>
-            <MenuItem Header="ROM _sets"
+            <MenuItem Header="{Binding RomSetsMenuText}"
                       IsEnabled="{Binding SelectedRomSet, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <MenuItem Header="_Save ROMs to folder" Command="{Binding ExportRomsCommand}" /> <Separator />
-                <MenuItem Header="_Save DAT file" Command="{Binding ExportDatCommand}" /> <Separator />
-                <MenuItem Header="_Edit" Command="{Binding EditRomSetCommand}" /> <Separator />
-                <MenuItem Header="_Delete" Command="{Binding DeleteRomSetCommand}" /> <Separator />
+                <MenuItem Header="{Binding RomSetsMenuSaveRomsText}" Command="{Binding ExportRomsCommand}" />
+                <Separator />
+                <MenuItem Header="{Binding RomSetsMenuSaveDatText}" Command="{Binding ExportDatCommand}" />
+                <Separator /> <MenuItem Header="{Binding RomSetsMenuEditText}" Command="{Binding EditRomSetCommand}" />
+                <Separator />
+                <MenuItem Header="{Binding RomSetsMenuDeleteText}" Command="{Binding DeleteRomSetCommand}" />
+                <Separator />
             </MenuItem>
-            <MenuItem Header="_Help">
-                <MenuItem Header="_About" Name="AboutMenuItem" IsVisible="{Binding !NativeMenuSupported}"
-                          Command="{Binding AboutCommand}" />
+            <MenuItem Header="{Binding HelpMenuText}">
+                <MenuItem Header="{Binding HelpMenuAboutText}" Name="AboutMenuItem"
+                          IsVisible="{Binding !NativeMenuSupported}" Command="{Binding AboutCommand}" />
             </MenuItem>
         </Menu>
         <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
