@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RomRepoMgr.Core", "RomRepoM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.Library", "SabreTools\SabreTools.Library\SabreTools.Library.csproj", "{9DFA390F-1E96-476B-92CB-0C96EFF3CC9D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "winfsp-netcore", "winfsp-netcore\winfsp-netcore.csproj", "{4B2B4DAC-39E2-417D-90F2-DCC97A5564B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{9DFA390F-1E96-476B-92CB-0C96EFF3CC9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DFA390F-1E96-476B-92CB-0C96EFF3CC9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DFA390F-1E96-476B-92CB-0C96EFF3CC9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B2B4DAC-39E2-417D-90F2-DCC97A5564B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B2B4DAC-39E2-417D-90F2-DCC97A5564B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B2B4DAC-39E2-417D-90F2-DCC97A5564B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B2B4DAC-39E2-417D-90F2-DCC97A5564B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

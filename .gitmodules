@@ -1,3 +1,6 @@
 [submodule "SabreTools"]
 	path = SabreTools
 	url = https://github.com/SabreTools/SabreTools
+[submodule "winfsp"]
+	path = winfsp
+	url = https://github.com/billziss-gh/winfsp/

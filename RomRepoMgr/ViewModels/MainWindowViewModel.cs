@@ -79,7 +79,7 @@ namespace RomRepoMgr.ViewModels
         public string RomSetTotalRomsLabel => Localization.RomSetTotalRomsLabel;
         public string RomSetHaveRomsLabel => Localization.RomSetHaveRomsLabel;
         public string RomSetMissRomsLabel => Localization.RomSetMissRomsLabel;
-        public bool IsVfsAvailable => Fuse.IsAvailable;
+        public bool IsVfsAvailable => Vfs.IsAvailable;
         public string FileMenuText => Localization.FileMenuText;
         public string FileMenuImportDatFileText => Localization.FileMenuImportDatFileText;
         public string FileMenuImportDatFolderText => Localization.FileMenuImportDatFolderText;
