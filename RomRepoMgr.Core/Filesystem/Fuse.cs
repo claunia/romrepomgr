@@ -27,6 +27,7 @@ namespace RomRepoMgr.Core.Filesystem
         readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
         long                                                                             _lastHandle;
         ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
+        string                                                                           _umountToken;
 
         public Fuse()
         {
@@ -107,7 +108,27 @@ namespace RomRepoMgr.Core.Filesystem
                 FillRootDirectoryCache();
 
             if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            {
+                if(pieces[0]    == ".fuse_umount" &&
+                   _umountToken != null)
+                {
+                    stat = new Stat
+                    {
+                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                        st_nlink   = 1,
+                        st_ctime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                        st_mtime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                        st_blksize = 0,
+                        st_blocks  = 0,
+                        st_ino     = 0,
+                        st_size    = 0
+                    };
+
+                    return 0;
+                }
+
                 return Errno.ENOENT;
+            }
 
             if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
             {
@@ -472,8 +493,25 @@ namespace RomRepoMgr.Core.Filesystem
         protected override Errno OnSynchronizeHandle(string file, OpenedPathInfo info, bool onlyUserData) =>
             Errno.EOPNOTSUPP;
 
-        protected override Errno OnSetPathExtendedAttribute(string path, string name, byte[] value, XattrFlags flags) =>
-            Errno.EROFS;
+        protected override Errno OnSetPathExtendedAttribute(string path, string name, byte[] value, XattrFlags flags)
+        {
+            if(_umountToken == null)
+                return Errno.EROFS;
+
+            if(path != "/.fuse_umount")
+                return Errno.EROFS;
+
+            if(name != _umountToken)
+                return Errno.EROFS;
+
+            if(value?.Length != 0)
+                return Errno.EROFS;
+
+            _umountToken = null;
+            Stop();
+
+            return 0;
+        }
 
         protected override Errno OnGetPathExtendedAttribute(string path, string name, byte[] value,
                                                             out int bytesWritten)
@@ -1153,6 +1191,18 @@ namespace RomRepoMgr.Core.Filesystem
             physical = ulong.MaxValue;
 
             return Errno.EOPNOTSUPP;
+        }
+
+        [DllImport("libc", SetLastError = true)]
+        static extern int setxattr(string path, string name, IntPtr value, long size, int flags);
+
+        public void Umount()
+        {
+            var    rnd   = new Random();
+            byte[] token = new byte[64];
+            rnd.NextBytes(token);
+            _umountToken = Base32.ToBase32String(token);
+            setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);
         }
 
         sealed class CachedMachine

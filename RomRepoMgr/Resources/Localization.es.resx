@@ -340,4 +340,7 @@
   <data name="UnArPathLabel" xml:space="preserve">
     <value>Ruta a UnAr</value>
   </data>
+  <data name="FilesystemMenuUmountText" xml:space="preserve">
+    <value>_Desmontar</value>
+  </data>
 </root>

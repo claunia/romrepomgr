@@ -20,7 +20,12 @@
                           Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="{Binding FilesystemMenuText}" IsEnabled="{Binding IsVfsAvailable}">
-                <MenuItem Header="{Binding FilesystemMenuMountText}" Command="{Binding MountCommand}" /> <Separator />
+                <MenuItem Header="{Binding FilesystemMenuMountText}" Command="{Binding MountCommand}"
+                          IsEnabled="{Binding Vfs, Converter={x:Static ObjectConverters.IsNull}}" />
+                <Separator />
+                <MenuItem Header="{Binding FilesystemMenuUmountText}" Command="{Binding UmountCommand}"
+                          IsEnabled="{Binding Vfs, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Separator />
             </MenuItem>
             <MenuItem Header="{Binding RomsMenuText}">
                 <MenuItem Header="{Binding RomsMenuImportText}" Command="{Binding ImportRomFolderCommand}" />

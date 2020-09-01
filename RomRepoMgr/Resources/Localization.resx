@@ -346,4 +346,7 @@ Do you want to delete the file?</value>
   <data name="ExitButtonText" xml:space="preserve">
     <value>Exit</value>
   </data>
+  <data name="FilesystemMenuUmountText" xml:space="preserve">
+    <value>_Umount</value>
+  </data>
 </root>

@@ -23,8 +23,10 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using Avalonia;
@@ -45,8 +47,8 @@ namespace RomRepoMgr.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         readonly MainWindow _view;
-
-        RomSetModel _selectedRomSet;
+        RomSetModel         _selectedRomSet;
+        Vfs                 _vfs;
 
         public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
         {
@@ -62,6 +64,7 @@ namespace RomRepoMgr.ViewModels
             ExportDatCommand       = ReactiveCommand.Create(ExecuteExportDatCommand);
             ExportRomsCommand      = ReactiveCommand.Create(ExecuteExportRomsCommand);
             MountCommand           = ReactiveCommand.Create(ExecuteMountCommand);
+            UmountCommand          = ReactiveCommand.Create(ExecuteUmountCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -96,6 +99,7 @@ namespace RomRepoMgr.ViewModels
         public string RomSetsMenuDeleteText => Localization.RomSetsMenuDeleteText;
         public string HelpMenuText => Localization.HelpMenuText;
         public string HelpMenuAboutText => Localization.HelpMenuAboutText;
+        public string FilesystemMenuUmountText => Localization.FilesystemMenuUmountText;
 
         public bool NativeMenuSupported =>
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
@@ -112,6 +116,13 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> ExportDatCommand       { get; }
         public ReactiveCommand<Unit, Unit> ExportRomsCommand      { get; }
         public ReactiveCommand<Unit, Unit> MountCommand           { get; }
+        public ReactiveCommand<Unit, Unit> UmountCommand          { get; }
+
+        public Vfs Vfs
+        {
+            get => _vfs;
+            set => this.RaiseAndSetIfChanged(ref _vfs, value);
+        }
 
         public RomSetModel SelectedRomSet
         {
@@ -304,6 +315,9 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteMountCommand()
         {
+            if(Vfs != null)
+                return;
+
             var dlgOpen = new OpenFolderDialog
             {
                 Title = Localization.SelectMountPointDialogTitle
@@ -314,12 +328,23 @@ namespace RomRepoMgr.ViewModels
             if(result == null)
                 return;
 
-            var fs = new Fuse
+            try
             {
-                MountPoint = result
-            };
+                Vfs          =  new Vfs();
+                Vfs.Umounted += VfsOnUmounted;
+                Vfs.MountTo(result);
+            }
+            catch(Exception)
+            {
+                if(Debugger.IsAttached)
+                    throw;
 
-            fs.Start();
+                Vfs = null;
+            }
         }
+
+        void VfsOnUmounted(object sender, EventArgs e) => Vfs = null;
+
+        void ExecuteUmountCommand() => Vfs?.Umount();
     }
 }
