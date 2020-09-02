@@ -96,7 +96,7 @@ namespace RomRepoMgr.Core.Filesystem
         {
             stat = new Stat();
 
-            string[] pieces = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = _vfs.SplitPath(path);
 
             if(pieces.Length == 0)
             {
@@ -275,7 +275,7 @@ namespace RomRepoMgr.Core.Filesystem
 
         protected override Errno OnOpenHandle(string path, OpenedPathInfo info)
         {
-            string[] pieces = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = _vfs.SplitPath(path);
 
             if(pieces.Length == 0)
                 return Errno.EISDIR;
@@ -520,7 +520,7 @@ namespace RomRepoMgr.Core.Filesystem
         {
             bytesWritten = 0;
 
-            string[] pieces = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = _vfs.SplitPath(path);
 
             if(pieces.Length == 0)
                 return Errno.ENODATA;
@@ -689,7 +689,7 @@ namespace RomRepoMgr.Core.Filesystem
         {
             names = null;
 
-            string[] pieces = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = _vfs.SplitPath(path);
 
             if(pieces.Length == 0)
                 return 0;
@@ -1071,7 +1071,7 @@ namespace RomRepoMgr.Core.Filesystem
 
         protected override Errno OnAccessPath(string path, AccessModes mode)
         {
-            string[] pieces = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = _vfs.SplitPath(path);
 
             if(pieces.Length == 0)
                 return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;

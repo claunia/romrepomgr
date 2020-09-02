@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using RomRepoMgr.Database;
 
@@ -64,5 +65,9 @@ namespace RomRepoMgr.Core.Filesystem
             totalSize = (ulong)ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size);
             files     = (ulong)ctx.Files.Count(f => f.IsInRepo);
         }
+
+        internal string[] SplitPath(string path) =>
+            path.Split(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\\" : "/",
+                       StringSplitOptions.RemoveEmptyEntries);
     }
 }
