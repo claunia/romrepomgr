@@ -43,11 +43,64 @@ namespace RomRepoMgr.Core.Filesystem
 
         internal void Umount() => _host?.Unmount();
 
-        public override int SetVolumeLabel(string VolumeLabel, out VolumeInfo VolumeInfo)
+        public override int SetVolumeLabel(string volumeLabel, out VolumeInfo volumeInfo)
         {
-            VolumeInfo = default;
+            volumeInfo = default;
 
             return STATUS_MEDIA_WRITE_PROTECTED;
         }
+
+        public override int Create(string fileName, uint createOptions, uint grantedAccess, uint fileAttributes,
+                                   byte[] securityDescriptor, ulong allocationSize, out object fileNode,
+                                   out object fileDesc, out FileInfo fileInfo, out string normalizedName)
+        {
+            fileNode       = default;
+            fileDesc       = default;
+            fileInfo       = default;
+            normalizedName = default;
+
+            return STATUS_MEDIA_WRITE_PROTECTED;
+        }
+
+        public override int Overwrite(object fileNode, object fileDesc, uint fileAttributes, bool replaceFileAttributes,
+                                      ulong allocationSize, out FileInfo fileInfo)
+        {
+            fileInfo = default;
+
+            return STATUS_MEDIA_WRITE_PROTECTED;
+        }
+
+        public override int Write(object fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
+                                  bool writeToEndOfFile, bool constrainedIo, out uint bytesTransferred,
+                                  out FileInfo fileInfo)
+        {
+            bytesTransferred = default;
+            fileInfo         = default;
+
+            return STATUS_MEDIA_WRITE_PROTECTED;
+        }
+
+        public override int SetBasicInfo(object fileNode, object fileDesc, uint fileAttributes, ulong creationTime,
+                                         ulong lastAccessTime, ulong lastWriteTime, ulong changeTime,
+                                         out FileInfo fileInfo)
+        {
+            fileInfo = default;
+
+            return STATUS_MEDIA_WRITE_PROTECTED;
+        }
+
+        public override int SetFileSize(object fileNode, object fileDesc, ulong newSize, bool setAllocationSize,
+                                        out FileInfo fileInfo)
+        {
+            fileInfo = default;
+
+            return STATUS_MEDIA_WRITE_PROTECTED;
+        }
+
+        public override int CanDelete(object fileNode, object fileDesc, string fileName) =>
+            STATUS_MEDIA_WRITE_PROTECTED;
+
+        public override int Rename(object fileNode, object fileDesc, string fileName, string newFileName,
+                                   bool replaceIfExists) => STATUS_MEDIA_WRITE_PROTECTED;
     }
 }
