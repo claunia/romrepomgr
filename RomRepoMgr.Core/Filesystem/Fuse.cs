@@ -27,14 +27,12 @@ namespace RomRepoMgr.Core.Filesystem
         readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
         readonly Vfs                                                                     _vfs;
         long                                                                             _lastHandle;
-        ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
         string                                                                           _umountToken;
 
         public Fuse(Vfs vfs)
         {
             _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
             _lastHandle          = 0;
-            _rootDirectoryCache  = new ConcurrentDictionary<string, long>();
             _machinesStatCache   = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
             _romSetsCache        = new ConcurrentDictionary<long, RomSet>();
             _machineFilesCache   = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
@@ -106,30 +104,27 @@ namespace RomRepoMgr.Core.Filesystem
                 return 0;
             }
 
-            if(_rootDirectoryCache.Count == 0)
-                FillRootDirectoryCache();
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
 
-            if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            if(romSetId <= 0)
             {
-                if(pieces[0]    == ".fuse_umount" &&
-                   _umountToken != null)
+                if(pieces[0]    != ".fuse_umount" ||
+                   _umountToken == null)
+                    return Errno.ENOENT;
+
+                stat = new Stat
                 {
-                    stat = new Stat
-                    {
-                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                        st_nlink   = 1,
-                        st_ctime   = NativeConvert.ToTimeT(DateTime.UtcNow),
-                        st_mtime   = NativeConvert.ToTimeT(DateTime.UtcNow),
-                        st_blksize = 0,
-                        st_blocks  = 0,
-                        st_ino     = 0,
-                        st_size    = 0
-                    };
+                    st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                    st_nlink   = 1,
+                    st_ctime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                    st_mtime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                    st_blksize = 0,
+                    st_blocks  = 0,
+                    st_ino     = 0,
+                    st_size    = 0
+                };
 
-                    return 0;
-                }
-
-                return Errno.ENOENT;
+                return 0;
             }
 
             if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
@@ -808,40 +803,6 @@ namespace RomRepoMgr.Core.Filesystem
 
         protected override Errno OnRemovePathExtendedAttribute(string path, string name) => Errno.EROFS;
 
-        void FillRootDirectoryCache()
-        {
-            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-            List<DirectoryEntry> entries = new List<DirectoryEntry>
-            {
-                new DirectoryEntry("."),
-                new DirectoryEntry("..")
-            };
-
-            ConcurrentDictionary<string, long> rootCache = new ConcurrentDictionary<string, long>();
-
-            foreach(RomSet set in ctx.RomSets)
-            {
-                string name = set.Name.Replace('/', '∕');
-
-                if(entries.Any(e => e.Name == name))
-                    name = Path.GetFileNameWithoutExtension(set.Filename)?.Replace('/', '∕');
-
-                if(entries.Any(e => e.Name == name) ||
-                   name == null)
-                    name = Path.GetFileNameWithoutExtension(set.Sha384);
-
-                if(name == null)
-                    continue;
-
-                entries.Add(new DirectoryEntry(name));
-                rootCache[name]       = set.Id;
-                _romSetsCache[set.Id] = set;
-            }
-
-            _rootDirectoryCache = rootCache;
-        }
-
         protected override Errno OnOpenDirectory(string directory, OpenedPathInfo info)
         {
             try
@@ -881,7 +842,6 @@ namespace RomRepoMgr.Core.Filesystem
                     info.Handle = new IntPtr(_lastHandle);
 
                     _directoryCache[_lastHandle] = entries;
-                    _rootDirectoryCache          = rootCache;
 
                     return 0;
                 }
@@ -891,10 +851,9 @@ namespace RomRepoMgr.Core.Filesystem
                 if(pieces.Length == 0)
                     return Errno.ENOENT;
 
-                if(_rootDirectoryCache.Count == 0)
-                    FillRootDirectoryCache();
+                long romSetId = _vfs.GetRomSetId(pieces[0]);
 
-                if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+                if(romSetId <= 0)
                     return Errno.ENOENT;
 
                 if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
@@ -1076,10 +1035,9 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 0)
                 return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
 
-            if(_rootDirectoryCache.Count == 0)
-                FillRootDirectoryCache();
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
 
-            if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            if(romSetId <= 0)
                 return Errno.ENOENT;
 
             if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
