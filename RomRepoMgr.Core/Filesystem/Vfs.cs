@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using RomRepoMgr.Database;
 
 namespace RomRepoMgr.Core.Filesystem
 {
@@ -18,7 +20,7 @@ namespace RomRepoMgr.Core.Filesystem
         {
             if(Fuse.IsAvailable)
             {
-                _fuse = new Fuse
+                _fuse = new Fuse(this)
                 {
                     MountPoint = mountPoint
                 };
@@ -32,7 +34,7 @@ namespace RomRepoMgr.Core.Filesystem
             }
             else if(Winfsp.IsAvailable)
             {
-                _winfsp = new Winfsp();
+                _winfsp = new Winfsp(this);
                 bool ret = _winfsp.Mount(mountPoint);
 
                 if(ret)
@@ -53,6 +55,14 @@ namespace RomRepoMgr.Core.Filesystem
             _winfsp = null;
 
             Umounted?.Invoke(this, System.EventArgs.Empty);
+        }
+
+        internal void GetInfo(out ulong files, out ulong totalSize)
+        {
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            totalSize = (ulong)ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size);
+            files     = (ulong)ctx.Files.Count(f => f.IsInRepo);
         }
     }
 }

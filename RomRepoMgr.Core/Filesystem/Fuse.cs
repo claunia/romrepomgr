@@ -25,11 +25,12 @@ namespace RomRepoMgr.Core.Filesystem
         readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
         readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
         readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
+        readonly Vfs                                                                     _vfs;
         long                                                                             _lastHandle;
         ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
         string                                                                           _umountToken;
 
-        public Fuse()
+        public Fuse(Vfs vfs)
         {
             _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
             _lastHandle          = 0;
@@ -40,6 +41,7 @@ namespace RomRepoMgr.Core.Filesystem
             _streamsCache        = new ConcurrentDictionary<long, Stream>();
             _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
             Name                 = "romrepombgrfs";
+            _vfs                 = vfs;
         }
 
         public static bool IsAvailable
@@ -457,15 +459,15 @@ namespace RomRepoMgr.Core.Filesystem
 
         protected override Errno OnGetFileSystemStatus(string path, out Statvfs buf)
         {
-            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+            _vfs.GetInfo(out ulong files, out ulong totalSize);
 
             buf = new Statvfs
             {
                 f_bsize   = 512,
                 f_frsize  = 512,
-                f_blocks  = (ulong)(ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size) / 512),
+                f_blocks  = totalSize / 512,
                 f_bavail  = 0,
-                f_files   = (ulong)ctx.Files.Count(f => f.IsInRepo),
+                f_files   = files,
                 f_ffree   = 0,
                 f_favail  = 0,
                 f_fsid    = 0xFFFFFFFF,

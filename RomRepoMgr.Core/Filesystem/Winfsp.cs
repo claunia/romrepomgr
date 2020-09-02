@@ -6,7 +6,10 @@ namespace RomRepoMgr.Core.Filesystem
 {
     public class Winfsp : FileSystemBase
     {
+        readonly Vfs   _vfs;
         FileSystemHost _host;
+
+        public Winfsp(Vfs vfs) => _vfs = vfs;
 
         public static bool IsAvailable
         {
@@ -102,5 +105,17 @@ namespace RomRepoMgr.Core.Filesystem
 
         public override int Rename(object fileNode, object fileDesc, string fileName, string newFileName,
                                    bool replaceIfExists) => STATUS_MEDIA_WRITE_PROTECTED;
+
+        public override int GetVolumeInfo(out VolumeInfo volumeInfo)
+        {
+            volumeInfo = new VolumeInfo();
+
+            _vfs.GetInfo(out _, out ulong totalSize);
+
+            volumeInfo.FreeSize  = 0;
+            volumeInfo.TotalSize = totalSize;
+
+            return base.GetVolumeInfo(out volumeInfo);
+        }
     }
 }
