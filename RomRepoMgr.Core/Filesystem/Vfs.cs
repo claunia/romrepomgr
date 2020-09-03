@@ -1,20 +1,29 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
+using SharpCompress.Compressors;
+using SharpCompress.Compressors.LZMA;
 
 namespace RomRepoMgr.Core.Filesystem
 {
+    // TODO: Last handle goes negative
+    // TODO: Invalidate caches
+    // TODO: Mount options
+    // TODO: Do not show machines or romsets with no ROMs in repo
     public class Vfs : IDisposable
     {
         readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
         readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
         readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
+        readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
         Fuse                                                                             _fuse;
+        long                                                                             _lastHandle;
         ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
         Winfsp                                                                           _winfsp;
 
@@ -24,11 +33,13 @@ namespace RomRepoMgr.Core.Filesystem
             _romSetsCache       = new ConcurrentDictionary<long, RomSet>();
             _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
             _machineFilesCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
+            _streamsCache       = new ConcurrentDictionary<long, Stream>();
+            _lastHandle         = 0;
         }
 
         public static bool IsAvailable => Winfsp.IsAvailable || Fuse.IsAvailable;
 
-        public void Dispose() => _fuse?.Dispose();
+        public void Dispose() => Umount();
 
         public event EventHandler<System.EventArgs> Umounted;
 
@@ -45,7 +56,7 @@ namespace RomRepoMgr.Core.Filesystem
                 {
                     _fuse.Start();
 
-                    Umounted?.Invoke(this, System.EventArgs.Empty);
+                    CleanUp();
                 });
             }
             else if(Winfsp.IsAvailable)
@@ -57,10 +68,10 @@ namespace RomRepoMgr.Core.Filesystem
                     return;
 
                 _winfsp = null;
-                Umounted?.Invoke(this, System.EventArgs.Empty);
+                CleanUp();
             }
             else
-                Umounted?.Invoke(this, System.EventArgs.Empty);
+                CleanUp();
         }
 
         public void Umount()
@@ -69,6 +80,17 @@ namespace RomRepoMgr.Core.Filesystem
             _fuse = null;
             _winfsp?.Umount();
             _winfsp = null;
+
+            CleanUp();
+        }
+
+        public void CleanUp()
+        {
+            foreach(KeyValuePair<long, Stream> handle in _streamsCache)
+                handle.Value.Close();
+
+            _streamsCache.Clear();
+            _lastHandle = 0;
 
             Umounted?.Invoke(this, System.EventArgs.Empty);
         }
@@ -238,6 +260,75 @@ namespace RomRepoMgr.Core.Filesystem
                 return null;
 
             return file;
+        }
+
+        internal long Open(string sha384, long fileSize)
+        {
+            byte[] sha384Bytes = new byte[48];
+
+            for(int i = 0; i < 48; i++)
+            {
+                if(sha384[i * 2] >= 0x30 &&
+                   sha384[i * 2] <= 0x39)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
+                else if(sha384[i * 2] >= 0x41 &&
+                        sha384[i * 2] <= 0x46)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
+                else if(sha384[i * 2] >= 0x61 &&
+                        sha384[i * 2] <= 0x66)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
+
+                if(sha384[(i * 2) + 1] >= 0x30 &&
+                   sha384[(i * 2) + 1] <= 0x39)
+                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x30);
+                else if(sha384[(i * 2) + 1] >= 0x41 &&
+                        sha384[(i * 2) + 1] <= 0x46)
+                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x37);
+                else if(sha384[(i * 2) + 1] >= 0x61 &&
+                        sha384[(i * 2) + 1] <= 0x66)
+                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x57);
+            }
+
+            string sha384B32 = Base32.ToBase32String(sha384Bytes);
+
+            string repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath, "files", sha384B32[0].ToString(),
+                                           sha384B32[1].ToString(), sha384B32[2].ToString(), sha384B32[3].ToString(),
+                                           sha384B32[4].ToString(), sha384B32 + ".lz");
+
+            if(!File.Exists(repoPath))
+                return -1;
+
+            _lastHandle++;
+            long handle = _lastHandle;
+
+            _streamsCache[handle] =
+                Stream.Synchronized(new ForcedSeekStream<LZipStream>(fileSize,
+                                                                     new FileStream(repoPath, FileMode.Open,
+                                                                         FileAccess.Read),
+                                                                     CompressionMode.Decompress));
+
+            return handle;
+        }
+
+        internal int Read(long handle, byte[] buf, long offset)
+        {
+            if(!_streamsCache.TryGetValue(handle, out Stream stream))
+                return -1;
+
+            stream.Position = offset;
+
+            return stream.Read(buf, 0, buf.Length);
+        }
+
+        internal bool Close(long handle)
+        {
+            if(!_streamsCache.TryGetValue(handle, out Stream stream))
+                return false;
+
+            stream.Close();
+            _streamsCache.TryRemove(handle, out _);
+
+            return true;
         }
     }
 

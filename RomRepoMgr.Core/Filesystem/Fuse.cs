@@ -8,20 +8,14 @@ using Mono.Fuse.NETStandard;
 using Mono.Unix.Native;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
-using SharpCompress.Compressors;
-using SharpCompress.Compressors.LZMA;
 
 namespace RomRepoMgr.Core.Filesystem
 {
-    // TODO: Invalidate caches
-    // TODO: Mount options
-    // TODO: Do not show machines or romsets with no ROMs in repo
     // TODO: Last handle goes negative
     public sealed class Fuse : FileSystem
     {
         readonly ConcurrentDictionary<long, List<DirectoryEntry>> _directoryCache;
         readonly ConcurrentDictionary<long, Stat>                 _fileStatHandleCache;
-        readonly ConcurrentDictionary<long, Stream>               _streamsCache;
         readonly Vfs                                              _vfs;
         long                                                      _lastHandle;
         string                                                    _umountToken;
@@ -30,7 +24,6 @@ namespace RomRepoMgr.Core.Filesystem
         {
             _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
             _lastHandle          = 0;
-            _streamsCache        = new ConcurrentDictionary<long, Stream>();
             _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
             Name                 = "romrepombgrfs";
             _vfs                 = vfs;
@@ -75,14 +68,6 @@ namespace RomRepoMgr.Core.Filesystem
 
         [DllImport("libdl")]
         static extern int dlclose(IntPtr handle);
-
-        protected override void Dispose(bool disposing)
-        {
-            if(!disposing)
-                return;
-
-            // TODO: Close streams manually
-        }
 
         protected override Errno OnGetPathStatus(string path, out Stat stat)
         {
@@ -253,51 +238,14 @@ namespace RomRepoMgr.Core.Filesystem
                info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
                 return Errno.EROFS;
 
-            byte[] sha384Bytes = new byte[48];
-            string sha384      = file.Sha384;
+            long handle = _vfs.Open(file.Sha384, (long)file.Size);
 
-            for(int i = 0; i < 48; i++)
-            {
-                if(sha384[i * 2] >= 0x30 &&
-                   sha384[i * 2] <= 0x39)
-                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
-                else if(sha384[i * 2] >= 0x41 &&
-                        sha384[i * 2] <= 0x46)
-                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
-                else if(sha384[i * 2] >= 0x61 &&
-                        sha384[i * 2] <= 0x66)
-                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
-
-                if(sha384[(i * 2) + 1] >= 0x30 &&
-                   sha384[(i * 2) + 1] <= 0x39)
-                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x30);
-                else if(sha384[(i * 2) + 1] >= 0x41 &&
-                        sha384[(i * 2) + 1] <= 0x46)
-                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x37);
-                else if(sha384[(i * 2) + 1] >= 0x61 &&
-                        sha384[(i * 2) + 1] <= 0x66)
-                    sha384Bytes[i] += (byte)(sha384[(i * 2) + 1] - 0x57);
-            }
-
-            string sha384B32 = Base32.ToBase32String(sha384Bytes);
-
-            string repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath, "files", sha384B32[0].ToString(),
-                                           sha384B32[1].ToString(), sha384B32[2].ToString(), sha384B32[3].ToString(),
-                                           sha384B32[4].ToString(), sha384B32 + ".lz");
-
-            if(!File.Exists(repoPath))
+            if(handle <= 0)
                 return Errno.ENOENT;
 
-            _lastHandle++;
-            info.Handle = new IntPtr(_lastHandle);
+            info.Handle = new IntPtr(handle);
 
-            _streamsCache[_lastHandle] =
-                Stream.Synchronized(new ForcedSeekStream<LZipStream>((long)file.Size,
-                                                                     new FileStream(repoPath, FileMode.Open,
-                                                                         FileAccess.Read),
-                                                                     CompressionMode.Decompress));
-
-            _fileStatHandleCache[_lastHandle] = new Stat
+            _fileStatHandleCache[handle] = new Stat
             {
                 st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
                 st_nlink   = 1,
@@ -315,15 +263,14 @@ namespace RomRepoMgr.Core.Filesystem
         protected override Errno OnReadHandle(string file, OpenedPathInfo info, byte[] buf, long offset,
                                               out int bytesWritten)
         {
+            bytesWritten = _vfs.Read(info.Handle.ToInt64(), buf, offset);
+
+            if(bytesWritten >= 0)
+                return 0;
+
             bytesWritten = 0;
 
-            if(!_streamsCache.TryGetValue(info.Handle.ToInt64(), out Stream fileStream))
-                return Errno.EBADF;
-
-            fileStream.Position = offset;
-            bytesWritten        = fileStream.Read(buf, 0, buf.Length);
-
-            return 0;
+            return Errno.EBADF;
         }
 
         protected override Errno OnWriteHandle(string file, OpenedPathInfo info, byte[] buf, long offset,
@@ -359,11 +306,9 @@ namespace RomRepoMgr.Core.Filesystem
 
         protected override Errno OnReleaseHandle(string file, OpenedPathInfo info)
         {
-            if(!_streamsCache.TryGetValue(info.Handle.ToInt64(), out Stream fileStream))
+            if(!_vfs.Close(info.Handle.ToInt64()))
                 return Errno.EBADF;
 
-            fileStream.Close();
-            _streamsCache.TryRemove(info.Handle.ToInt64(), out _);
             _fileStatHandleCache.TryRemove(info.Handle.ToInt64(), out _);
 
             return 0;
