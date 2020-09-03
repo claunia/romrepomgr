@@ -414,6 +414,14 @@ namespace RomRepoMgr.Core.Filesystem
                     }));
                 }
 
+                if(marker != null)
+                {
+                    int idx = node.Children.FindIndex(f => f.FileName == marker);
+
+                    if(idx >= 0)
+                        node.Children.RemoveRange(0, idx + 1);
+                }
+
                 context = enumerator = node.Children.GetEnumerator();
             }
 
