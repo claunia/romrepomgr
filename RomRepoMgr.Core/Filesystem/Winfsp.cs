@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Runtime.InteropServices;
 using Fsp;
 using Fsp.Interop;
 using RomRepoMgr.Database.Models;
@@ -205,6 +206,28 @@ namespace RomRepoMgr.Core.Filesystem
 
             _vfs.Close(handle);
             _fileStatHandleCache.TryRemove(handle, out _);
+        }
+
+        public override int Read(object fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
+                                 out uint bytesTransferred)
+        {
+            bytesTransferred = 0;
+
+            if(!(fileNode is long handle))
+                return STATUS_INVALID_HANDLE;
+
+            byte[] buf = new byte[length];
+
+            int ret = _vfs.Read(handle, buf, (long)offset);
+
+            if(ret < 0)
+                return STATUS_INVALID_HANDLE;
+
+            Marshal.Copy(buf, 0, buffer, ret);
+
+            bytesTransferred = (uint)ret;
+
+            return STATUS_SUCCESS;
         }
     }
 }
