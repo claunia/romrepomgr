@@ -11,6 +11,7 @@ namespace RomRepoMgr.Core.Filesystem
 {
     public class Vfs : IDisposable
     {
+        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
         readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
         readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
         Fuse                                                                             _fuse;
@@ -22,6 +23,7 @@ namespace RomRepoMgr.Core.Filesystem
             _rootDirectoryCache = new ConcurrentDictionary<string, long>();
             _romSetsCache       = new ConcurrentDictionary<long, RomSet>();
             _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
+            _machineFilesCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
         }
 
         public static bool IsAvailable => Winfsp.IsAvailable || Fuse.IsAvailable;
@@ -190,6 +192,53 @@ namespace RomRepoMgr.Core.Filesystem
 
             return machine;
         }
+
+        internal ConcurrentDictionary<string, CachedFile> GetFilesFromMachine(ulong id)
+        {
+            _machineFilesCache.TryGetValue(id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+
+            if(cachedMachineFiles != null)
+                return cachedMachineFiles;
+
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
+
+            foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == id &&
+                                                                               fbm.File.IsInRepo))
+            {
+                var cachedFile = new CachedFile
+                {
+                    Id        = machineFile.File.Id,
+                    Crc32     = machineFile.File.Crc32,
+                    Md5       = machineFile.File.Md5,
+                    Sha1      = machineFile.File.Sha1,
+                    Sha256    = machineFile.File.Sha256,
+                    Sha384    = machineFile.File.Sha384,
+                    Sha512    = machineFile.File.Sha512,
+                    Size      = machineFile.File.Size,
+                    CreatedOn = machineFile.File.CreatedOn,
+                    UpdatedOn = machineFile.File.UpdatedOn
+                };
+
+                cachedMachineFiles[machineFile.Name] = cachedFile;
+            }
+
+            _machineFilesCache[id] = cachedMachineFiles;
+
+            return cachedMachineFiles;
+        }
+
+        internal CachedFile GetFile(ulong machineId, string name)
+        {
+            ConcurrentDictionary<string, CachedFile> cachedFiles = GetFilesFromMachine(machineId);
+
+            if(cachedFiles == null ||
+               !cachedFiles.TryGetValue(name, out CachedFile file))
+                return null;
+
+            return file;
+        }
     }
 
     internal sealed class CachedMachine
@@ -197,5 +246,19 @@ namespace RomRepoMgr.Core.Filesystem
         public ulong    Id               { get; set; }
         public DateTime CreationDate     { get; set; }
         public DateTime ModificationDate { get; set; }
+    }
+
+    internal sealed class CachedFile
+    {
+        public ulong    Id        { get; set; }
+        public ulong    Size      { get; set; }
+        public string   Crc32     { get; set; }
+        public string   Md5       { get; set; }
+        public string   Sha1      { get; set; }
+        public string   Sha256    { get; set; }
+        public string   Sha384    { get; set; }
+        public string   Sha512    { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime UpdatedOn { get; set; }
     }
 }

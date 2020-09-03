@@ -19,19 +19,17 @@ namespace RomRepoMgr.Core.Filesystem
     // TODO: Last handle goes negative
     public sealed class Fuse : FileSystem
     {
-        readonly ConcurrentDictionary<long, List<DirectoryEntry>>                      _directoryCache;
-        readonly ConcurrentDictionary<long, Stat>                                      _fileStatHandleCache;
-        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>> _machineFilesCache;
-        readonly ConcurrentDictionary<long, Stream>                                    _streamsCache;
-        readonly Vfs                                                                   _vfs;
-        long                                                                           _lastHandle;
-        string                                                                         _umountToken;
+        readonly ConcurrentDictionary<long, List<DirectoryEntry>> _directoryCache;
+        readonly ConcurrentDictionary<long, Stat>                 _fileStatHandleCache;
+        readonly ConcurrentDictionary<long, Stream>               _streamsCache;
+        readonly Vfs                                              _vfs;
+        long                                                      _lastHandle;
+        string                                                    _umountToken;
 
         public Fuse(Vfs vfs)
         {
             _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
             _lastHandle          = 0;
-            _machineFilesCache   = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
             _streamsCache        = new ConcurrentDictionary<long, Stream>();
             _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
             Name                 = "romrepombgrfs";
@@ -156,38 +154,9 @@ namespace RomRepoMgr.Core.Filesystem
                 return 0;
             }
 
-            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            if(cachedMachineFiles == null)
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
-                                                                                   fbm.File.IsInRepo))
-                {
-                    var cachedFile = new CachedFile
-                    {
-                        Id        = machineFile.File.Id,
-                        Crc32     = machineFile.File.Crc32,
-                        Md5       = machineFile.File.Md5,
-                        Sha1      = machineFile.File.Sha1,
-                        Sha256    = machineFile.File.Sha256,
-                        Sha384    = machineFile.File.Sha384,
-                        Sha512    = machineFile.File.Sha512,
-                        Size      = machineFile.File.Size,
-                        CreatedOn = machineFile.File.CreatedOn,
-                        UpdatedOn = machineFile.File.UpdatedOn
-                    };
-
-                    cachedMachineFiles[machineFile.Name] = cachedFile;
-                }
-
-                _machineFilesCache[machine.Id] = cachedMachineFiles;
-            }
-
-            if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
+            if(file == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 3)
@@ -267,38 +236,9 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 2)
                 return Errno.EISDIR;
 
-            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            if(cachedMachineFiles == null)
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
-                                                                                   fbm.File.IsInRepo))
-                {
-                    var cachedFile = new CachedFile
-                    {
-                        Id        = machineFile.File.Id,
-                        Crc32     = machineFile.File.Crc32,
-                        Md5       = machineFile.File.Md5,
-                        Sha1      = machineFile.File.Sha1,
-                        Sha256    = machineFile.File.Sha256,
-                        Sha384    = machineFile.File.Sha384,
-                        Sha512    = machineFile.File.Sha512,
-                        Size      = machineFile.File.Size,
-                        CreatedOn = machineFile.File.CreatedOn,
-                        UpdatedOn = machineFile.File.UpdatedOn
-                    };
-
-                    cachedMachineFiles[machineFile.Name] = cachedFile;
-                }
-
-                _machineFilesCache[machine.Id] = cachedMachineFiles;
-            }
-
-            if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
+            if(file == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)
@@ -483,38 +423,9 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 2)
                 return Errno.ENODATA;
 
-            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            if(cachedMachineFiles == null)
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
-                                                                                   fbm.File.IsInRepo))
-                {
-                    var cachedFile = new CachedFile
-                    {
-                        Id        = machineFile.File.Id,
-                        Crc32     = machineFile.File.Crc32,
-                        Md5       = machineFile.File.Md5,
-                        Sha1      = machineFile.File.Sha1,
-                        Sha256    = machineFile.File.Sha256,
-                        Sha384    = machineFile.File.Sha384,
-                        Sha512    = machineFile.File.Sha512,
-                        Size      = machineFile.File.Size,
-                        CreatedOn = machineFile.File.CreatedOn,
-                        UpdatedOn = machineFile.File.UpdatedOn
-                    };
-
-                    cachedMachineFiles[machineFile.Name] = cachedFile;
-                }
-
-                _machineFilesCache[machine.Id] = cachedMachineFiles;
-            }
-
-            if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
+            if(file == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)
@@ -623,38 +534,9 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 2)
                 return 0;
 
-            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            if(cachedMachineFiles == null)
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
-                                                                                   fbm.File.IsInRepo))
-                {
-                    var cachedFile = new CachedFile
-                    {
-                        Id        = machineFile.File.Id,
-                        Crc32     = machineFile.File.Crc32,
-                        Md5       = machineFile.File.Md5,
-                        Sha1      = machineFile.File.Sha1,
-                        Sha256    = machineFile.File.Sha256,
-                        Sha384    = machineFile.File.Sha384,
-                        Sha512    = machineFile.File.Sha512,
-                        Size      = machineFile.File.Size,
-                        CreatedOn = machineFile.File.CreatedOn,
-                        UpdatedOn = machineFile.File.UpdatedOn
-                    };
-
-                    cachedMachineFiles[machineFile.Name] = cachedFile;
-                }
-
-                _machineFilesCache[machine.Id] = cachedMachineFiles;
-            }
-
-            if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
+            if(file == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)
@@ -769,37 +651,7 @@ namespace RomRepoMgr.Core.Filesystem
                 if(machine == null)
                     return Errno.ENOENT;
 
-                _machineFilesCache.TryGetValue(machine.Id,
-                                               out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
-
-                if(cachedMachineFiles == null)
-                {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                    foreach(FileByMachine machineFile in
-                        ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id && fbm.File.IsInRepo))
-                    {
-                        var file = new CachedFile
-                        {
-                            Id        = machineFile.File.Id,
-                            Crc32     = machineFile.File.Crc32,
-                            Md5       = machineFile.File.Md5,
-                            Sha1      = machineFile.File.Sha1,
-                            Sha256    = machineFile.File.Sha256,
-                            Sha384    = machineFile.File.Sha384,
-                            Sha512    = machineFile.File.Sha512,
-                            Size      = machineFile.File.Size,
-                            CreatedOn = machineFile.File.CreatedOn,
-                            UpdatedOn = machineFile.File.UpdatedOn
-                        };
-
-                        cachedMachineFiles[machineFile.Name] = file;
-                    }
-
-                    _machineFilesCache[machine.Id] = cachedMachineFiles;
-                }
+                ConcurrentDictionary<string, CachedFile> cachedMachineFiles = _vfs.GetFilesFromMachine(machine.Id);
 
                 if(pieces.Length == 2)
                 {
@@ -887,38 +739,9 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 2)
                 return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
 
-            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            if(cachedMachineFiles == null)
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
-
-                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
-                                                                                   fbm.File.IsInRepo))
-                {
-                    var cachedFile = new CachedFile
-                    {
-                        Id        = machineFile.File.Id,
-                        Crc32     = machineFile.File.Crc32,
-                        Md5       = machineFile.File.Md5,
-                        Sha1      = machineFile.File.Sha1,
-                        Sha256    = machineFile.File.Sha256,
-                        Sha384    = machineFile.File.Sha384,
-                        Sha512    = machineFile.File.Sha512,
-                        Size      = machineFile.File.Size,
-                        CreatedOn = machineFile.File.CreatedOn,
-                        UpdatedOn = machineFile.File.UpdatedOn
-                    };
-
-                    cachedMachineFiles[machineFile.Name] = cachedFile;
-                }
-
-                _machineFilesCache[machine.Id] = cachedMachineFiles;
-            }
-
-            if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile _))
+            if(file == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)
@@ -963,20 +786,6 @@ namespace RomRepoMgr.Core.Filesystem
             rnd.NextBytes(token);
             _umountToken = Base32.ToBase32String(token);
             setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);
-        }
-
-        sealed class CachedFile
-        {
-            public ulong    Id        { get; set; }
-            public ulong    Size      { get; set; }
-            public string   Crc32     { get; set; }
-            public string   Md5       { get; set; }
-            public string   Sha1      { get; set; }
-            public string   Sha256    { get; set; }
-            public string   Sha384    { get; set; }
-            public string   Sha512    { get; set; }
-            public DateTime CreatedOn { get; set; }
-            public DateTime UpdatedOn { get; set; }
         }
     }
 }
