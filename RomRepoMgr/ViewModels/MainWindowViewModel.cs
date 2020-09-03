@@ -159,8 +159,8 @@ namespace RomRepoMgr.ViewModels
             {
                 Extensions = new List<string>
                 {
-                    "*.dat",
-                    "*.xml"
+                    "dat",
+                    "xml"
                 },
                 Name = Localization.DatFilesDialogLabel
             });
@@ -169,7 +169,7 @@ namespace RomRepoMgr.ViewModels
             {
                 Extensions = new List<string>
                 {
-                    "*.*"
+                    "*"
                 },
                 Name = Localization.AllFilesDialogLabel
             });
