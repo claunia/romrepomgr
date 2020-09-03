@@ -229,5 +229,20 @@ namespace RomRepoMgr.Core.Filesystem
 
             return STATUS_SUCCESS;
         }
+
+        public override int GetFileInfo(object fileNode, object fileDesc, out FileInfo fileInfo)
+        {
+            fileInfo = default;
+
+            if(!(fileNode is long handle))
+                return STATUS_INVALID_HANDLE;
+
+            if(!_fileStatHandleCache.TryGetValue(handle, out FileInfo info))
+                return STATUS_INVALID_HANDLE;
+
+            fileInfo = info;
+
+            return STATUS_SUCCESS;
+        }
     }
 }
