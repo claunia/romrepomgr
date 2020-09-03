@@ -1,15 +1,24 @@
 using System;
+using System.Collections.Concurrent;
+using System.IO;
 using Fsp;
 using Fsp.Interop;
+using RomRepoMgr.Database.Models;
+using FileInfo = Fsp.Interop.FileInfo;
 
 namespace RomRepoMgr.Core.Filesystem
 {
     public class Winfsp : FileSystemBase
     {
-        readonly Vfs   _vfs;
-        FileSystemHost _host;
+        readonly ConcurrentDictionary<long, FileInfo> _fileStatHandleCache;
+        readonly Vfs                                  _vfs;
+        FileSystemHost                                _host;
 
-        public Winfsp(Vfs vfs) => _vfs = vfs;
+        public Winfsp(Vfs vfs)
+        {
+            _vfs                 = vfs;
+            _fileStatHandleCache = new ConcurrentDictionary<long, FileInfo>();
+        }
 
         public static bool IsAvailable
         {
@@ -116,6 +125,77 @@ namespace RomRepoMgr.Core.Filesystem
             volumeInfo.TotalSize = totalSize;
 
             return base.GetVolumeInfo(out volumeInfo);
+        }
+
+        public override int Open(string fileName, uint createOptions, uint grantedAccess, out object fileNode,
+                                 out object fileDesc, out FileInfo fileInfo, out string normalizedName)
+        {
+            fileNode       = default;
+            fileDesc       = default;
+            fileInfo       = default;
+            normalizedName = default;
+
+            string[] pieces = _vfs.SplitPath(fileName);
+
+            if(pieces.Length == 0)
+                return STATUS_FILE_IS_A_DIRECTORY;
+
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+            if(romSetId <= 0)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            RomSet romSet = _vfs.GetRomSet(romSetId);
+
+            if(romSet == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            if(pieces.Length == 1)
+                return STATUS_FILE_IS_A_DIRECTORY;
+
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+            if(machine == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            if(pieces.Length == 2)
+                return STATUS_FILE_IS_A_DIRECTORY;
+
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+            if(file == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            if(pieces.Length > 3)
+                return STATUS_FILE_IS_A_DIRECTORY;
+
+            if(file.Sha384 == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            long handle = _vfs.Open(file.Sha384, (long)file.Size);
+
+            if(handle <= 0)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            fileNode       = handle;
+            normalizedName = Path.GetFileName(fileName);
+
+            // TODO: Real allocation size
+            fileInfo = new FileInfo
+            {
+                ChangeTime     = (ulong)file.UpdatedOn.ToFileTimeUtc(),
+                AllocationSize = (file.Size + 511) / 512,
+                FileSize       = file.Size,
+                CreationTime   = (ulong)file.CreatedOn.ToFileTimeUtc(),
+                FileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                IndexNumber    = file.Id,
+                LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                LastWriteTime  = (ulong)file.UpdatedOn.ToFileTimeUtc()
+            };
+
+            _fileStatHandleCache[handle] = fileInfo;
+
+            return STATUS_SUCCESS;
         }
     }
 }
