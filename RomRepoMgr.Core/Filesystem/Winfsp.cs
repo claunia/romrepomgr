@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Fsp;
 using Fsp.Interop;
@@ -184,7 +186,13 @@ namespace RomRepoMgr.Core.Filesystem
                     IsDirectory = true,
                     Info        = fileInfo,
                     Path        = fileName,
-                    RomSetId    = romSet.Id
+                    RomSetId    = romSet.Id,
+                    ParentInfo = new FileInfo
+                    {
+                        CreationTime   = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                        FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                        LastWriteTime  = (ulong)DateTime.UtcNow.ToFileTimeUtc()
+                    }
                 };
 
                 return STATUS_SUCCESS;
@@ -200,9 +208,9 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 fileInfo = new FileInfo
                 {
-                    CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                    CreationTime   = (ulong)machine.CreationDate.ToUniversalTime().ToFileTimeUtc(),
                     FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                    LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                    LastWriteTime  = (ulong)machine.ModificationDate.ToUniversalTime().ToFileTimeUtc()
                 };
 
                 normalizedName = Path.GetFileName(fileName);
@@ -213,7 +221,13 @@ namespace RomRepoMgr.Core.Filesystem
                     IsDirectory = true,
                     Info        = fileInfo,
                     Path        = fileName,
-                    MachineId   = machine.Id
+                    MachineId   = machine.Id,
+                    ParentInfo = new FileInfo
+                    {
+                        CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                        FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                        LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                    }
                 };
 
                 return STATUS_SUCCESS;
@@ -307,16 +321,151 @@ namespace RomRepoMgr.Core.Filesystem
             return STATUS_SUCCESS;
         }
 
-        class FileNode
+        public override bool ReadDirectoryEntry(object fileNode, object fileDesc, string pattern, string marker,
+                                                ref object context, out string fileName, out FileInfo fileInfo)
         {
-            public FileInfo     Info        { get; set; }
-            public string       FileName    { get; set; }
-            public string       Path        { get; set; }
-            public long         Handle      { get; set; }
-            public List<string> Children    { get; set; }
-            public bool         IsDirectory { get; set; }
-            public long         RomSetId    { get; set; }
-            public ulong        MachineId   { get; set; }
+            fileName = default;
+            fileInfo = default;
+
+            if(!(fileNode is FileNode node) ||
+               !node.IsDirectory)
+                return false;
+
+            if(!(context is IEnumerator<FileEntry> enumerator))
+            {
+                if(node.MachineId > 0)
+                {
+                    ConcurrentDictionary<string, CachedFile> cachedMachineFiles =
+                        _vfs.GetFilesFromMachine(node.MachineId);
+
+                    node.Children = new List<FileEntry>
+                    {
+                        new FileEntry
+                        {
+                            FileName = ".",
+                            Info     = node.Info
+                        },
+                        new FileEntry
+                        {
+                            FileName = "..",
+                            Info     = node.ParentInfo
+                        }
+                    };
+
+                    node.Children.AddRange(cachedMachineFiles.Select(file => new FileEntry
+                    {
+                        FileName = file.Key,
+                        Info = new FileInfo
+                        {
+                            ChangeTime     = (ulong)file.Value.UpdatedOn.ToFileTimeUtc(),
+                            AllocationSize = (file.Value.Size + 511) / 512,
+                            FileSize       = file.Value.Size,
+                            CreationTime   = (ulong)file.Value.CreatedOn.ToFileTimeUtc(),
+                            FileAttributes =
+                                (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                            IndexNumber    = file.Value.Id,
+                            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                            LastWriteTime  = (ulong)file.Value.UpdatedOn.ToFileTimeUtc()
+                        }
+                    }));
+                }
+                else if(node.RomSetId > 0)
+                {
+                    ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(node.RomSetId);
+
+                    node.Children = new List<FileEntry>
+                    {
+                        new FileEntry
+                        {
+                            FileName = ".",
+                            Info     = node.Info
+                        },
+                        new FileEntry
+                        {
+                            FileName = "..",
+                            Info     = node.ParentInfo
+                        }
+                    };
+
+                    node.Children.AddRange(machines.Select(machine => new FileEntry
+                    {
+                        FileName = machine.Key,
+                        Info = new FileInfo
+                        {
+                            CreationTime   = (ulong)machine.Value.CreationDate.ToUniversalTime().ToFileTimeUtc(),
+                            FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                            LastWriteTime  = (ulong)machine.Value.ModificationDate.ToUniversalTime().ToFileTimeUtc()
+                        }
+                    }));
+                }
+                else
+                {
+                    node.Children = new List<FileEntry>();
+
+                    node.Children.AddRange(_vfs.GetRootEntries().Select(e => new FileEntry
+                    {
+                        FileName = e,
+                        IsRomSet = true
+                    }));
+                }
+
+                context = enumerator = node.Children.GetEnumerator();
+            }
+
+            while(enumerator.MoveNext())
+            {
+                FileEntry entry = enumerator.Current;
+
+                if(entry is null)
+                    continue;
+
+                if(entry.IsRomSet)
+                {
+                    long romSetId = _vfs.GetRomSetId(entry.FileName);
+
+                    if(romSetId <= 0)
+                        continue;
+
+                    RomSet romSet = _vfs.GetRomSet(romSetId);
+
+                    if(romSet is null)
+                        continue;
+
+                    entry.Info = new FileInfo
+                    {
+                        CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                        FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                        LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                    };
+                }
+
+                fileName = entry.FileName;
+                fileInfo = entry.Info;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        sealed class FileEntry
+        {
+            public string   FileName { get; set; }
+            public FileInfo Info     { get; set; }
+            public bool     IsRomSet { get; set; }
+        }
+
+        sealed class FileNode
+        {
+            public FileInfo        Info        { get; set; }
+            public FileInfo        ParentInfo  { get; set; }
+            public string          FileName    { get; set; }
+            public string          Path        { get; set; }
+            public long            Handle      { get; set; }
+            public List<FileEntry> Children    { get; set; }
+            public bool            IsDirectory { get; set; }
+            public long            RomSetId    { get; set; }
+            public ulong           MachineId   { get; set; }
         }
     }
 }
