@@ -41,6 +41,10 @@ namespace RomRepoMgr.Core.Filesystem
         internal bool Mount(string mountPoint)
         {
             _host = new FileSystemHost(this);
+
+            if(Directory.Exists(mountPoint))
+                Directory.Delete(mountPoint);
+
             int ret = _host.Mount(mountPoint);
 
             if(ret == STATUS_SUCCESS)
