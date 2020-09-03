@@ -41,7 +41,16 @@ namespace RomRepoMgr.Core.Filesystem
 
         internal bool Mount(string mountPoint)
         {
-            _host = new FileSystemHost(this);
+            _host = new FileSystemHost(this)
+            {
+                SectorSize               = 512,
+                CasePreservedNames       = true,
+                CaseSensitiveSearch      = true,
+                FileSystemName           = "romrepomgrfs",
+                MaxComponentLength       = 255,
+                UnicodeOnDisk            = true,
+                SectorsPerAllocationUnit = 1
+            };
 
             if(Directory.Exists(mountPoint))
                 Directory.Delete(mountPoint);
