@@ -11,16 +11,17 @@ namespace RomRepoMgr.Core.Filesystem
 {
     public class Vfs : IDisposable
     {
-        readonly ConcurrentDictionary<long, RomSet> _romSetsCache;
-        Fuse                                        _fuse;
-
-        ConcurrentDictionary<string, long> _rootDirectoryCache;
-        Winfsp                             _winfsp;
+        readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
+        readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
+        Fuse                                                                             _fuse;
+        ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
+        Winfsp                                                                           _winfsp;
 
         public Vfs()
         {
             _rootDirectoryCache = new ConcurrentDictionary<string, long>();
             _romSetsCache       = new ConcurrentDictionary<long, RomSet>();
+            _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
         }
 
         public static bool IsAvailable => Winfsp.IsAvailable || Fuse.IsAvailable;
@@ -135,5 +136,66 @@ namespace RomRepoMgr.Core.Filesystem
 
             return romSetId;
         }
+
+        internal RomSet GetRomSet(long id)
+        {
+            if(_romSetsCache.TryGetValue(id, out RomSet romSet))
+                return romSet;
+
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            romSet = ctx.RomSets.Find(id);
+
+            if(romSet == null)
+                return null;
+
+            _romSetsCache[id] = romSet;
+
+            return romSet;
+        }
+
+        internal ConcurrentDictionary<string, CachedMachine> GetMachinesFromRomSet(long id)
+        {
+            _machinesStatCache.TryGetValue(id, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+
+            if(cachedMachines != null)
+                return cachedMachines;
+
+            cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
+
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == id))
+            {
+                cachedMachines[mach.Name] = new CachedMachine
+                {
+                    Id               = mach.Id,
+                    CreationDate     = mach.CreatedOn,
+                    ModificationDate = mach.UpdatedOn
+                };
+            }
+
+            _machinesStatCache[id] = cachedMachines;
+
+            return cachedMachines;
+        }
+
+        internal CachedMachine GetMachine(long romSetId, string name)
+        {
+            ConcurrentDictionary<string, CachedMachine> cachedMachines = GetMachinesFromRomSet(romSetId);
+
+            if(cachedMachines == null ||
+               !cachedMachines.TryGetValue(name, out CachedMachine machine))
+                return null;
+
+            return machine;
+        }
+    }
+
+    internal sealed class CachedMachine
+    {
+        public ulong    Id               { get; set; }
+        public DateTime CreationDate     { get; set; }
+        public DateTime ModificationDate { get; set; }
     }
 }

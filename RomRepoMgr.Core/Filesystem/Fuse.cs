@@ -19,22 +19,18 @@ namespace RomRepoMgr.Core.Filesystem
     // TODO: Last handle goes negative
     public sealed class Fuse : FileSystem
     {
-        readonly ConcurrentDictionary<long, List<DirectoryEntry>>                        _directoryCache;
-        readonly ConcurrentDictionary<long, Stat>                                        _fileStatHandleCache;
-        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
-        readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
-        readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
-        readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
-        readonly Vfs                                                                     _vfs;
-        long                                                                             _lastHandle;
-        string                                                                           _umountToken;
+        readonly ConcurrentDictionary<long, List<DirectoryEntry>>                      _directoryCache;
+        readonly ConcurrentDictionary<long, Stat>                                      _fileStatHandleCache;
+        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>> _machineFilesCache;
+        readonly ConcurrentDictionary<long, Stream>                                    _streamsCache;
+        readonly Vfs                                                                   _vfs;
+        long                                                                           _lastHandle;
+        string                                                                         _umountToken;
 
         public Fuse(Vfs vfs)
         {
             _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
             _lastHandle          = 0;
-            _machinesStatCache   = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
-            _romSetsCache        = new ConcurrentDictionary<long, RomSet>();
             _machineFilesCache   = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
             _streamsCache        = new ConcurrentDictionary<long, Stream>();
             _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
@@ -127,13 +123,7 @@ namespace RomRepoMgr.Core.Filesystem
                 return 0;
             }
 
-            if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                romSet                  = ctx.RomSets.Find(romSetId);
-                _romSetsCache[romSetId] = romSet;
-            }
+            RomSet romSet = _vfs.GetRomSet(romSetId);
 
             if(romSet == null)
                 return Errno.ENOENT;
@@ -148,44 +138,25 @@ namespace RomRepoMgr.Core.Filesystem
                 return 0;
             }
 
-            _machinesStatCache.TryGetValue(romSetId, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(cachedMachines == null)
-            {
-                cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                {
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-                }
-
-                _machinesStatCache[romSetId] = cachedMachines;
-            }
-
-            if(!cachedMachines.TryGetValue(pieces[1], out CachedMachine machineStat))
+            if(machine == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 2)
             {
-                stat = machineStat.Stat;
+                stat = new Stat
+                {
+                    st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
+                    st_nlink = 2,
+                    st_ctime = NativeConvert.ToTimeT(machine.CreationDate.ToUniversalTime()),
+                    st_mtime = NativeConvert.ToTimeT(machine.ModificationDate.ToUniversalTime())
+                };
 
                 return 0;
             }
 
-            _machineFilesCache.TryGetValue(machineStat.Id,
-                                           out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
 
             if(cachedMachineFiles == null)
             {
@@ -193,8 +164,8 @@ namespace RomRepoMgr.Core.Filesystem
 
                 cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-                foreach(FileByMachine machineFile in
-                    ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machineStat.Id && fbm.File.IsInRepo))
+                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
+                                                                                   fbm.File.IsInRepo))
                 {
                     var cachedFile = new CachedFile
                     {
@@ -213,7 +184,7 @@ namespace RomRepoMgr.Core.Filesystem
                     cachedMachineFiles[machineFile.Name] = cachedFile;
                 }
 
-                _machineFilesCache[machineStat.Id] = cachedMachineFiles;
+                _machineFilesCache[machine.Id] = cachedMachineFiles;
             }
 
             if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
@@ -275,16 +246,12 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 0)
                 return Errno.EISDIR;
 
-            if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+            if(romSetId <= 0)
                 return Errno.ENOENT;
 
-            if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                romSet                  = ctx.RomSets.Find(romSetId);
-                _romSetsCache[romSetId] = romSet;
-            }
+            RomSet romSet = _vfs.GetRomSet(romSetId);
 
             if(romSet == null)
                 return Errno.ENOENT;
@@ -292,40 +259,15 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 1)
                 return Errno.EISDIR;
 
-            _machinesStatCache.TryGetValue(romSetId, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(cachedMachines == null)
-            {
-                cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                {
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-                }
-
-                _machinesStatCache[romSetId] = cachedMachines;
-            }
-
-            if(!cachedMachines.TryGetValue(pieces[1], out CachedMachine machineStat))
+            if(machine == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 2)
                 return Errno.EISDIR;
 
-            _machineFilesCache.TryGetValue(machineStat.Id,
-                                           out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
 
             if(cachedMachineFiles == null)
             {
@@ -333,8 +275,8 @@ namespace RomRepoMgr.Core.Filesystem
 
                 cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-                foreach(FileByMachine machineFile in
-                    ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machineStat.Id && fbm.File.IsInRepo))
+                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
+                                                                                   fbm.File.IsInRepo))
                 {
                     var cachedFile = new CachedFile
                     {
@@ -353,7 +295,7 @@ namespace RomRepoMgr.Core.Filesystem
                     cachedMachineFiles[machineFile.Name] = cachedFile;
                 }
 
-                _machineFilesCache[machineStat.Id] = cachedMachineFiles;
+                _machineFilesCache[machine.Id] = cachedMachineFiles;
             }
 
             if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
@@ -520,16 +462,12 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 0)
                 return Errno.ENODATA;
 
-            if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+            if(romSetId <= 0)
                 return Errno.ENOENT;
 
-            if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                romSet                  = ctx.RomSets.Find(romSetId);
-                _romSetsCache[romSetId] = romSet;
-            }
+            RomSet romSet = _vfs.GetRomSet(romSetId);
 
             if(romSet == null)
                 return Errno.ENOENT;
@@ -537,40 +475,15 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 1)
                 return Errno.ENODATA;
 
-            _machinesStatCache.TryGetValue(romSetId, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(cachedMachines == null)
-            {
-                cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                {
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-                }
-
-                _machinesStatCache[romSetId] = cachedMachines;
-            }
-
-            if(!cachedMachines.TryGetValue(pieces[1], out CachedMachine machineStat))
+            if(machine == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 2)
                 return Errno.ENODATA;
 
-            _machineFilesCache.TryGetValue(machineStat.Id,
-                                           out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
 
             if(cachedMachineFiles == null)
             {
@@ -578,8 +491,8 @@ namespace RomRepoMgr.Core.Filesystem
 
                 cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-                foreach(FileByMachine machineFile in
-                    ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machineStat.Id && fbm.File.IsInRepo))
+                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
+                                                                                   fbm.File.IsInRepo))
                 {
                     var cachedFile = new CachedFile
                     {
@@ -598,7 +511,7 @@ namespace RomRepoMgr.Core.Filesystem
                     cachedMachineFiles[machineFile.Name] = cachedFile;
                 }
 
-                _machineFilesCache[machineStat.Id] = cachedMachineFiles;
+                _machineFilesCache[machine.Id] = cachedMachineFiles;
             }
 
             if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
@@ -689,16 +602,12 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 0)
                 return 0;
 
-            if(!_rootDirectoryCache.TryGetValue(pieces[0], out long romSetId))
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+            if(romSetId <= 0)
                 return Errno.ENOENT;
 
-            if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                romSet                  = ctx.RomSets.Find(romSetId);
-                _romSetsCache[romSetId] = romSet;
-            }
+            RomSet romSet = _vfs.GetRomSet(romSetId);
 
             if(romSet == null)
                 return Errno.ENOENT;
@@ -706,40 +615,15 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 1)
                 return 0;
 
-            _machinesStatCache.TryGetValue(romSetId, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(cachedMachines == null)
-            {
-                cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                {
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-                }
-
-                _machinesStatCache[romSetId] = cachedMachines;
-            }
-
-            if(!cachedMachines.TryGetValue(pieces[1], out CachedMachine machineStat))
+            if(machine == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 2)
                 return 0;
 
-            _machineFilesCache.TryGetValue(machineStat.Id,
-                                           out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
 
             if(cachedMachineFiles == null)
             {
@@ -747,8 +631,8 @@ namespace RomRepoMgr.Core.Filesystem
 
                 cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-                foreach(FileByMachine machineFile in
-                    ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machineStat.Id && fbm.File.IsInRepo))
+                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
+                                                                                   fbm.File.IsInRepo))
                 {
                     var cachedFile = new CachedFile
                     {
@@ -767,7 +651,7 @@ namespace RomRepoMgr.Core.Filesystem
                     cachedMachineFiles[machineFile.Name] = cachedFile;
                 }
 
-                _machineFilesCache[machineStat.Id] = cachedMachineFiles;
+                _machineFilesCache[machine.Id] = cachedMachineFiles;
             }
 
             if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile file))
@@ -834,8 +718,7 @@ namespace RomRepoMgr.Core.Filesystem
                             continue;
 
                         entries.Add(new DirectoryEntry(name));
-                        rootCache[name]       = set.Id;
-                        _romSetsCache[set.Id] = set;
+                        rootCache[name] = set.Id;
                     }
 
                     _lastHandle++;
@@ -856,43 +739,12 @@ namespace RomRepoMgr.Core.Filesystem
                 if(romSetId <= 0)
                     return Errno.ENOENT;
 
-                if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-                {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    romSet                  = ctx.RomSets.Find(romSetId);
-                    _romSetsCache[romSetId] = romSet;
-                }
+                RomSet romSet = _vfs.GetRomSet(romSetId);
 
                 if(romSet == null)
                     return Errno.ENOENT;
 
-                _machinesStatCache.TryGetValue(romSetId,
-                                               out ConcurrentDictionary<string, CachedMachine> cachedMachines);
-
-                if(cachedMachines == null)
-                {
-                    cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                    {
-                        cachedMachines[mach.Name] = new CachedMachine
-                        {
-                            Id = mach.Id,
-                            Stat = new Stat
-                            {
-                                st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0755"),
-                                st_nlink = 2,
-                                st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                                st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                            }
-                        };
-                    }
-
-                    _machinesStatCache[romSetId] = cachedMachines;
-                }
+                ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(romSetId);
 
                 if(pieces.Length == 1)
                 {
@@ -902,7 +754,7 @@ namespace RomRepoMgr.Core.Filesystem
                         new DirectoryEntry("..")
                     };
 
-                    entries.AddRange(cachedMachines.Select(mach => new DirectoryEntry(mach.Key)));
+                    entries.AddRange(machines.Select(mach => new DirectoryEntry(mach.Key)));
 
                     _lastHandle++;
                     info.Handle = new IntPtr(_lastHandle);
@@ -912,31 +764,10 @@ namespace RomRepoMgr.Core.Filesystem
                     return 0;
                 }
 
-                cachedMachines.TryGetValue(pieces[1], out CachedMachine machine);
+                CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
                 if(machine == null)
-                {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    Machine mach = ctx.Machines.FirstOrDefault(m => m.RomSet.Id == romSetId && m.Name == pieces[1]);
-
-                    if(mach == null)
-                        return Errno.ENOENT;
-
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0755"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-
-                    machine = cachedMachines[mach.Name];
-                }
+                    return Errno.ENOENT;
 
                 _machineFilesCache.TryGetValue(machine.Id,
                                                out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
@@ -1040,13 +871,7 @@ namespace RomRepoMgr.Core.Filesystem
             if(romSetId <= 0)
                 return Errno.ENOENT;
 
-            if(!_romSetsCache.TryGetValue(romSetId, out RomSet romSet))
-            {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                romSet                  = ctx.RomSets.Find(romSetId);
-                _romSetsCache[romSetId] = romSet;
-            }
+            RomSet romSet = _vfs.GetRomSet(romSetId);
 
             if(romSet == null)
                 return Errno.ENOENT;
@@ -1054,40 +879,15 @@ namespace RomRepoMgr.Core.Filesystem
             if(pieces.Length == 1)
                 return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
 
-            _machinesStatCache.TryGetValue(romSetId, out ConcurrentDictionary<string, CachedMachine> cachedMachines);
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(cachedMachines == null)
-            {
-                cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
-
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == romSetId))
-                {
-                    cachedMachines[mach.Name] = new CachedMachine
-                    {
-                        Id = mach.Id,
-                        Stat = new Stat
-                        {
-                            st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                            st_nlink = 2,
-                            st_ctime = NativeConvert.ToTimeT(mach.CreatedOn.ToUniversalTime()),
-                            st_mtime = NativeConvert.ToTimeT(mach.UpdatedOn.ToUniversalTime())
-                        }
-                    };
-                }
-
-                _machinesStatCache[romSetId] = cachedMachines;
-            }
-
-            if(!cachedMachines.TryGetValue(pieces[1], out CachedMachine machineStat))
+            if(machine == null)
                 return Errno.ENOENT;
 
             if(pieces.Length == 2)
                 return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
 
-            _machineFilesCache.TryGetValue(machineStat.Id,
-                                           out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
+            _machineFilesCache.TryGetValue(machine.Id, out ConcurrentDictionary<string, CachedFile> cachedMachineFiles);
 
             if(cachedMachineFiles == null)
             {
@@ -1095,8 +895,8 @@ namespace RomRepoMgr.Core.Filesystem
 
                 cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-                foreach(FileByMachine machineFile in
-                    ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machineStat.Id && fbm.File.IsInRepo))
+                foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == machine.Id &&
+                                                                                   fbm.File.IsInRepo))
                 {
                     var cachedFile = new CachedFile
                     {
@@ -1115,7 +915,7 @@ namespace RomRepoMgr.Core.Filesystem
                     cachedMachineFiles[machineFile.Name] = cachedFile;
                 }
 
-                _machineFilesCache[machineStat.Id] = cachedMachineFiles;
+                _machineFilesCache[machine.Id] = cachedMachineFiles;
             }
 
             if(!cachedMachineFiles.TryGetValue(pieces[2], out CachedFile _))
@@ -1163,12 +963,6 @@ namespace RomRepoMgr.Core.Filesystem
             rnd.NextBytes(token);
             _umountToken = Base32.ToBase32String(token);
             setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);
-        }
-
-        sealed class CachedMachine
-        {
-            public ulong Id   { get; set; }
-            public Stat  Stat { get; set; }
         }
 
         sealed class CachedFile
