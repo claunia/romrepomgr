@@ -17,9 +17,10 @@ namespace RomRepoMgr.Core.Workers
 {
     public class FileImporter
     {
-        const    long BUFFER_SIZE = 131072;
-        readonly bool _deleteAfterImport;
-        readonly bool _onlyKnown;
+        const    long         BUFFER_SIZE = 131072;
+        readonly bool         _deleteAfterImport;
+        readonly List<DbFile> _newFiles;
+        readonly bool         _onlyKnown;
 
         readonly Dictionary<string, DbFile> _pendingFiles;
 
@@ -30,6 +31,7 @@ namespace RomRepoMgr.Core.Workers
         public FileImporter(bool onlyKnown, bool deleteAfterImport)
         {
             _pendingFiles      = new Dictionary<string, DbFile>();
+            _newFiles          = new List<DbFile>();
             _onlyKnown         = onlyKnown;
             _deleteAfterImport = deleteAfterImport;
             _position          = 0;
@@ -262,19 +264,13 @@ namespace RomRepoMgr.Core.Workers
 
                 bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
-                dbFile ??=
-                    ((((Context.Singleton.Files.FirstOrDefault(f => f.Size   == uSize &&
-                                                                    f.Sha512 == checksums[ChecksumType.Sha512]) ??
-                        Context.Singleton.Files.FirstOrDefault(f => f.Size   == uSize &&
-                                                                    f.Sha384 == checksums[ChecksumType.Sha384])) ??
-                       Context.Singleton.Files.FirstOrDefault(f => f.Size   == uSize &&
-                                                                   f.Sha256 == checksums[ChecksumType.Sha256])) ??
-                      Context.Singleton.Files.FirstOrDefault(f => f.Size == uSize &&
-                                                                  f.Sha1 == checksums[ChecksumType.Sha1])) ??
-                     Context.Singleton.Files.FirstOrDefault(f => f.Size == uSize &&
-                                                                 f.Md5  == checksums[ChecksumType.Md5])) ??
-                    Context.Singleton.Files.FirstOrDefault(f => f.Size  == uSize &&
-                                                                f.Crc32 == checksums[ChecksumType.Crc32]);
+                dbFile ??= Context.Singleton.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
+                                                                        f.Sha384 == checksums[ChecksumType.Sha384] ||
+                                                                        f.Sha256 == checksums[ChecksumType.Sha256] ||
+                                                                        f.Sha1   == checksums[ChecksumType.Sha1]   ||
+                                                                        f.Md5    == checksums[ChecksumType.Md5]    ||
+                                                                        f.Crc32  == checksums[ChecksumType.Crc32]) &&
+                                                                       f.Size == uSize);
 
                 if(dbFile == null)
                 {
@@ -384,7 +380,7 @@ namespace RomRepoMgr.Core.Workers
                     dbFile.UpdatedOn = DateTime.UtcNow;
 
                     if(!fileInDb)
-                        Context.Singleton.Files.Add(dbFile);
+                        _newFiles.Add(dbFile);
 
                     inFs.Close();
 
@@ -449,7 +445,7 @@ namespace RomRepoMgr.Core.Workers
                 dbFile.UpdatedOn = DateTime.UtcNow;
 
                 if(!fileInDb)
-                    Context.Singleton.Files.Add(dbFile);
+                    _newFiles.Add(dbFile);
 
                 if(_deleteAfterImport)
                     File.Delete(path);
@@ -473,7 +469,10 @@ namespace RomRepoMgr.Core.Workers
                 Message = Localization.SavingChangesToDatabase
             });
 
+            Context.Singleton.Files.AddRange(_newFiles);
             Context.Singleton.SaveChanges();
+
+            _newFiles.Clear();
         }
 
         string GetArchiveFormat(string path, out long counter)

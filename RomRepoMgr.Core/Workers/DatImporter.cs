@@ -224,6 +224,8 @@ namespace RomRepoMgr.Core.Workers
                 Dictionary<string, DbFile> pendingFilesByMd5    = new Dictionary<string, DbFile>();
                 Dictionary<string, DbFile> pendingFilesByCrc    = new Dictionary<string, DbFile>();
                 List<DbFile>               pendingFiles         = new List<DbFile>();
+                List<DbFile>               newFiles             = new List<DbFile>();
+                List<FileByMachine>        newFilesByMachine    = new List<FileByMachine>();
 
                 foreach(Rom rom in roms)
                 {
@@ -327,29 +329,12 @@ namespace RomRepoMgr.Core.Workers
                             file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
                     }
 
-                    if(file       == null &&
-                       rom.SHA512 != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha512 == rom.SHA512 && f.Size == uSize);
-
-                    if(file       == null &&
-                       rom.SHA384 != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha384 == rom.SHA384 && f.Size == uSize);
-
-                    if(file       == null &&
-                       rom.SHA256 != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha256 == rom.SHA256 && f.Size == uSize);
-
-                    if(file     == null &&
-                       rom.SHA1 != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Sha1 == rom.SHA1 && f.Size == uSize);
-
-                    if(file    == null &&
-                       rom.MD5 != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Md5 == rom.MD5 && f.Size == uSize);
-
-                    if(file    == null &&
-                       rom.CRC != null)
-                        file = Context.Singleton.Files.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
+                    file ??= Context.Singleton.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
+                                                                          (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
+                                                                          (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
+                                                                          (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
+                                                                          (rom.MD5    != null && f.Md5    == rom.MD5)    ||
+                                                                          (rom.CRC    != null && f.Crc32  == rom.CRC)) && f.Size == uSize);
 
                     if(file == null)
                     {
@@ -366,7 +351,9 @@ namespace RomRepoMgr.Core.Workers
                             UpdatedOn = DateTime.UtcNow
                         };
 
-                        Context.Singleton.Files.Add(file);
+                        newFiles.Add(file);
+
+                        //Context.Singleton.Files.Add(file);
                     }
 
                     if(string.IsNullOrEmpty(file.Crc32) &&
@@ -411,7 +398,7 @@ namespace RomRepoMgr.Core.Workers
                         file.UpdatedOn = DateTime.UtcNow;
                     }
 
-                    Context.Singleton.FilesByMachines.Add(new FileByMachine
+                    newFilesByMachine.Add(new FileByMachine
                     {
                         File    = file,
                         Machine = machine,
@@ -442,6 +429,9 @@ namespace RomRepoMgr.Core.Workers
                 });
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                Context.Singleton.Files.AddRange(newFiles);
+                Context.Singleton.FilesByMachines.AddRange(newFilesByMachine);
 
                 Context.Singleton.SaveChanges();
 
