@@ -197,5 +197,14 @@ namespace RomRepoMgr.Core.Filesystem
 
             return STATUS_SUCCESS;
         }
+
+        public override void Close(object fileNode, object fileDesc)
+        {
+            if(!(fileNode is long handle))
+                return;
+
+            _vfs.Close(handle);
+            _fileStatHandleCache.TryRemove(handle, out _);
+        }
     }
 }
