@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using Fsp;
 using Fsp.Interop;
 using RomRepoMgr.Database.Models;
@@ -450,6 +451,82 @@ namespace RomRepoMgr.Core.Filesystem
             }
 
             return false;
+        }
+
+        public override int GetSecurityByName(string fileName, out uint fileAttributes, ref byte[] securityDescriptor)
+        {
+            fileAttributes = 0;
+
+            string[] pieces = _vfs.SplitPath(fileName);
+
+            // Root directory
+            if(pieces.Length == 0)
+            {
+                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+
+                if(securityDescriptor == null)
+                    return STATUS_SUCCESS;
+
+                string rootSddl = "O:BAG:BAD:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;WD)";
+
+                var    rootSecurityDescriptor = new RawSecurityDescriptor(rootSddl);
+                byte[] fileSecurity           = new byte[rootSecurityDescriptor.BinaryLength];
+                rootSecurityDescriptor.GetBinaryForm(fileSecurity, 0);
+                securityDescriptor = fileSecurity;
+
+                return STATUS_SUCCESS;
+            }
+
+            long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+            if(romSetId <= 0)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            RomSet romSet = _vfs.GetRomSet(romSetId);
+
+            if(romSet == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            // ROM Set
+            if(pieces.Length == 1)
+            {
+                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+
+                return STATUS_SUCCESS;
+            }
+
+            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+            if(machine == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            // Machine
+            if(pieces.Length == 2)
+            {
+                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+
+                return STATUS_SUCCESS;
+            }
+
+            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+            if(file == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            if(pieces.Length > 3)
+                return STATUS_INVALID_DEVICE_REQUEST;
+
+            if(file.Sha384 == null)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            long handle = _vfs.Open(file.Sha384, (long)file.Size);
+
+            if(handle <= 0)
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+
+            return STATUS_SUCCESS;
         }
 
         sealed class FileEntry
