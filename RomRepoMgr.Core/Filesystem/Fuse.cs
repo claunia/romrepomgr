@@ -520,33 +520,13 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 if(directory == "/")
                 {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
                     List<DirectoryEntry> entries = new List<DirectoryEntry>
                     {
                         new DirectoryEntry("."),
                         new DirectoryEntry("..")
                     };
 
-                    ConcurrentDictionary<string, long> rootCache = new ConcurrentDictionary<string, long>();
-
-                    foreach(RomSet set in ctx.RomSets)
-                    {
-                        string name = set.Name.Replace('/', '∕');
-
-                        if(entries.Any(e => e.Name == name))
-                            name = Path.GetFileNameWithoutExtension(set.Filename)?.Replace('/', '∕');
-
-                        if(entries.Any(e => e.Name == name) ||
-                           name == null)
-                            name = Path.GetFileNameWithoutExtension(set.Sha384);
-
-                        if(name == null)
-                            continue;
-
-                        entries.Add(new DirectoryEntry(name));
-                        rootCache[name] = set.Id;
-                    }
+                    entries.AddRange(_vfs.GetRootEntries().Select(e => new DirectoryEntry(e)));
 
                     _lastHandle++;
                     info.Handle = new IntPtr(_lastHandle);

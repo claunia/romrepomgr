@@ -330,6 +330,14 @@ namespace RomRepoMgr.Core.Filesystem
 
             return true;
         }
+
+        internal IEnumerable<string> GetRootEntries()
+        {
+            if(_rootDirectoryCache.Count == 0)
+                FillRootDirectoryCache();
+
+            return _rootDirectoryCache.Keys.ToArray();
+        }
     }
 
     internal sealed class CachedMachine
