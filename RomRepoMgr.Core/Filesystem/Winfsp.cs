@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Fsp;
@@ -11,15 +11,10 @@ namespace RomRepoMgr.Core.Filesystem
 {
     public class Winfsp : FileSystemBase
     {
-        readonly ConcurrentDictionary<long, FileInfo> _fileStatHandleCache;
-        readonly Vfs                                  _vfs;
-        FileSystemHost                                _host;
+        readonly Vfs   _vfs;
+        FileSystemHost _host;
 
-        public Winfsp(Vfs vfs)
-        {
-            _vfs                 = vfs;
-            _fileStatHandleCache = new ConcurrentDictionary<long, FileInfo>();
-        }
+        public Winfsp(Vfs vfs) => _vfs = vfs;
 
         public static bool IsAvailable
         {
@@ -138,8 +133,28 @@ namespace RomRepoMgr.Core.Filesystem
 
             string[] pieces = _vfs.SplitPath(fileName);
 
+            // Root directory
             if(pieces.Length == 0)
-                return STATUS_FILE_IS_A_DIRECTORY;
+            {
+                fileInfo = new FileInfo
+                {
+                    CreationTime   = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                    FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                    LastWriteTime  = (ulong)DateTime.UtcNow.ToFileTimeUtc()
+                };
+
+                normalizedName = "";
+
+                fileNode = new FileNode
+                {
+                    FileName    = normalizedName,
+                    IsDirectory = true,
+                    Info        = fileInfo,
+                    Path        = fileName
+                };
+
+                return STATUS_SUCCESS;
+            }
 
             long romSetId = _vfs.GetRomSetId(pieces[0]);
 
@@ -151,16 +166,58 @@ namespace RomRepoMgr.Core.Filesystem
             if(romSet == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
+            // ROM Set
             if(pieces.Length == 1)
-                return STATUS_FILE_IS_A_DIRECTORY;
+            {
+                fileInfo = new FileInfo
+                {
+                    CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                    FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                    LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                };
+
+                normalizedName = Path.GetFileName(fileName);
+
+                fileNode = new FileNode
+                {
+                    FileName    = normalizedName,
+                    IsDirectory = true,
+                    Info        = fileInfo,
+                    Path        = fileName,
+                    RomSetId    = romSet.Id
+                };
+
+                return STATUS_SUCCESS;
+            }
 
             CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
             if(machine == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
+            // Machine
             if(pieces.Length == 2)
-                return STATUS_FILE_IS_A_DIRECTORY;
+            {
+                fileInfo = new FileInfo
+                {
+                    CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                    FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                    LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                };
+
+                normalizedName = Path.GetFileName(fileName);
+
+                fileNode = new FileNode
+                {
+                    FileName    = normalizedName,
+                    IsDirectory = true,
+                    Info        = fileInfo,
+                    Path        = fileName,
+                    MachineId   = machine.Id
+                };
+
+                return STATUS_SUCCESS;
+            }
 
             CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
@@ -168,7 +225,7 @@ namespace RomRepoMgr.Core.Filesystem
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
             if(pieces.Length > 3)
-                return STATUS_FILE_IS_A_DIRECTORY;
+                return STATUS_INVALID_DEVICE_REQUEST;
 
             if(file.Sha384 == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
@@ -178,7 +235,6 @@ namespace RomRepoMgr.Core.Filesystem
             if(handle <= 0)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            fileNode       = handle;
             normalizedName = Path.GetFileName(fileName);
 
             // TODO: Real allocation size
@@ -194,18 +250,26 @@ namespace RomRepoMgr.Core.Filesystem
                 LastWriteTime  = (ulong)file.UpdatedOn.ToFileTimeUtc()
             };
 
-            _fileStatHandleCache[handle] = fileInfo;
+            fileNode = new FileNode
+            {
+                FileName = normalizedName,
+                Info     = fileInfo,
+                Path     = fileName,
+                Handle   = handle
+            };
 
             return STATUS_SUCCESS;
         }
 
         public override void Close(object fileNode, object fileDesc)
         {
-            if(!(fileNode is long handle))
+            if(!(fileNode is FileNode node))
                 return;
 
-            _vfs.Close(handle);
-            _fileStatHandleCache.TryRemove(handle, out _);
+            if(node.Handle <= 0)
+                return;
+
+            _vfs.Close(node.Handle);
         }
 
         public override int Read(object fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
@@ -213,12 +277,13 @@ namespace RomRepoMgr.Core.Filesystem
         {
             bytesTransferred = 0;
 
-            if(!(fileNode is long handle))
+            if(!(fileNode is FileNode node) ||
+               node.Handle <= 0)
                 return STATUS_INVALID_HANDLE;
 
             byte[] buf = new byte[length];
 
-            int ret = _vfs.Read(handle, buf, (long)offset);
+            int ret = _vfs.Read(node.Handle, buf, (long)offset);
 
             if(ret < 0)
                 return STATUS_INVALID_HANDLE;
@@ -234,15 +299,24 @@ namespace RomRepoMgr.Core.Filesystem
         {
             fileInfo = default;
 
-            if(!(fileNode is long handle))
+            if(!(fileNode is FileNode node))
                 return STATUS_INVALID_HANDLE;
 
-            if(!_fileStatHandleCache.TryGetValue(handle, out FileInfo info))
-                return STATUS_INVALID_HANDLE;
-
-            fileInfo = info;
+            fileInfo = node.Info;
 
             return STATUS_SUCCESS;
+        }
+
+        class FileNode
+        {
+            public FileInfo     Info        { get; set; }
+            public string       FileName    { get; set; }
+            public string       Path        { get; set; }
+            public long         Handle      { get; set; }
+            public List<string> Children    { get; set; }
+            public bool         IsDirectory { get; set; }
+            public long         RomSetId    { get; set; }
+            public ulong        MachineId   { get; set; }
         }
     }
 }
