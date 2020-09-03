@@ -126,7 +126,7 @@ namespace RomRepoMgr.Core.Filesystem
             volumeInfo.FreeSize  = 0;
             volumeInfo.TotalSize = totalSize;
 
-            return base.GetVolumeInfo(out volumeInfo);
+            return STATUS_SUCCESS;
         }
 
         public override int Open(string fileName, uint createOptions, uint grantedAccess, out object fileNode,
