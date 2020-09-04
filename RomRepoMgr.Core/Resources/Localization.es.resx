@@ -155,4 +155,10 @@
   <data name="UnknownFile" xml:space="preserve">
     <value>Archivo desconocido.</value>
   </data>
+  <data name="AddingDisks" xml:space="preserve">
+    <value>Añadiendo discos...</value>
+  </data>
+  <data name="FoundDiskWithoutMachine" xml:space="preserve">
+    <value>Se encontró un disco sin máquina, esto no debería pasar.</value>
+  </data>
 </root>

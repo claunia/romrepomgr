@@ -160,4 +160,10 @@
   <data name="UnhandledExceptionWhenImporting" xml:space="preserve">
     <value>Unhandled exception when importing file.</value>
   </data>
+  <data name="AddingDisks" xml:space="preserve">
+    <value>Adding disks...</value>
+  </data>
+  <data name="FoundDiskWithoutMachine" xml:space="preserve">
+    <value>Found a disk with an unknown machine, this should not happen.</value>
+  </data>
 </root>

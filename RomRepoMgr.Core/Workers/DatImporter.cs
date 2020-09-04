@@ -354,8 +354,6 @@ namespace RomRepoMgr.Core.Workers
                         };
 
                         newFiles.Add(file);
-
-                        //Context.Singleton.Files.Add(file);
                     }
 
                     if(string.IsNullOrEmpty(file.Crc32) &&
@@ -453,11 +451,115 @@ namespace RomRepoMgr.Core.Workers
                     Maximum = disks.Count
                 });
 
-                // TODO: Support CHDs
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
-                    Message = "Adding disks..."
+                    Message = Localization.AddingDisks
                 });
+
+                position = 0;
+
+                Dictionary<string, DbDisk> pendingDisksBySha1 = new Dictionary<string, DbDisk>();
+                Dictionary<string, DbDisk> pendingDisksByMd5  = new Dictionary<string, DbDisk>();
+                List<DbDisk>               newDisks           = new List<DbDisk>();
+                List<DiskByMachine>        newDisksByMachine  = new List<DiskByMachine>();
+
+                foreach(Disk disk in disks)
+                {
+                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = position
+                    });
+
+                    if(!machines.TryGetValue(disk.Machine.Name, out Machine machine))
+                    {
+                        ErrorOccurred?.Invoke(this, new ErrorEventArgs
+                        {
+                            Message = Localization.FoundDiskWithoutMachine
+                        });
+
+                        return;
+                    }
+
+                    if(disk.MD5  == null &&
+                       disk.SHA1 == null)
+                    {
+                        position++;
+
+                        continue;
+                    }
+
+                    DbDisk dbDisk = null;
+
+                    if(disk.SHA1 != null &&
+                       dbDisk    == null)
+                        pendingDisksBySha1.TryGetValue(disk.SHA1, out dbDisk);
+
+                    if(disk.MD5 != null &&
+                       dbDisk   == null)
+                        pendingDisksByMd5.TryGetValue(disk.MD5, out dbDisk);
+
+                    dbDisk ??= Context.Singleton.Disks.FirstOrDefault(f => (disk.SHA1 != null && f.Sha1 == disk.SHA1) ||
+                                                                           (disk.MD5  != null && f.Md5  == disk.MD5));
+
+                    if(dbDisk == null)
+                    {
+                        dbDisk = new DbDisk
+                        {
+                            CreatedOn = DateTime.UtcNow,
+                            Md5       = disk.MD5,
+                            Sha1      = disk.SHA1,
+                            UpdatedOn = DateTime.UtcNow
+                        };
+
+                        newDisks.Add(dbDisk);
+                    }
+
+                    if(string.IsNullOrEmpty(dbDisk.Md5) &&
+                       !string.IsNullOrEmpty(disk.MD5))
+                    {
+                        dbDisk.Md5       = disk.MD5;
+                        dbDisk.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(dbDisk.Sha1) &&
+                       !string.IsNullOrEmpty(disk.SHA1))
+                    {
+                        dbDisk.Sha1      = disk.SHA1;
+                        dbDisk.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    newDisksByMachine.Add(new DiskByMachine
+                    {
+                        Disk    = dbDisk,
+                        Machine = machine,
+                        Name    = disk.Name
+                    });
+
+                    if(dbDisk.Sha1 != null)
+                        pendingDisksBySha1[dbDisk.Sha1] = dbDisk;
+
+                    if(dbDisk.Md5 != null)
+                        pendingDisksByMd5[dbDisk.Md5] = dbDisk;
+
+                    position++;
+                }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.SavingChangesToDatabase
+                });
+
+                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                Context.Singleton.Disks.AddRange(newDisks);
+                Context.Singleton.DisksByMachines.AddRange(newDisksByMachine);
+
+                Context.Singleton.SaveChanges();
+
+                pendingDisksBySha1.Clear();
+                pendingDisksByMd5.Clear();
+                newDisks.Clear();
+                newDisksByMachine.Clear();
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
 
