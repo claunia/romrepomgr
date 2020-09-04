@@ -34,6 +34,8 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.HasKey("Id");
 
+                b.HasIndex("IsInRepo");
+
                 b.HasIndex("Md5");
 
                 b.HasIndex("Sha1");
@@ -72,6 +74,8 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasKey("Id");
 
                 b.HasIndex("Crc32");
+
+                b.HasIndex("IsInRepo");
 
                 b.HasIndex("Md5");
 

@@ -97,6 +97,8 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Sha512);
 
                 entity.HasIndex(e => e.Size);
+
+                entity.HasIndex(e => e.IsInRepo);
             });
 
             modelBuilder.Entity<RomSet>(entity =>
@@ -143,6 +145,8 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Sha1);
 
                 entity.HasIndex(e => e.Size);
+
+                entity.HasIndex(e => e.IsInRepo);
             });
 
             modelBuilder.Entity<DiskByMachine>(entity =>
