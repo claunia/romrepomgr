@@ -329,12 +329,14 @@ namespace RomRepoMgr.Core.Workers
                             file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
                     }
 
-                    file ??= Context.Singleton.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
-                                                                          (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
-                                                                          (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
-                                                                          (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
-                                                                          (rom.MD5    != null && f.Md5    == rom.MD5)    ||
-                                                                          (rom.CRC    != null && f.Crc32  == rom.CRC)) && f.Size == uSize);
+                    file ??=
+                        Context.Singleton.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
+                                                                     (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
+                                                                     (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
+                                                                     (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
+                                                                     (rom.MD5    != null && f.Md5    == rom.MD5)    ||
+                                                                     (rom.CRC    != null && f.Crc32  == rom.CRC)) &&
+                                                                    f.Size == uSize);
 
                     if(file == null)
                     {
@@ -434,6 +436,16 @@ namespace RomRepoMgr.Core.Workers
                 Context.Singleton.FilesByMachines.AddRange(newFilesByMachine);
 
                 Context.Singleton.SaveChanges();
+
+                pendingFilesBySha512.Clear();
+                pendingFilesBySha384.Clear();
+                pendingFilesBySha256.Clear();
+                pendingFilesBySha1.Clear();
+                pendingFilesByMd5.Clear();
+                pendingFilesByCrc.Clear();
+                pendingFiles.Clear();
+                newFiles.Clear();
+                newFilesByMachine.Clear();
 
                 SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
                 {
