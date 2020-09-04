@@ -364,9 +364,12 @@ namespace RomRepoMgr.Core.Filesystem
             if(!_streamsCache.TryGetValue(handle, out Stream stream))
                 return -1;
 
-            stream.Position = offset;
+            lock(stream)
+            {
+                stream.Position = offset;
 
-            return stream.Read(buf, 0, buf.Length);
+                return stream.Read(buf, 0, buf.Length);
+            }
         }
 
         internal bool Close(long handle)
