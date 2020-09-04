@@ -344,5 +344,17 @@ namespace RomRepoMgr.Core.Resources {
                 return ResourceManager.GetString("FoundDiskWithoutMachine", resourceCulture);
             }
         }
+        
+        internal static string NotAChdFile {
+            get {
+                return ResourceManager.GetString("NotAChdFile", resourceCulture);
+            }
+        }
+        
+        internal static string NoChecksumsFound {
+            get {
+                return ResourceManager.GetString("NoChecksumsFound", resourceCulture);
+            }
+        }
     }
 }

@@ -161,4 +161,10 @@
   <data name="FoundDiskWithoutMachine" xml:space="preserve">
     <value>Se encontró un disco sin máquina, esto no debería pasar.</value>
   </data>
+  <data name="NoChecksumsFound" xml:space="preserve">
+    <value>No se encontraron hashes.</value>
+  </data>
+  <data name="NotAChdFile" xml:space="preserve">
+    <value>No es un CHD.</value>
+  </data>
 </root>
