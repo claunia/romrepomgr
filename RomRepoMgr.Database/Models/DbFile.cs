@@ -46,7 +46,8 @@ namespace RomRepoMgr.Database.Models
         [StringLength(128, MinimumLength = 128)]
         public string Sha512 { get; set; }
         [DefaultValue(false)]
-        public bool IsInRepo { get;                               set; }
-        public virtual ICollection<FileByMachine> Machines { get; set; }
+        public bool IsInRepo { get;                                       set; }
+        public         string                     OriginalFileName { get; set; }
+        public virtual ICollection<FileByMachine> Machines         { get; set; }
     }
 }

@@ -26,6 +26,8 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<string>("Md5").HasColumnType("TEXT").HasMaxLength(32);
 
+                b.Property<string>("OriginalFileName").HasColumnType("TEXT");
+
                 b.Property<string>("Sha1").HasColumnType("TEXT").HasMaxLength(40);
 
                 b.Property<string>("Sha256").HasColumnType("TEXT").HasMaxLength(64);

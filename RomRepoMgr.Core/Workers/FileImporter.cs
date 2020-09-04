@@ -283,15 +283,16 @@ namespace RomRepoMgr.Core.Workers
 
                     dbFile = new DbFile
                     {
-                        Crc32     = checksums[ChecksumType.Crc32],
-                        Md5       = checksums[ChecksumType.Md5],
-                        Sha1      = checksums[ChecksumType.Sha1],
-                        Sha256    = checksums[ChecksumType.Sha256],
-                        Sha384    = checksums[ChecksumType.Sha384],
-                        Sha512    = checksums[ChecksumType.Sha512],
-                        Size      = uSize,
-                        CreatedOn = DateTime.UtcNow,
-                        UpdatedOn = DateTime.UtcNow
+                        Crc32            = checksums[ChecksumType.Crc32],
+                        Md5              = checksums[ChecksumType.Md5],
+                        Sha1             = checksums[ChecksumType.Sha1],
+                        Sha256           = checksums[ChecksumType.Sha256],
+                        Sha384           = checksums[ChecksumType.Sha384],
+                        Sha512           = checksums[ChecksumType.Sha512],
+                        Size             = uSize,
+                        CreatedOn        = DateTime.UtcNow,
+                        UpdatedOn        = DateTime.UtcNow,
+                        OriginalFileName = Path.GetFileName(path)
                     };
 
                     fileInDb = false;
