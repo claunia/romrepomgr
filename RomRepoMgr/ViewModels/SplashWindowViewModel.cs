@@ -329,12 +329,17 @@ namespace RomRepoMgr.ViewModels
                                               Version       = r.Version,
                                               TotalMachines = r.Machines.Count,
                                               CompleteMachines =
-                                                  r.Machines.Count(m => m.Files.All(f => f.File.IsInRepo)),
+                                                  r.Machines.Count(m => m.Files.All(f => f.File.IsInRepo) &&
+                                                                        m.Disks.All(f => f.Disk.IsInRepo)),
                                               IncompleteMachines =
-                                                  r.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo)),
-                                              TotalRoms = r.Machines.Sum(m => m.Files.Count),
-                                              HaveRoms  = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)),
-                                              MissRoms  = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo))
+                                                  r.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                        m.Disks.Any(f => !f.Disk.IsInRepo)),
+                                              TotalRoms = r.Machines.Sum(m => m.Files.Count) +
+                                                          r.Machines.Sum(m => m.Disks.Count),
+                                              HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                                         r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)),
+                                              MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                                         r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo))
                                           }).ToList()
                     });
 

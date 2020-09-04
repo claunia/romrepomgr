@@ -467,22 +467,28 @@ namespace RomRepoMgr.Core.Workers
                 {
                     RomSet = new RomSetModel
                     {
-                        Id                 = romSet.Id,
-                        Author             = romSet.Author,
-                        Comment            = romSet.Comment,
-                        Date               = romSet.Date,
-                        Description        = romSet.Description,
-                        Filename           = romSet.Filename,
-                        Homepage           = romSet.Homepage,
-                        Name               = romSet.Name,
-                        Sha384             = romSet.Sha384,
-                        Version            = romSet.Version,
-                        TotalMachines      = romSet.Machines.Count,
-                        CompleteMachines   = romSet.Machines.Count(m => m.Files.All(f => f.File.IsInRepo)),
-                        IncompleteMachines = romSet.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo)),
-                        TotalRoms          = romSet.Machines.Sum(m => m.Files.Count),
-                        HaveRoms           = romSet.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)),
-                        MissRoms           = romSet.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo))
+                        Id            = romSet.Id,
+                        Author        = romSet.Author,
+                        Comment       = romSet.Comment,
+                        Date          = romSet.Date,
+                        Description   = romSet.Description,
+                        Filename      = romSet.Filename,
+                        Homepage      = romSet.Homepage,
+                        Name          = romSet.Name,
+                        Sha384        = romSet.Sha384,
+                        Version       = romSet.Version,
+                        TotalMachines = romSet.Machines.Count,
+                        CompleteMachines =
+                            romSet.Machines.Count(m => m.Files.All(f => f.File.IsInRepo) &&
+                                                       m.Disks.All(f => f.Disk.IsInRepo)),
+                        IncompleteMachines =
+                            romSet.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo) ||
+                                                       m.Disks.Any(f => !f.Disk.IsInRepo)),
+                        TotalRoms = romSet.Machines.Sum(m => m.Files.Count) + romSet.Machines.Sum(m => m.Disks.Count),
+                        HaveRoms = romSet.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                   romSet.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)),
+                        MissRoms = romSet.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                   romSet.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo))
                     }
                 });
             }
