@@ -73,6 +73,8 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.HasIndex("Crc32");
 
+                b.HasIndex("Md5");
+
                 b.HasIndex("Sha1");
 
                 b.HasIndex("Sha256");
