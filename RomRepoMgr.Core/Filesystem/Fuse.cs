@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Mono.Fuse.NETStandard;
 using Mono.Unix.Native;
 using RomRepoMgr.Database.Models;
@@ -162,7 +163,29 @@ namespace RomRepoMgr.Core.Filesystem
 
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(disk == null)
+            if(disk != null)
+            {
+                if(pieces.Length != 3)
+                    return Errno.ENOSYS;
+
+                stat = new Stat
+                {
+                    st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                    st_nlink   = 1,
+                    st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
+                    st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
+                    st_blksize = 512,
+                    st_blocks  = (long)(disk.Size / 512),
+                    st_ino     = disk.Id,
+                    st_size    = (long)disk.Size
+                };
+
+                return 0;
+            }
+
+            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+            if(media == null)
                 return Errno.ENOENT;
 
             if(pieces.Length != 3)
@@ -172,12 +195,12 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
                 st_nlink   = 1,
-                st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
-                st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
+                st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
+                st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
                 st_blksize = 512,
-                st_blocks  = (long)(disk.Size / 512),
-                st_ino     = disk.Id,
-                st_size    = (long)disk.Size
+                st_blocks  = (long)(media.Size / 512),
+                st_ino     = media.Id,
+                st_size    = (long)media.Size
             };
 
             return 0;
@@ -277,35 +300,70 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-                if(disk == null)
-                    return Errno.ENOENT;
-
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
-
-                if(disk.Sha1 == null &&
-                   disk.Md5  == null)
-                    return Errno.ENOENT;
-
-                if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
-                   info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
-                   info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
-                   info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
-                    return Errno.EROFS;
-
-                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
-
-                stat = new Stat
+                if(disk != null)
                 {
-                    st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                    st_nlink   = 1,
-                    st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
-                    st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
-                    st_blksize = 512,
-                    st_blocks  = (long)(disk.Size / 512),
-                    st_ino     = disk.Id,
-                    st_size    = (long)disk.Size
-                };
+                    if(pieces.Length > 3)
+                        return Errno.ENOSYS;
+
+                    if(disk.Sha1 == null &&
+                       disk.Md5  == null)
+                        return Errno.ENOENT;
+
+                    if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
+                        return Errno.EROFS;
+
+                    handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+
+                    stat = new Stat
+                    {
+                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                        st_nlink   = 1,
+                        st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
+                        st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
+                        st_blksize = 512,
+                        st_blocks  = (long)(disk.Size / 512),
+                        st_ino     = disk.Id,
+                        st_size    = (long)disk.Size
+                    };
+                }
+                else
+                {
+                    CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+                    if(media == null)
+                        return Errno.ENOENT;
+
+                    if(pieces.Length > 3)
+                        return Errno.ENOSYS;
+
+                    if(media.Sha256 == null &&
+                       media.Sha1   == null &&
+                       media.Md5    == null)
+                        return Errno.ENOENT;
+
+                    if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
+                       info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
+                        return Errno.EROFS;
+
+                    handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
+
+                    stat = new Stat
+                    {
+                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                        st_nlink   = 1,
+                        st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
+                        st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
+                        st_blksize = 512,
+                        st_blocks  = (long)(media.Size / 512),
+                        st_ino     = media.Id,
+                        st_size    = (long)media.Size
+                    };
+                }
             }
 
             if(handle <= 0)
@@ -467,48 +525,84 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-                if(disk == null)
-                    return Errno.ENOENT;
-
-                switch(name)
+                if(disk != null)
                 {
-                    case "user.md5":
-                        hash = disk.Md5;
+                    switch(name)
+                    {
+                        case "user.md5":
+                            hash = disk.Md5;
 
-                        break;
-                    case "user.sha1":
-                        hash = disk.Sha1;
+                            break;
+                        case "user.sha1":
+                            hash = disk.Sha1;
 
-                        break;
+                            break;
+                    }
+                }
+                else
+                {
+                    CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+                    if(media == null)
+                        return Errno.ENOENT;
+
+                    switch(name)
+                    {
+                        case "user.md5":
+                            hash = media.Md5;
+
+                            break;
+                        case "user.sha1":
+                            hash = media.Sha1;
+
+                            break;
+                        case "user.sha256":
+                            hash = media.Sha256;
+
+                            break;
+                        case "user.spamsum":
+                            hash = media.SpamSum;
+
+                            break;
+                    }
                 }
             }
 
             if(hash == null)
                 return Errno.ENODATA;
 
-            byte[] xattr = new byte[hash.Length / 2];
+            byte[] xattr = null;
 
-            for(int i = 0; i < xattr.Length; i++)
+            if(name == "user.spamsum")
             {
-                if(hash[i * 2] >= 0x30 &&
-                   hash[i * 2] <= 0x39)
-                    xattr[i] = (byte)((hash[i * 2] - 0x30) * 0x10);
-                else if(hash[i * 2] >= 0x41 &&
-                        hash[i * 2] <= 0x46)
-                    xattr[i] = (byte)((hash[i * 2] - 0x37) * 0x10);
-                else if(hash[i * 2] >= 0x61 &&
-                        hash[i * 2] <= 0x66)
-                    xattr[i] = (byte)((hash[i * 2] - 0x57) * 0x10);
+                xattr = Encoding.ASCII.GetBytes(hash);
+            }
+            else
+            {
+                xattr = new byte[hash.Length / 2];
 
-                if(hash[(i * 2) + 1] >= 0x30 &&
-                   hash[(i * 2) + 1] <= 0x39)
-                    xattr[i] += (byte)(hash[(i * 2) + 1] - 0x30);
-                else if(hash[(i * 2) + 1] >= 0x41 &&
-                        hash[(i * 2) + 1] <= 0x46)
-                    xattr[i] += (byte)(hash[(i * 2) + 1] - 0x37);
-                else if(hash[(i * 2) + 1] >= 0x61 &&
-                        hash[(i * 2) + 1] <= 0x66)
-                    xattr[i] += (byte)(hash[(i * 2) + 1] - 0x57);
+                for(int i = 0; i < xattr.Length; i++)
+                {
+                    if(hash[i * 2] >= 0x30 &&
+                       hash[i * 2] <= 0x39)
+                        xattr[i] = (byte)((hash[i * 2] - 0x30) * 0x10);
+                    else if(hash[i * 2] >= 0x41 &&
+                            hash[i * 2] <= 0x46)
+                        xattr[i] = (byte)((hash[i * 2] - 0x37) * 0x10);
+                    else if(hash[i * 2] >= 0x61 &&
+                            hash[i * 2] <= 0x66)
+                        xattr[i] = (byte)((hash[i * 2] - 0x57) * 0x10);
+
+                    if(hash[(i * 2) + 1] >= 0x30 &&
+                       hash[(i * 2) + 1] <= 0x39)
+                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x30);
+                    else if(hash[(i * 2) + 1] >= 0x41 &&
+                            hash[(i * 2) + 1] <= 0x46)
+                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x37);
+                    else if(hash[(i * 2) + 1] >= 0x61 &&
+                            hash[(i * 2) + 1] <= 0x66)
+                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x57);
+                }
             }
 
             if(value == null)
@@ -590,17 +684,41 @@ namespace RomRepoMgr.Core.Filesystem
 
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(disk == null)
+            if(disk != null)
+            {
+                if(pieces.Length > 3)
+                    return Errno.ENOSYS;
+
+                if(disk.Md5 != null)
+                    xattrs.Add("user.md5");
+
+                if(disk.Sha1 != null)
+                    xattrs.Add("user.sha1");
+
+                names = xattrs.ToArray();
+
+                return 0;
+            }
+
+            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+            if(media == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)
                 return Errno.ENOSYS;
 
-            if(disk.Md5 != null)
+            if(media.Md5 != null)
                 xattrs.Add("user.md5");
 
-            if(disk.Sha1 != null)
+            if(media.Sha1 != null)
                 xattrs.Add("user.sha1");
+
+            if(media.Sha256 != null)
+                xattrs.Add("user.sha256");
+
+            if(media.SpamSum != null)
+                xattrs.Add("user.spamsum");
 
             names = xattrs.ToArray();
 
@@ -671,8 +789,9 @@ namespace RomRepoMgr.Core.Filesystem
                 if(machine == null)
                     return Errno.ENOENT;
 
-                ConcurrentDictionary<string, CachedFile> cachedMachineFiles = _vfs.GetFilesFromMachine(machine.Id);
-                ConcurrentDictionary<string, CachedDisk> cachedMachineDisks = _vfs.GetDisksFromMachine(machine.Id);
+                ConcurrentDictionary<string, CachedFile>  cachedMachineFiles  = _vfs.GetFilesFromMachine(machine.Id);
+                ConcurrentDictionary<string, CachedDisk>  cachedMachineDisks  = _vfs.GetDisksFromMachine(machine.Id);
+                ConcurrentDictionary<string, CachedMedia> cachedMachineMedias = _vfs.GetMediasFromMachine(machine.Id);
 
                 if(pieces.Length == 2)
                 {
@@ -683,7 +802,8 @@ namespace RomRepoMgr.Core.Filesystem
                     };
 
                     entries.AddRange(cachedMachineFiles.Select(file => new DirectoryEntry(file.Key)));
-                    entries.AddRange(cachedMachineDisks.Select(disk => new DirectoryEntry(disk.Key + ".chd")));
+                    entries.AddRange(cachedMachineDisks.Select(disk => new DirectoryEntry(disk.Key    + ".chd")));
+                    entries.AddRange(cachedMachineMedias.Select(media => new DirectoryEntry(media.Key + ".aif")));
 
                     _lastHandle++;
                     info.Handle = new IntPtr(_lastHandle);
@@ -773,7 +893,17 @@ namespace RomRepoMgr.Core.Filesystem
 
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(disk == null)
+            if(disk != null)
+            {
+                if(pieces.Length > 3)
+                    return Errno.ENOSYS;
+
+                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+            }
+
+            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+            if(media == null)
                 return Errno.ENOENT;
 
             if(pieces.Length > 3)

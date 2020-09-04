@@ -20,6 +20,7 @@ namespace RomRepoMgr.Core.Filesystem
     {
         readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>   _machineDisksCache;
         readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
+        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedMedia>>  _machineMediasCache;
         readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
         readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
         readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
@@ -35,6 +36,7 @@ namespace RomRepoMgr.Core.Filesystem
             _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
             _machineFilesCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
             _machineDisksCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>();
+            _machineMediasCache = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedMedia>>();
             _streamsCache       = new ConcurrentDictionary<long, Stream>();
             _lastHandle         = 0;
         }
@@ -101,8 +103,12 @@ namespace RomRepoMgr.Core.Filesystem
         {
             using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-            totalSize = (ulong)ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size);
-            files     = (ulong)ctx.Files.Count(f => f.IsInRepo);
+            totalSize = (ulong)(ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size) +
+                                ctx.Disks.Where(f => f.IsInRepo).Sum(f => (double)f.Size) +
+                                ctx.Medias.Where(f => f.IsInRepo).Sum(f => (double)f.Size));
+
+            files = (ulong)(ctx.Files.Count(f => f.IsInRepo) + ctx.Disks.Count(f => f.IsInRepo) +
+                            ctx.Medias.Count(f => f.IsInRepo));
         }
 
         internal string[] SplitPath(string path) =>
@@ -286,6 +292,41 @@ namespace RomRepoMgr.Core.Filesystem
             return cachedMachineDisks;
         }
 
+        internal ConcurrentDictionary<string, CachedMedia> GetMediasFromMachine(ulong id)
+        {
+            _machineMediasCache.TryGetValue(id, out ConcurrentDictionary<string, CachedMedia> cachedMachineMedias);
+
+            if(cachedMachineMedias != null)
+                return cachedMachineMedias;
+
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            cachedMachineMedias = new ConcurrentDictionary<string, CachedMedia>();
+
+            foreach(MediaByMachine machineMedia in ctx.MediasByMachines.Where(mbm => mbm.Machine.Id == id &&
+                                                                                  mbm.Media.IsInRepo      &&
+                                                                                  mbm.Media.Size != null))
+            {
+                var cachedDisk = new CachedMedia
+                {
+                    Id        = machineMedia.Media.Id,
+                    Md5       = machineMedia.Media.Md5,
+                    Sha1      = machineMedia.Media.Sha1,
+                    Sha256    = machineMedia.Media.Sha256,
+                    SpamSum   = machineMedia.Media.SpamSum,
+                    Size      = machineMedia.Media.Size ?? 0,
+                    CreatedOn = machineMedia.Media.CreatedOn,
+                    UpdatedOn = machineMedia.Media.UpdatedOn
+                };
+
+                cachedMachineMedias[machineMedia.Name] = cachedDisk;
+            }
+
+            _machineMediasCache[id] = cachedMachineMedias;
+
+            return cachedMachineMedias;
+        }
+
         internal CachedFile GetFile(ulong machineId, string name)
         {
             ConcurrentDictionary<string, CachedFile> cachedFiles = GetFilesFromMachine(machineId);
@@ -309,6 +350,20 @@ namespace RomRepoMgr.Core.Filesystem
                 return null;
 
             return disk;
+        }
+
+        internal CachedMedia GetMedia(ulong machineId, string name)
+        {
+            if(name.EndsWith(".aif", StringComparison.OrdinalIgnoreCase))
+                name = name.Substring(0, name.Length - 4);
+
+            ConcurrentDictionary<string, CachedMedia> cachedMedias = GetMediasFromMachine(machineId);
+
+            if(cachedMedias == null ||
+               !cachedMedias.TryGetValue(name, out CachedMedia media))
+                return null;
+
+            return media;
         }
 
         internal long Open(string sha384, long fileSize)
@@ -484,6 +539,138 @@ namespace RomRepoMgr.Core.Filesystem
 
             return handle;
         }
+
+        public long OpenMedia(string sha256, string sha1, string md5)
+        {
+            if(sha256 == null &&
+               sha1   == null &&
+               md5    == null)
+                return -1;
+
+            string repoPath   = null;
+            string md5Path    = null;
+            string sha1Path   = null;
+            string sha256Path = null;
+
+            if(sha256 != null)
+            {
+                byte[] sha256Bytes = new byte[32];
+
+                for(int i = 0; i < 32; i++)
+                {
+                    if(sha256[i * 2] >= 0x30 &&
+                       sha256[i * 2] <= 0x39)
+                        sha256Bytes[i] = (byte)((sha256[i * 2] - 0x30) * 0x10);
+                    else if(sha256[i * 2] >= 0x41 &&
+                            sha256[i * 2] <= 0x46)
+                        sha256Bytes[i] = (byte)((sha256[i * 2] - 0x37) * 0x10);
+                    else if(sha256[i * 2] >= 0x61 &&
+                            sha256[i * 2] <= 0x66)
+                        sha256Bytes[i] = (byte)((sha256[i * 2] - 0x57) * 0x10);
+
+                    if(sha256[(i * 2) + 1] >= 0x30 &&
+                       sha256[(i * 2) + 1] <= 0x39)
+                        sha256Bytes[i] += (byte)(sha256[(i * 2) + 1] - 0x30);
+                    else if(sha256[(i * 2) + 1] >= 0x41 &&
+                            sha256[(i * 2) + 1] <= 0x46)
+                        sha256Bytes[i] += (byte)(sha256[(i * 2) + 1] - 0x37);
+                    else if(sha256[(i * 2) + 1] >= 0x61 &&
+                            sha256[(i * 2) + 1] <= 0x66)
+                        sha256Bytes[i] += (byte)(sha256[(i * 2) + 1] - 0x57);
+                }
+
+                string sha256B32 = Base32.ToBase32String(sha256Bytes);
+
+                sha256Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "sha256",
+                                          sha256B32[0].ToString(), sha256B32[1].ToString(), sha256B32[2].ToString(),
+                                          sha256B32[3].ToString(), sha256B32[4].ToString(), sha256B32 + ".aif");
+            }
+
+            if(sha1 != null)
+            {
+                byte[] sha1Bytes = new byte[20];
+
+                for(int i = 0; i < 20; i++)
+                {
+                    if(sha1[i * 2] >= 0x30 &&
+                       sha1[i * 2] <= 0x39)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
+                    else if(sha1[i * 2] >= 0x41 &&
+                            sha1[i * 2] <= 0x46)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x37) * 0x10);
+                    else if(sha1[i * 2] >= 0x61 &&
+                            sha1[i * 2] <= 0x66)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x57) * 0x10);
+
+                    if(sha1[(i * 2) + 1] >= 0x30 &&
+                       sha1[(i * 2) + 1] <= 0x39)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x30);
+                    else if(sha1[(i * 2) + 1] >= 0x41 &&
+                            sha1[(i * 2) + 1] <= 0x46)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x37);
+                    else if(sha1[(i * 2) + 1] >= 0x61 &&
+                            sha1[(i * 2) + 1] <= 0x66)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x57);
+                }
+
+                string sha1B32 = Base32.ToBase32String(sha1Bytes);
+
+                sha1Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "sha1", sha1B32[0].ToString(),
+                                        sha1B32[1].ToString(), sha1B32[2].ToString(), sha1B32[3].ToString(),
+                                        sha1B32[4].ToString(), sha1B32 + ".aif");
+            }
+
+            if(md5 != null)
+            {
+                byte[] md5Bytes = new byte[16];
+
+                for(int i = 0; i < 16; i++)
+                {
+                    if(md5[i * 2] >= 0x30 &&
+                       md5[i * 2] <= 0x39)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
+                    else if(md5[i * 2] >= 0x41 &&
+                            md5[i * 2] <= 0x46)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x37) * 0x10);
+                    else if(md5[i * 2] >= 0x61 &&
+                            md5[i * 2] <= 0x66)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x57) * 0x10);
+
+                    if(md5[(i * 2) + 1] >= 0x30 &&
+                       md5[(i * 2) + 1] <= 0x39)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x30);
+                    else if(md5[(i * 2) + 1] >= 0x41 &&
+                            md5[(i * 2) + 1] <= 0x46)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x37);
+                    else if(md5[(i * 2) + 1] >= 0x61 &&
+                            md5[(i * 2) + 1] <= 0x66)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x57);
+                }
+
+                string md5B32 = Base32.ToBase32String(md5Bytes);
+
+                md5Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "md5", md5B32[0].ToString(),
+                                       md5B32[1].ToString(), md5B32[2].ToString(), md5B32[3].ToString(),
+                                       md5B32[4].ToString(), md5B32 + ".aif");
+            }
+
+            if(File.Exists(sha256Path))
+                repoPath = sha256Path;
+            else if(File.Exists(sha1Path))
+                repoPath = sha1Path;
+            else if(File.Exists(md5Path))
+                repoPath = md5Path;
+
+            if(repoPath == null)
+                return -1;
+
+            _lastHandle++;
+            long handle = _lastHandle;
+
+            _streamsCache[handle] = Stream.Synchronized(new FileStream(repoPath, FileMode.Open, FileAccess.Read));
+
+            return handle;
+        }
     }
 
     internal sealed class CachedMachine
@@ -513,6 +700,18 @@ namespace RomRepoMgr.Core.Filesystem
         public ulong    Size      { get; set; }
         public string   Md5       { get; set; }
         public string   Sha1      { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime UpdatedOn { get; set; }
+    }
+
+    internal sealed class CachedMedia
+    {
+        public ulong    Id        { get; set; }
+        public ulong    Size      { get; set; }
+        public string   Md5       { get; set; }
+        public string   Sha1      { get; set; }
+        public string   Sha256    { get; set; }
+        public string   SpamSum   { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
     }

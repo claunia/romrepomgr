@@ -15,7 +15,7 @@
     <value>Añadiendo DAT a la base de datos...</value>
   </data>
   <data name="AddingMachines" xml:space="preserve">
-    <value>Añadiendo máquinas (juegos)</value>
+    <value>Añadiendo máquinas (juegos)...</value>
   </data>
   <data name="AddingRoms" xml:space="preserve">
     <value>Añadiendo ROMs...</value>
@@ -172,5 +172,14 @@
   </data>
   <data name="CopyingFile" xml:space="preserve">
     <value>Copiando archivo...</value>
+  </data>
+  <data name="FoundMediaWithoutMachine" xml:space="preserve">
+    <value>Se encontró un medio sin máquina, esto no debería pasar.</value>
+  </data>
+  <data name="NotAnAaruFormatFile" xml:space="preserve">
+    <value>No es un archivo AaruFormat.</value>
+  </data>
+  <data name="AddingMedias" xml:space="preserve">
+    <value>Añadiendo medios...</value>
   </data>
 </root>

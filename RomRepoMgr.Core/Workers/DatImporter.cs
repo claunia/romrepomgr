@@ -183,8 +183,9 @@ namespace RomRepoMgr.Core.Workers
                     Message = Localization.RetrievingRomsAndDisks
                 });
 
-                List<Rom>  roms  = new List<Rom>();
-                List<Disk> disks = new List<Disk>();
+                List<Rom>   roms   = new List<Rom>();
+                List<Disk>  disks  = new List<Disk>();
+                List<Media> medias = new List<Media>();
 
                 foreach(List<DatItem> values in datFile.Items.Values)
                 {
@@ -198,6 +199,10 @@ namespace RomRepoMgr.Core.Workers
                                 continue;
                             case Disk disk:
                                 disks.Add(disk);
+
+                                continue;
+                            case Media media:
+                                medias.Add(media);
 
                                 continue;
                         }
@@ -561,6 +566,145 @@ namespace RomRepoMgr.Core.Workers
                 newDisks.Clear();
                 newDisksByMachine.Clear();
 
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = medias.Count
+                });
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.AddingMedias
+                });
+
+                position = 0;
+
+                Dictionary<string, DbMedia> pendingMediasBySha256 = new Dictionary<string, DbMedia>();
+                Dictionary<string, DbMedia> pendingMediasBySha1   = new Dictionary<string, DbMedia>();
+                Dictionary<string, DbMedia> pendingMediasByMd5    = new Dictionary<string, DbMedia>();
+                List<DbMedia>               newMedias             = new List<DbMedia>();
+                List<MediaByMachine>        newMediasByMachine    = new List<MediaByMachine>();
+
+                foreach(Media media in medias)
+                {
+                    SetProgress?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = position
+                    });
+
+                    if(!machines.TryGetValue(media.Machine.Name, out Machine machine))
+                    {
+                        ErrorOccurred?.Invoke(this, new ErrorEventArgs
+                        {
+                            Message = Localization.FoundMediaWithoutMachine
+                        });
+
+                        return;
+                    }
+
+                    if(media.MD5    == null &&
+                       media.SHA1   == null &&
+                       media.SHA256 == null)
+                    {
+                        position++;
+
+                        continue;
+                    }
+
+                    DbMedia dbMedia = null;
+
+                    if(media.SHA256 != null &&
+                       dbMedia      == null)
+                        pendingMediasBySha256.TryGetValue(media.SHA256, out dbMedia);
+
+                    if(media.SHA1 != null &&
+                       dbMedia    == null)
+                        pendingMediasBySha1.TryGetValue(media.SHA1, out dbMedia);
+
+                    if(media.MD5 != null &&
+                       dbMedia   == null)
+                        pendingMediasByMd5.TryGetValue(media.MD5, out dbMedia);
+
+                    dbMedia ??=
+                        Context.Singleton.Medias.FirstOrDefault(f =>
+                                                                    (media.SHA256 != null &&
+                                                                     f.Sha256     == media.SHA256)               ||
+                                                                    (media.SHA1 != null && f.Sha1 == media.SHA1) ||
+                                                                    (media.MD5  != null && f.Md5  == media.MD5));
+
+                    // TODO: SpamSum
+                    if(dbMedia == null)
+                    {
+                        dbMedia = new DbMedia
+                        {
+                            CreatedOn = DateTime.UtcNow,
+                            Md5       = media.MD5,
+                            Sha1      = media.SHA1,
+                            Sha256    = media.SHA256,
+                            UpdatedOn = DateTime.UtcNow
+                        };
+
+                        newMedias.Add(dbMedia);
+                    }
+
+                    if(string.IsNullOrEmpty(dbMedia.Md5) &&
+                       !string.IsNullOrEmpty(media.MD5))
+                    {
+                        dbMedia.Md5       = media.MD5;
+                        dbMedia.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(dbMedia.Sha1) &&
+                       !string.IsNullOrEmpty(media.SHA1))
+                    {
+                        dbMedia.Sha1      = media.SHA1;
+                        dbMedia.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    if(string.IsNullOrEmpty(dbMedia.Sha256) &&
+                       !string.IsNullOrEmpty(media.SHA256))
+                    {
+                        dbMedia.Sha256    = media.SHA256;
+                        dbMedia.UpdatedOn = DateTime.UtcNow;
+                    }
+
+                    newMediasByMachine.Add(new MediaByMachine
+                    {
+                        Media   = dbMedia,
+                        Machine = machine,
+                        Name    = media.Name
+                    });
+
+                    if(dbMedia.Sha256 != null)
+                        pendingMediasBySha256[dbMedia.Sha256] = dbMedia;
+
+                    if(dbMedia.Sha1 != null)
+                        pendingMediasBySha1[dbMedia.Sha1] = dbMedia;
+
+                    if(dbMedia.Md5 != null)
+                        pendingMediasByMd5[dbMedia.Md5] = dbMedia;
+
+                    position++;
+                }
+
+                SetMessage?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.SavingChangesToDatabase
+                });
+
+                SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                Context.Singleton.Medias.AddRange(newMedias);
+                Context.Singleton.MediasByMachines.AddRange(newMediasByMachine);
+
+                Context.Singleton.SaveChanges();
+
+                pendingMediasBySha256.Clear();
+                pendingMediasBySha1.Clear();
+                pendingMediasByMd5.Clear();
+                newMedias.Clear();
+                newMediasByMachine.Clear();
+
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
 
                 romSet = Context.Singleton.RomSets.Find(romSet.Id);
@@ -596,11 +740,14 @@ namespace RomRepoMgr.Core.Workers
                             romSet.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
                                                        (m.Files.Any(f => !f.File.IsInRepo) ||
                                                         m.Disks.Any(f => !f.Disk.IsInRepo))),
-                        TotalRoms = romSet.Machines.Sum(m => m.Files.Count) + romSet.Machines.Sum(m => m.Disks.Count),
+                        TotalRoms = romSet.Machines.Sum(m => m.Files.Count) + romSet.Machines.Sum(m => m.Disks.Count) +
+                                    romSet.Machines.Sum(m => m.Medias.Count),
                         HaveRoms = romSet.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                   romSet.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)),
+                                   romSet.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                   romSet.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
                         MissRoms = romSet.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                   romSet.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo))
+                                   romSet.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                   romSet.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
                     }
                 });
             }

@@ -292,17 +292,61 @@ namespace RomRepoMgr.Core.Filesystem
 
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(disk == null)
+            if(disk != null)
+            {
+                if(pieces.Length > 3)
+                    return STATUS_INVALID_DEVICE_REQUEST;
+
+                if(disk.Sha1 == null &&
+                   disk.Md5  == null)
+                    return STATUS_OBJECT_NAME_NOT_FOUND;
+
+                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+
+                if(handle <= 0)
+                    return STATUS_OBJECT_NAME_NOT_FOUND;
+
+                normalizedName = Path.GetFileName(fileName);
+
+                // TODO: Real allocation size
+                fileInfo = new FileInfo
+                {
+                    ChangeTime     = (ulong)disk.UpdatedOn.ToFileTimeUtc(),
+                    AllocationSize = (disk.Size + 511) / 512,
+                    FileSize       = disk.Size,
+                    CreationTime   = (ulong)disk.CreatedOn.ToFileTimeUtc(),
+                    FileAttributes =
+                        (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                    IndexNumber    = disk.Id,
+                    LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                    LastWriteTime  = (ulong)disk.UpdatedOn.ToFileTimeUtc()
+                };
+
+                fileNode = new FileNode
+                {
+                    FileName = normalizedName,
+                    Info     = fileInfo,
+                    Path     = fileName,
+                    Handle   = handle
+                };
+
+                return STATUS_SUCCESS;
+            }
+
+            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+            if(media == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
             if(pieces.Length > 3)
                 return STATUS_INVALID_DEVICE_REQUEST;
 
-            if(disk.Sha1 == null &&
-               disk.Md5  == null)
+            if(media.Sha256 == null &&
+               media.Sha1   == null &&
+               media.Md5    == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+            handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
 
             if(handle <= 0)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
@@ -312,14 +356,14 @@ namespace RomRepoMgr.Core.Filesystem
             // TODO: Real allocation size
             fileInfo = new FileInfo
             {
-                ChangeTime     = (ulong)disk.UpdatedOn.ToFileTimeUtc(),
-                AllocationSize = (disk.Size + 511) / 512,
-                FileSize       = disk.Size,
-                CreationTime   = (ulong)disk.CreatedOn.ToFileTimeUtc(),
+                ChangeTime     = (ulong)media.UpdatedOn.ToFileTimeUtc(),
+                AllocationSize = (media.Size + 511) / 512,
+                FileSize       = media.Size,
+                CreationTime   = (ulong)media.CreatedOn.ToFileTimeUtc(),
                 FileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                IndexNumber    = disk.Id,
+                IndexNumber    = media.Id,
                 LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                LastWriteTime  = (ulong)disk.UpdatedOn.ToFileTimeUtc()
+                LastWriteTime  = (ulong)media.UpdatedOn.ToFileTimeUtc()
             };
 
             fileNode = new FileNode
@@ -399,6 +443,9 @@ namespace RomRepoMgr.Core.Filesystem
                     ConcurrentDictionary<string, CachedDisk> cachedMachineDisks =
                         _vfs.GetDisksFromMachine(node.MachineId);
 
+                    ConcurrentDictionary<string, CachedMedia> cachedMachineMedias =
+                        _vfs.GetMediasFromMachine(node.MachineId);
+
                     node.Children = new List<FileEntry>
                     {
                         new FileEntry
@@ -444,6 +491,23 @@ namespace RomRepoMgr.Core.Filesystem
                             IndexNumber    = disk.Value.Id,
                             LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
                             LastWriteTime  = (ulong)disk.Value.UpdatedOn.ToFileTimeUtc()
+                        }
+                    }));
+
+                    node.Children.AddRange(cachedMachineMedias.Select(media => new FileEntry
+                    {
+                        FileName = media.Key + ".aif",
+                        Info = new FileInfo
+                        {
+                            ChangeTime     = (ulong)media.Value.UpdatedOn.ToFileTimeUtc(),
+                            AllocationSize = (media.Value.Size + 511) / 512,
+                            FileSize       = media.Value.Size,
+                            CreationTime   = (ulong)media.Value.CreatedOn.ToFileTimeUtc(),
+                            FileAttributes =
+                                (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                            IndexNumber    = media.Value.Id,
+                            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                            LastWriteTime  = (ulong)media.Value.UpdatedOn.ToFileTimeUtc()
                         }
                     }));
                 }
@@ -612,17 +676,39 @@ namespace RomRepoMgr.Core.Filesystem
 
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(disk == null)
+            if(disk != null)
+            {
+                if(pieces.Length > 3)
+                    return STATUS_INVALID_DEVICE_REQUEST;
+
+                if(disk.Sha1 == null &&
+                   disk.Md5  == null)
+                    return STATUS_OBJECT_NAME_NOT_FOUND;
+
+                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+
+                if(handle <= 0)
+                    return STATUS_OBJECT_NAME_NOT_FOUND;
+
+                fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+
+                return STATUS_SUCCESS;
+            }
+
+            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+            if(media == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
             if(pieces.Length > 3)
                 return STATUS_INVALID_DEVICE_REQUEST;
 
-            if(disk.Sha1 == null &&
-               disk.Md5  == null)
+            if(media.Sha256 == null &&
+               media.Sha1   == null &&
+               media.Md5    == null)
                 return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+            handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
 
             if(handle <= 0)
                 return STATUS_OBJECT_NAME_NOT_FOUND;

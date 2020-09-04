@@ -345,11 +345,14 @@ namespace RomRepoMgr.ViewModels
                                                                         (m.Files.Any(f => !f.File.IsInRepo) ||
                                                                          m.Disks.Any(f => !f.Disk.IsInRepo))),
                                               TotalRoms = r.Machines.Sum(m => m.Files.Count) +
-                                                          r.Machines.Sum(m => m.Disks.Count),
+                                                          r.Machines.Sum(m => m.Disks.Count) +
+                                                          r.Machines.Sum(m => m.Medias.Count),
                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)),
+                                                         r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                                         r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo))
+                                                         r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                                         r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
                                           }).ToList()
                     });
 

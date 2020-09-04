@@ -368,5 +368,23 @@ namespace RomRepoMgr.Core.Resources {
                 return ResourceManager.GetString("CopyingFile", resourceCulture);
             }
         }
+        
+        internal static string AddingMedias {
+            get {
+                return ResourceManager.GetString("AddingMedias", resourceCulture);
+            }
+        }
+        
+        internal static string FoundMediaWithoutMachine {
+            get {
+                return ResourceManager.GetString("FoundMediaWithoutMachine", resourceCulture);
+            }
+        }
+        
+        internal static string NotAnAaruFormatFile {
+            get {
+                return ResourceManager.GetString("NotAnAaruFormatFile", resourceCulture);
+            }
+        }
     }
 }

@@ -178,4 +178,13 @@
   <data name="CopyingFile" xml:space="preserve">
     <value>Copying file...</value>
   </data>
+  <data name="AddingMedias" xml:space="preserve">
+    <value>Adding medias...</value>
+  </data>
+  <data name="FoundMediaWithoutMachine" xml:space="preserve">
+    <value>Found media with an unknown machine, this should not happen.</value>
+  </data>
+  <data name="NotAnAaruFormatFile" xml:space="preserve">
+    <value>Not an AaruFormat file.</value>
+  </data>
 </root>

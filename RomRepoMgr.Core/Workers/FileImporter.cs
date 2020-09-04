@@ -18,28 +18,36 @@ namespace RomRepoMgr.Core.Workers
 {
     public class FileImporter
     {
-        const    long                       BUFFER_SIZE = 131072;
-        readonly bool                       _deleteAfterImport;
-        readonly List<DbDisk>               _newDisks;
-        readonly List<DbFile>               _newFiles;
-        readonly bool                       _onlyKnown;
-        readonly Dictionary<string, DbDisk> _pendingDisksByMd5;
-        readonly Dictionary<string, DbDisk> _pendingDisksBySha1;
-        readonly Dictionary<string, DbFile> _pendingFiles;
-        string                              _lastMessage;
-        long                                _position;
-        long                                _totalFiles;
+        const    long                        BUFFER_SIZE = 131072;
+        readonly bool                        _deleteAfterImport;
+        readonly List<DbDisk>                _newDisks;
+        readonly List<DbFile>                _newFiles;
+        readonly List<DbMedia>               _newMedias;
+        readonly bool                        _onlyKnown;
+        readonly Dictionary<string, DbDisk>  _pendingDisksByMd5;
+        readonly Dictionary<string, DbDisk>  _pendingDisksBySha1;
+        readonly Dictionary<string, DbFile>  _pendingFiles;
+        readonly Dictionary<string, DbMedia> _pendingMediasByMd5;
+        readonly Dictionary<string, DbMedia> _pendingMediasBySha1;
+        readonly Dictionary<string, DbMedia> _pendingMediasBySha256;
+        string                               _lastMessage;
+        long                                 _position;
+        long                                 _totalFiles;
 
         public FileImporter(bool onlyKnown, bool deleteAfterImport)
         {
-            _pendingFiles       = new Dictionary<string, DbFile>();
-            _pendingDisksByMd5  = new Dictionary<string, DbDisk>();
-            _pendingDisksBySha1 = new Dictionary<string, DbDisk>();
-            _newFiles           = new List<DbFile>();
-            _newDisks           = new List<DbDisk>();
-            _onlyKnown          = onlyKnown;
-            _deleteAfterImport  = deleteAfterImport;
-            _position           = 0;
+            _pendingFiles          = new Dictionary<string, DbFile>();
+            _pendingDisksByMd5     = new Dictionary<string, DbDisk>();
+            _pendingDisksBySha1    = new Dictionary<string, DbDisk>();
+            _pendingMediasBySha256 = new Dictionary<string, DbMedia>();
+            _pendingMediasBySha1   = new Dictionary<string, DbMedia>();
+            _pendingMediasByMd5    = new Dictionary<string, DbMedia>();
+            _newFiles              = new List<DbFile>();
+            _newDisks              = new List<DbDisk>();
+            _newMedias             = new List<DbMedia>();
+            _onlyKnown             = onlyKnown;
+            _deleteAfterImport     = deleteAfterImport;
+            _position              = 0;
         }
 
         public event EventHandler                           SetIndeterminateProgress2;
@@ -92,6 +100,44 @@ namespace RomRepoMgr.Core.Workers
 
                         var fs = new FileStream(file, FileMode.Open, FileAccess.Read);
 
+                        var aif = AaruFormat.Create(fs);
+
+                        if(aif != null)
+                        {
+                            fs.Close();
+
+                            bool ret = ImportMedia(file);
+
+                            if(ret)
+                            {
+                                ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = Localization.OK
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                ImportedRom?.Invoke(this, new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = string.Format(Localization.ErrorWithMessage, _lastMessage)
+                                    }
+                                });
+                            }
+
+                            _position++;
+
+                            continue;
+                        }
+
+                        fs.Position = 0;
+
                         var chd = CHDFile.Create(fs);
 
                         if(chd != null)
@@ -127,6 +173,8 @@ namespace RomRepoMgr.Core.Workers
 
                             continue;
                         }
+
+                        fs.Close();
 
                         if(processArchives)
                         {
@@ -770,6 +818,346 @@ namespace RomRepoMgr.Core.Workers
                     File.Delete(path);
 
                 if(knownDiskWasBigger)
+                    File.Delete(repoPath + ".bak");
+
+                return true;
+            }
+            catch(Exception e)
+            {
+                _lastMessage = Localization.UnhandledExceptionWhenImporting;
+
+                return false;
+            }
+        }
+
+        bool ImportMedia(string path)
+        {
+            try
+            {
+                var inFs = new FileStream(path, FileMode.Open, FileAccess.Read);
+
+                SetMessage2?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.HashingFile
+                });
+
+                var aif = AaruFormat.Create(path);
+
+                if(aif == null)
+                {
+                    _lastMessage = Localization.NotAnAaruFormatFile;
+
+                    return false;
+                }
+
+                if(aif.MD5    == null &&
+                   aif.SHA1   == null &&
+                   aif.SHA256 == null)
+                {
+                    _lastMessage = Localization.NoChecksumsFound;
+
+                    return false;
+                }
+
+                string md5    = null;
+                string sha1   = null;
+                string sha256 = null;
+
+                if(aif.MD5 != null)
+                {
+                    char[] chdArray = new char[32];
+
+                    for(int i = 0; i < 16; i++)
+                    {
+                        int nibble1 = aif.MD5[i] >> 4;
+                        int nibble2 = aif.MD5[i] & 0xF;
+
+                        nibble1 += nibble1 >= 0xA ? 0x37 : 0x30;
+                        nibble2 += nibble2 >= 0xA ? 0x37 : 0x30;
+
+                        chdArray[i * 2]       = (char)nibble1;
+                        chdArray[(i * 2) + 1] = (char)nibble2;
+                    }
+
+                    md5 = new string(chdArray);
+                }
+
+                if(aif.SHA1 != null)
+                {
+                    char[] chdArray = new char[40];
+
+                    for(int i = 0; i < 20; i++)
+                    {
+                        int nibble1 = aif.SHA1[i] >> 4;
+                        int nibble2 = aif.SHA1[i] & 0xF;
+
+                        nibble1 += nibble1 >= 0xA ? 0x57 : 0x30;
+                        nibble2 += nibble2 >= 0xA ? 0x57 : 0x30;
+
+                        chdArray[i * 2]       = (char)nibble1;
+                        chdArray[(i * 2) + 1] = (char)nibble2;
+                    }
+
+                    sha1 = new string(chdArray);
+                }
+
+                if(aif.SHA256 != null)
+                {
+                    char[] chdArray = new char[64];
+
+                    for(int i = 0; i < 32; i++)
+                    {
+                        int nibble1 = aif.SHA256[i] >> 4;
+                        int nibble2 = aif.SHA256[i] & 0xF;
+
+                        nibble1 += nibble1 >= 0xA ? 0x57 : 0x30;
+                        nibble2 += nibble2 >= 0xA ? 0x57 : 0x30;
+
+                        chdArray[i * 2]       = (char)nibble1;
+                        chdArray[(i * 2) + 1] = (char)nibble2;
+                    }
+
+                    sha256 = new string(chdArray);
+                }
+
+                ulong   uSize               = (ulong)inFs.Length;
+                bool    mediaInDb           = true;
+                DbMedia dbMedia             = null;
+                bool    knownMedia          = false;
+                bool    knownMediaWasBigger = false;
+
+                if(sha256 != null)
+                    knownMedia = _pendingMediasBySha1.TryGetValue(sha256, out dbMedia);
+
+                if(!knownMedia &&
+                   sha1 != null)
+                    knownMedia = _pendingMediasBySha1.TryGetValue(sha1, out dbMedia);
+
+                if(!knownMedia &&
+                   md5 != null)
+                    knownMedia = _pendingMediasByMd5.TryGetValue(md5, out dbMedia);
+
+                dbMedia ??= Context.Singleton.Medias.FirstOrDefault(d => (d.Sha256 != null && d.Sha256 == sha256) ||
+                                                                         (d.Sha1   != null && d.Sha1   == sha1)   ||
+                                                                         (d.Md5    != null && d.Md5    == sha1));
+
+                if(dbMedia == null)
+                {
+                    if(_onlyKnown)
+                    {
+                        _lastMessage = Localization.UnknownFile;
+
+                        return false;
+                    }
+
+                    dbMedia = new DbMedia
+                    {
+                        Md5              = md5,
+                        Sha1             = sha1,
+                        Sha256           = sha256,
+                        Size             = uSize,
+                        CreatedOn        = DateTime.UtcNow,
+                        UpdatedOn        = DateTime.UtcNow,
+                        OriginalFileName = Path.GetFileName(path)
+                    };
+
+                    mediaInDb = false;
+                }
+
+                if(!knownMedia)
+                {
+                    if(sha256 != null)
+                        _pendingMediasBySha256[sha256] = dbMedia;
+                    else if(sha1 != null)
+                        _pendingMediasBySha1[sha1] = dbMedia;
+                    else if(md5 != null)
+                        _pendingMediasByMd5[md5] = dbMedia;
+                }
+
+                string sha256B32 = null;
+                string sha1B32   = null;
+                string md5B32    = null;
+
+                if(aif.SHA256 != null)
+                    sha256B32 = Base32.ToBase32String(aif.SHA256);
+
+                if(aif.SHA1 != null)
+                    sha1B32 = Base32.ToBase32String(aif.SHA1);
+
+                if(aif.MD5 != null)
+                    md5B32 = Base32.ToBase32String(aif.SHA1);
+
+                if(dbMedia.Md5 == null &&
+                   md5         != null)
+                {
+                    dbMedia.Md5       = md5;
+                    dbMedia.UpdatedOn = DateTime.UtcNow;
+                }
+
+                if(dbMedia.Sha1 == null &&
+                   sha1         != null)
+                {
+                    dbMedia.Sha1      = sha1;
+                    dbMedia.UpdatedOn = DateTime.UtcNow;
+                }
+
+                if(dbMedia.Sha256 == null &&
+                   sha256         != null)
+                {
+                    dbMedia.Sha256    = sha256;
+                    dbMedia.UpdatedOn = DateTime.UtcNow;
+                }
+
+                if(dbMedia.Size > uSize)
+                {
+                    knownMediaWasBigger = true;
+                    dbMedia.Size        = null;
+                }
+
+                if(dbMedia.Size == null)
+                {
+                    dbMedia.Size      = uSize;
+                    dbMedia.UpdatedOn = DateTime.UtcNow;
+                }
+
+                string md5Path    = null;
+                string sha1Path   = null;
+                string sha256Path = null;
+                string repoPath   = null;
+
+                if(md5 != null)
+                {
+                    md5Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "md5",
+                                           md5B32[0].ToString(), md5B32[1].ToString(), md5B32[2].ToString(),
+                                           md5B32[3].ToString(), md5B32[4].ToString());
+
+                    repoPath = md5Path;
+
+                    md5Path = Path.Combine(repoPath, md5B32 + ".aif");
+                }
+
+                if(sha1 != null)
+                {
+                    sha1Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "sha1",
+                                            sha1B32[0].ToString(), sha1B32[1].ToString(), sha1B32[2].ToString(),
+                                            sha1B32[3].ToString(), sha1B32[4].ToString());
+
+                    repoPath = sha1Path;
+
+                    sha1Path = Path.Combine(repoPath, sha1B32 + ".aif");
+                }
+
+                if(sha256 != null)
+                {
+                    sha256Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "aaru", "sha256",
+                                              sha256B32[0].ToString(), sha256B32[1].ToString(), sha256B32[2].ToString(),
+                                              sha256B32[3].ToString(), sha256B32[4].ToString());
+
+                    repoPath = sha256Path;
+
+                    sha256Path = Path.Combine(repoPath, sha256B32 + ".aif");
+                }
+
+                if(!Directory.Exists(repoPath))
+                    Directory.CreateDirectory(repoPath);
+
+                if(File.Exists(md5Path))
+                {
+                    if(sha256Path != null)
+                        File.Move(md5Path, sha256Path);
+                    else if(sha1Path != null)
+                        File.Move(md5Path, sha1Path);
+                }
+
+                if(File.Exists(sha1Path) &&
+                   sha256Path != null)
+                    File.Move(sha1Path, sha256Path);
+
+                if(sha256Path != null)
+                    repoPath = sha256Path;
+                else if(sha1Path != null)
+                    repoPath = sha1Path;
+                else if(md5Path != null)
+                    repoPath = md5Path;
+
+                if(File.Exists(repoPath))
+                {
+                    if(!knownMediaWasBigger)
+                        File.Move(repoPath, repoPath + ".bak", true);
+                    else
+                    {
+                        dbMedia.IsInRepo  = true;
+                        dbMedia.UpdatedOn = DateTime.UtcNow;
+
+                        if(!mediaInDb)
+                            _newMedias.Add(dbMedia);
+
+                        inFs.Close();
+
+                        if(_deleteAfterImport)
+                            File.Delete(path);
+
+                        return true;
+                    }
+                }
+
+                inFs.Position = 0;
+                var outFs = new FileStream(repoPath, FileMode.CreateNew, FileAccess.Write);
+
+                SetProgressBounds2?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = inFs.Length
+                });
+
+                SetMessage2?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.CopyingFile
+                });
+
+                byte[] buffer = new byte[BUFFER_SIZE];
+
+                while(inFs.Position + BUFFER_SIZE <= inFs.Length)
+                {
+                    SetProgress2?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = inFs.Position
+                    });
+
+                    inFs.Read(buffer, 0, buffer.Length);
+                    outFs.Write(buffer, 0, buffer.Length);
+                }
+
+                buffer = new byte[inFs.Length - inFs.Position];
+
+                SetProgress2?.Invoke(this, new ProgressEventArgs
+                {
+                    Value = inFs.Position
+                });
+
+                inFs.Read(buffer, 0, buffer.Length);
+                outFs.Write(buffer, 0, buffer.Length);
+
+                SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+                SetMessage2?.Invoke(this, new MessageEventArgs
+                {
+                    Message = Localization.Finishing
+                });
+
+                inFs.Close();
+                outFs.Close();
+
+                dbMedia.IsInRepo  = true;
+                dbMedia.UpdatedOn = DateTime.UtcNow;
+
+                if(!mediaInDb)
+                    _newMedias.Add(dbMedia);
+
+                if(_deleteAfterImport)
+                    File.Delete(path);
+
+                if(knownMediaWasBigger)
                     File.Delete(repoPath + ".bak");
 
                 return true;

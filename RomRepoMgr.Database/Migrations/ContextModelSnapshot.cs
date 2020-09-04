@@ -88,6 +88,45 @@ namespace RomRepoMgr.Database.Migrations
                 b.ToTable("Files");
             });
 
+            modelBuilder.Entity("RomRepoMgr.Database.Models.DbMedia", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
+
+                b.Property<bool>("IsInRepo").HasColumnType("INTEGER");
+
+                b.Property<string>("Md5").HasColumnType("TEXT").HasMaxLength(32);
+
+                b.Property<string>("OriginalFileName").HasColumnType("TEXT");
+
+                b.Property<string>("Sha1").HasColumnType("TEXT").HasMaxLength(40);
+
+                b.Property<string>("Sha256").HasColumnType("TEXT").HasMaxLength(64);
+
+                b.Property<ulong?>("Size").HasColumnType("INTEGER");
+
+                b.Property<string>("SpamSum").HasColumnType("TEXT");
+
+                b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("IsInRepo");
+
+                b.HasIndex("Md5");
+
+                b.HasIndex("Sha1");
+
+                b.HasIndex("Sha256");
+
+                b.HasIndex("Size");
+
+                b.HasIndex("SpamSum");
+
+                b.ToTable("Medias");
+            });
+
             modelBuilder.Entity("RomRepoMgr.Database.Models.DiskByMachine", b =>
             {
                 b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
@@ -149,6 +188,27 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("RomSetId");
 
                 b.ToTable("Machines");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.MediaByMachine", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<ulong>("MachineId").HasColumnType("INTEGER");
+
+                b.Property<ulong>("MediaId").HasColumnType("INTEGER");
+
+                b.Property<string>("Name").IsRequired().HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("MachineId");
+
+                b.HasIndex("MediaId");
+
+                b.HasIndex("Name");
+
+                b.ToTable("MediasByMachines");
             });
 
             modelBuilder.Entity("RomRepoMgr.Database.Models.RomSet", b =>
@@ -221,6 +281,15 @@ namespace RomRepoMgr.Database.Migrations
             modelBuilder.Entity("RomRepoMgr.Database.Models.Machine", b =>
             {
                 b.HasOne("RomRepoMgr.Database.Models.RomSet", "RomSet").WithMany("Machines").HasForeignKey("RomSetId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.MediaByMachine", b =>
+            {
+                b.HasOne("RomRepoMgr.Database.Models.Machine", "Machine").WithMany("Medias").HasForeignKey("MachineId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
+
+                b.HasOne("RomRepoMgr.Database.Models.DbMedia", "Media").WithMany("Machines").HasForeignKey("MediaId").
                   OnDelete(DeleteBehavior.Cascade).IsRequired();
             });
             #pragma warning restore 612, 618

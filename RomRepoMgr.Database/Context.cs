@@ -54,12 +54,14 @@ namespace RomRepoMgr.Database
             }
         }
 
-        public DbSet<DbFile>        Files           { get; set; }
-        public DbSet<RomSet>        RomSets         { get; set; }
-        public DbSet<Machine>       Machines        { get; set; }
-        public DbSet<FileByMachine> FilesByMachines { get; set; }
-        public DbSet<DbDisk>        Disks           { get; set; }
-        public DbSet<DiskByMachine> DisksByMachines { get; set; }
+        public DbSet<DbFile>         Files            { get; set; }
+        public DbSet<RomSet>         RomSets          { get; set; }
+        public DbSet<Machine>        Machines         { get; set; }
+        public DbSet<FileByMachine>  FilesByMachines  { get; set; }
+        public DbSet<DbDisk>         Disks            { get; set; }
+        public DbSet<DiskByMachine>  DisksByMachines  { get; set; }
+        public DbSet<DbMedia>        Medias           { get; set; }
+        public DbSet<MediaByMachine> MediasByMachines { get; set; }
 
         public static void ReplaceSingleton(string dbPath) => _singleton = Create(dbPath);
 
@@ -150,6 +152,30 @@ namespace RomRepoMgr.Database
                 entity.HasOne(e => e.Machine).WithMany(e => e.Disks).OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Disk).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DbMedia>(entity =>
+            {
+                entity.HasIndex(e => e.Md5);
+
+                entity.HasIndex(e => e.Sha1);
+
+                entity.HasIndex(e => e.Sha256);
+
+                entity.HasIndex(e => e.SpamSum);
+
+                entity.HasIndex(e => e.Size);
+
+                entity.HasIndex(e => e.IsInRepo);
+            });
+
+            modelBuilder.Entity<MediaByMachine>(entity =>
+            {
+                entity.HasIndex(e => e.Name);
+
+                entity.HasOne(e => e.Machine).WithMany(e => e.Medias).OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Media).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
