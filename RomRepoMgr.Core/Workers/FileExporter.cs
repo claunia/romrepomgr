@@ -17,6 +17,7 @@ namespace RomRepoMgr.Core.Workers
 {
     public class FileExporter
     {
+        const    long                     BUFFER_SIZE = 131072;
         readonly string                   _outPath;
         readonly long                     _romSetId;
         long                              _filePosition;
@@ -106,6 +107,172 @@ namespace RomRepoMgr.Core.Workers
                 Message = machine.Name
             });
 
+            Dictionary<string, DiskByMachine> disksByMachine = Context.Singleton.DisksByMachines.
+                                                                       Where(f => f.Machine.Id == machine.Id &&
+                                                                                 f.Disk.IsInRepo).
+                                                                       ToDictionary(f => f.Name);
+
+            string machineName = machine.Name;
+
+            if(disksByMachine.Count > 0)
+            {
+                SetProgress2Bounds?.Invoke(this, new ProgressBoundsEventArgs
+                {
+                    Minimum = 0,
+                    Maximum = disksByMachine.Count
+                });
+
+                if(machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
+                    machineName = machineName.Substring(0, machineName.Length - 4);
+
+                string machinePath = Path.Combine(_outPath, machineName);
+
+                if(!Directory.Exists(machinePath))
+                    Directory.CreateDirectory(machinePath);
+
+                long diskPosition = 0;
+
+                foreach(KeyValuePair<string, DiskByMachine> diskByMachine in disksByMachine)
+                {
+                    string outputPath = Path.Combine(machinePath, diskByMachine.Key);
+
+                    if(!outputPath.EndsWith(".chd", StringComparison.InvariantCultureIgnoreCase))
+                        outputPath += ".chd";
+
+                    SetProgress2?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = diskPosition
+                    });
+
+                    string repoPath = null;
+                    string md5Path  = null;
+                    string sha1Path = null;
+
+                    DbDisk disk = diskByMachine.Value.Disk;
+
+                    if(disk.Sha1 != null)
+                    {
+                        byte[] sha1Bytes = new byte[20];
+                        string sha1      = disk.Sha1;
+
+                        for(int i = 0; i < 20; i++)
+                        {
+                            if(sha1[i * 2] >= 0x30 &&
+                               sha1[i * 2] <= 0x39)
+                                sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
+                            else if(sha1[i * 2] >= 0x41 &&
+                                    sha1[i * 2] <= 0x46)
+                                sha1Bytes[i] = (byte)((sha1[i * 2] - 0x37) * 0x10);
+                            else if(sha1[i * 2] >= 0x61 &&
+                                    sha1[i * 2] <= 0x66)
+                                sha1Bytes[i] = (byte)((sha1[i * 2] - 0x57) * 0x10);
+
+                            if(sha1[(i * 2) + 1] >= 0x30 &&
+                               sha1[(i * 2) + 1] <= 0x39)
+                                sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x30);
+                            else if(sha1[(i * 2) + 1] >= 0x41 &&
+                                    sha1[(i * 2) + 1] <= 0x46)
+                                sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x37);
+                            else if(sha1[(i * 2) + 1] >= 0x61 &&
+                                    sha1[(i * 2) + 1] <= 0x66)
+                                sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x57);
+                        }
+
+                        string sha1B32 = Base32.ToBase32String(sha1Bytes);
+
+                        sha1Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "chd", "sha1",
+                                                sha1B32[0].ToString(), sha1B32[1].ToString(), sha1B32[2].ToString(),
+                                                sha1B32[3].ToString(), sha1B32[4].ToString(), sha1B32 + ".chd");
+                    }
+
+                    if(disk.Md5 != null)
+                    {
+                        byte[] md5Bytes = new byte[16];
+                        string md5      = disk.Md5;
+
+                        for(int i = 0; i < 16; i++)
+                        {
+                            if(md5[i * 2] >= 0x30 &&
+                               md5[i * 2] <= 0x39)
+                                md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
+                            else if(md5[i * 2] >= 0x41 &&
+                                    md5[i * 2] <= 0x46)
+                                md5Bytes[i] = (byte)((md5[i * 2] - 0x37) * 0x10);
+                            else if(md5[i * 2] >= 0x61 &&
+                                    md5[i * 2] <= 0x66)
+                                md5Bytes[i] = (byte)((md5[i * 2] - 0x57) * 0x10);
+
+                            if(md5[(i * 2) + 1] >= 0x30 &&
+                               md5[(i * 2) + 1] <= 0x39)
+                                md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x30);
+                            else if(md5[(i * 2) + 1] >= 0x41 &&
+                                    md5[(i * 2) + 1] <= 0x46)
+                                md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x37);
+                            else if(md5[(i * 2) + 1] >= 0x61 &&
+                                    md5[(i * 2) + 1] <= 0x66)
+                                md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x57);
+                        }
+
+                        string md5B32 = Base32.ToBase32String(md5Bytes);
+
+                        md5Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "chd", "md5",
+                                               md5B32[0].ToString(), md5B32[1].ToString(), md5B32[2].ToString(),
+                                               md5B32[3].ToString(), md5B32[4].ToString(), md5B32 + ".chd");
+                    }
+
+                    if(File.Exists(sha1Path))
+                        repoPath = sha1Path;
+                    else if(File.Exists(md5Path))
+                        repoPath = md5Path;
+
+                    if(repoPath == null)
+                        throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository,
+                                                                  disk.Sha1 ?? disk.Md5));
+
+                    var inFs  = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
+                    var outFs = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+
+                    SetMessage3?.Invoke(this, new MessageEventArgs
+                    {
+                        Message = string.Format(Localization.Copying, Path.GetFileName(outputPath))
+                    });
+
+                    SetProgress3Bounds?.Invoke(this, new ProgressBoundsEventArgs
+                    {
+                        Minimum = 0,
+                        Maximum = inFs.Length
+                    });
+
+                    byte[] buffer = new byte[BUFFER_SIZE];
+
+                    while(inFs.Position + BUFFER_SIZE <= inFs.Length)
+                    {
+                        SetProgress3?.Invoke(this, new ProgressEventArgs
+                        {
+                            Value = inFs.Position
+                        });
+
+                        inFs.Read(buffer, 0, buffer.Length);
+                        outFs.Write(buffer, 0, buffer.Length);
+                    }
+
+                    buffer = new byte[inFs.Length - inFs.Position];
+
+                    SetProgress3?.Invoke(this, new ProgressEventArgs
+                    {
+                        Value = inFs.Position
+                    });
+
+                    inFs.Read(buffer, 0, buffer.Length);
+                    outFs.Write(buffer, 0, buffer.Length);
+
+                    inFs.Close();
+                    outFs.Close();
+
+                    diskPosition++;
+                }
+            }
+
             _filesByMachine = Context.Singleton.FilesByMachines.
                                       Where(f => f.Machine.Id == machine.Id && f.File.IsInRepo).
                                       ToDictionary(f => f.Name);
@@ -123,8 +290,6 @@ namespace RomRepoMgr.Core.Workers
                 Minimum = 0,
                 Maximum = _filesByMachine.Count
             });
-
-            string machineName = machine.Name;
 
             if(!machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
                 machineName += ".zip";

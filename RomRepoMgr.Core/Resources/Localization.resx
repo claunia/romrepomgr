@@ -172,4 +172,10 @@
   <data name="NoChecksumsFound" xml:space="preserve">
     <value>No checksums found.</value>
   </data>
+  <data name="Copying" xml:space="preserve">
+    <value>Copying {0}...</value>
+  </data>
+  <data name="CopyingFile" xml:space="preserve">
+    <value>Copying file...</value>
+  </data>
 </root>

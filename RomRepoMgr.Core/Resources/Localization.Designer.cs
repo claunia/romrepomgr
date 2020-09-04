@@ -356,5 +356,17 @@ namespace RomRepoMgr.Core.Resources {
                 return ResourceManager.GetString("NoChecksumsFound", resourceCulture);
             }
         }
+        
+        internal static string Copying {
+            get {
+                return ResourceManager.GetString("Copying", resourceCulture);
+            }
+        }
+        
+        internal static string CopyingFile {
+            get {
+                return ResourceManager.GetString("CopyingFile", resourceCulture);
+            }
+        }
     }
 }

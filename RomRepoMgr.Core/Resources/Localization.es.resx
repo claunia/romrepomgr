@@ -167,4 +167,10 @@
   <data name="NotAChdFile" xml:space="preserve">
     <value>No es un CHD.</value>
   </data>
+  <data name="Copying" xml:space="preserve">
+    <value>Copiando {0}...</value>
+  </data>
+  <data name="CopyingFile" xml:space="preserve">
+    <value>Copiando archivo...</value>
+  </data>
 </root>

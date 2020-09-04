@@ -563,8 +563,8 @@ namespace RomRepoMgr.Core.Workers
                         int nibble1 = chd.SHA1[i] >> 4;
                         int nibble2 = chd.SHA1[i] & 0xF;
 
-                        nibble1 += nibble1 >= 0xA ? 0x37 : 0x30;
-                        nibble2 += nibble2 >= 0xA ? 0x37 : 0x30;
+                        nibble1 += nibble1 >= 0xA ? 0x57 : 0x30;
+                        nibble2 += nibble2 >= 0xA ? 0x57 : 0x30;
 
                         chdArray[i * 2]       = (char)nibble1;
                         chdArray[(i * 2) + 1] = (char)nibble2;
@@ -642,12 +642,16 @@ namespace RomRepoMgr.Core.Workers
                     dbDisk.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(dbDisk.Size == null ||
-                   dbDisk.Size > uSize)
+                if(dbDisk.Size > uSize)
                 {
-                    dbDisk.Size        = uSize;
-                    dbDisk.UpdatedOn   = DateTime.UtcNow;
                     knownDiskWasBigger = true;
+                    dbDisk.Size        = null;
+                }
+
+                if(dbDisk.Size == null)
+                {
+                    dbDisk.Size      = uSize;
+                    dbDisk.UpdatedOn = DateTime.UtcNow;
                 }
 
                 string md5Path  = null;
@@ -720,7 +724,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetMessage2?.Invoke(this, new MessageEventArgs
                 {
-                    Message = Localization.CompressingFile
+                    Message = Localization.CopyingFile
                 });
 
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -765,7 +769,7 @@ namespace RomRepoMgr.Core.Workers
                 if(_deleteAfterImport)
                     File.Delete(path);
 
-                if(!knownDiskWasBigger)
+                if(knownDiskWasBigger)
                     File.Delete(repoPath + ".bak");
 
                 return true;
