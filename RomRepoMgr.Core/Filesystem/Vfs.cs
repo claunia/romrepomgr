@@ -18,6 +18,7 @@ namespace RomRepoMgr.Core.Filesystem
     // TODO: Do not show machines or romsets with no ROMs in repo
     public class Vfs : IDisposable
     {
+        readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>   _machineDisksCache;
         readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
         readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
         readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
@@ -33,6 +34,7 @@ namespace RomRepoMgr.Core.Filesystem
             _romSetsCache       = new ConcurrentDictionary<long, RomSet>();
             _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
             _machineFilesCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
+            _machineDisksCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>();
             _streamsCache       = new ConcurrentDictionary<long, Stream>();
             _lastHandle         = 0;
         }
@@ -251,6 +253,39 @@ namespace RomRepoMgr.Core.Filesystem
             return cachedMachineFiles;
         }
 
+        internal ConcurrentDictionary<string, CachedDisk> GetDisksFromMachine(ulong id)
+        {
+            _machineDisksCache.TryGetValue(id, out ConcurrentDictionary<string, CachedDisk> cachedMachineDisks);
+
+            if(cachedMachineDisks != null)
+                return cachedMachineDisks;
+
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            cachedMachineDisks = new ConcurrentDictionary<string, CachedDisk>();
+
+            foreach(DiskByMachine machineDisk in ctx.DisksByMachines.Where(dbm => dbm.Machine.Id == id &&
+                                                                               dbm.Disk.IsInRepo       &&
+                                                                               dbm.Disk.Size != null))
+            {
+                var cachedDisk = new CachedDisk
+                {
+                    Id        = machineDisk.Disk.Id,
+                    Md5       = machineDisk.Disk.Md5,
+                    Sha1      = machineDisk.Disk.Sha1,
+                    Size      = machineDisk.Disk.Size ?? 0,
+                    CreatedOn = machineDisk.Disk.CreatedOn,
+                    UpdatedOn = machineDisk.Disk.UpdatedOn
+                };
+
+                cachedMachineDisks[machineDisk.Name] = cachedDisk;
+            }
+
+            _machineDisksCache[id] = cachedMachineDisks;
+
+            return cachedMachineDisks;
+        }
+
         internal CachedFile GetFile(ulong machineId, string name)
         {
             ConcurrentDictionary<string, CachedFile> cachedFiles = GetFilesFromMachine(machineId);
@@ -260,6 +295,20 @@ namespace RomRepoMgr.Core.Filesystem
                 return null;
 
             return file;
+        }
+
+        internal CachedDisk GetDisk(ulong machineId, string name)
+        {
+            if(name.EndsWith(".chd", StringComparison.OrdinalIgnoreCase))
+                name = name.Substring(0, name.Length - 4);
+
+            ConcurrentDictionary<string, CachedDisk> cachedDisks = GetDisksFromMachine(machineId);
+
+            if(cachedDisks == null ||
+               !cachedDisks.TryGetValue(name, out CachedDisk disk))
+                return null;
+
+            return disk;
         }
 
         internal long Open(string sha384, long fileSize)
@@ -338,6 +387,100 @@ namespace RomRepoMgr.Core.Filesystem
 
             return _rootDirectoryCache.Keys.ToArray();
         }
+
+        public long OpenDisk(string sha1, string md5)
+        {
+            if(sha1 == null &&
+               md5  == null)
+                return -1;
+
+            string repoPath = null;
+            string md5Path  = null;
+            string sha1Path = null;
+
+            if(sha1 != null)
+            {
+                byte[] sha1Bytes = new byte[20];
+
+                for(int i = 0; i < 20; i++)
+                {
+                    if(sha1[i * 2] >= 0x30 &&
+                       sha1[i * 2] <= 0x39)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
+                    else if(sha1[i * 2] >= 0x41 &&
+                            sha1[i * 2] <= 0x46)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x37) * 0x10);
+                    else if(sha1[i * 2] >= 0x61 &&
+                            sha1[i * 2] <= 0x66)
+                        sha1Bytes[i] = (byte)((sha1[i * 2] - 0x57) * 0x10);
+
+                    if(sha1[(i * 2) + 1] >= 0x30 &&
+                       sha1[(i * 2) + 1] <= 0x39)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x30);
+                    else if(sha1[(i * 2) + 1] >= 0x41 &&
+                            sha1[(i * 2) + 1] <= 0x46)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x37);
+                    else if(sha1[(i * 2) + 1] >= 0x61 &&
+                            sha1[(i * 2) + 1] <= 0x66)
+                        sha1Bytes[i] += (byte)(sha1[(i * 2) + 1] - 0x57);
+                }
+
+                string sha1B32 = Base32.ToBase32String(sha1Bytes);
+
+                sha1Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "chd", "sha1", sha1B32[0].ToString(),
+                                        sha1B32[1].ToString(), sha1B32[2].ToString(), sha1B32[3].ToString(),
+                                        sha1B32[4].ToString(), sha1B32 + ".chd");
+            }
+
+            if(md5 != null)
+            {
+                byte[] md5Bytes = new byte[16];
+
+                for(int i = 0; i < 16; i++)
+                {
+                    if(md5[i * 2] >= 0x30 &&
+                       md5[i * 2] <= 0x39)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
+                    else if(md5[i * 2] >= 0x41 &&
+                            md5[i * 2] <= 0x46)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x37) * 0x10);
+                    else if(md5[i * 2] >= 0x61 &&
+                            md5[i * 2] <= 0x66)
+                        md5Bytes[i] = (byte)((md5[i * 2] - 0x57) * 0x10);
+
+                    if(md5[(i * 2) + 1] >= 0x30 &&
+                       md5[(i * 2) + 1] <= 0x39)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x30);
+                    else if(md5[(i * 2) + 1] >= 0x41 &&
+                            md5[(i * 2) + 1] <= 0x46)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x37);
+                    else if(md5[(i * 2) + 1] >= 0x61 &&
+                            md5[(i * 2) + 1] <= 0x66)
+                        md5Bytes[i] += (byte)(md5[(i * 2) + 1] - 0x57);
+                }
+
+                string md5B32 = Base32.ToBase32String(md5Bytes);
+
+                md5Path = Path.Combine(Settings.Settings.Current.RepositoryPath, "chd", "md5", md5B32[0].ToString(),
+                                       md5B32[1].ToString(), md5B32[2].ToString(), md5B32[3].ToString(),
+                                       md5B32[4].ToString(), md5B32 + ".chd");
+            }
+
+            if(File.Exists(sha1Path))
+                repoPath = sha1Path;
+            else if(File.Exists(md5Path))
+                repoPath = md5Path;
+
+            if(repoPath == null)
+                return -1;
+
+            _lastHandle++;
+            long handle = _lastHandle;
+
+            _streamsCache[handle] = Stream.Synchronized(new FileStream(repoPath, FileMode.Open, FileAccess.Read));
+
+            return handle;
+        }
     }
 
     internal sealed class CachedMachine
@@ -357,6 +500,16 @@ namespace RomRepoMgr.Core.Filesystem
         public string   Sha256    { get; set; }
         public string   Sha384    { get; set; }
         public string   Sha512    { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime UpdatedOn { get; set; }
+    }
+
+    internal sealed class CachedDisk
+    {
+        public ulong    Id        { get; set; }
+        public ulong    Size      { get; set; }
+        public string   Md5       { get; set; }
+        public string   Sha1      { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
     }
