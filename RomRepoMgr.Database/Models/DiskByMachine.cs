@@ -23,18 +23,19 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
 {
-    public class Machine : BaseModel<ulong>
+    public class DiskByMachine
     {
+        [Key]
+        public ulong Id { get; set; }
+        [Required]
+        public virtual DbDisk Disk { get; set; }
+        [Required]
+        public virtual Machine Machine { get; set; }
         [Required]
         public string Name { get; set; }
-        [Required]
-        public virtual RomSet RomSet { get;                    set; }
-        public virtual ICollection<FileByMachine> Files { get; set; }
-        public virtual ICollection<DiskByMachine> Disks { get; set; }
     }
 }

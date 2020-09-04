@@ -24,17 +24,21 @@
 *******************************************************************************/
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
 {
-    public class Machine : BaseModel<ulong>
+    public class DbDisk : BaseModel<ulong>
     {
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public virtual RomSet RomSet { get;                    set; }
-        public virtual ICollection<FileByMachine> Files { get; set; }
-        public virtual ICollection<DiskByMachine> Disks { get; set; }
+        public ulong? Size { get; set; }
+        [StringLength(32, MinimumLength = 32)]
+        public string Md5 { get; set; }
+        [StringLength(40, MinimumLength = 40)]
+        public string Sha1 { get; set; }
+        [DefaultValue(false)]
+        public bool IsInRepo { get;                                       set; }
+        public         string                     OriginalFileName { get; set; }
+        public virtual ICollection<DiskByMachine> Machines         { get; set; }
     }
 }

@@ -14,6 +14,35 @@ namespace RomRepoMgr.Database.Migrations
             #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "3.1.7");
 
+            modelBuilder.Entity("RomRepoMgr.Database.Models.DbDisk", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
+
+                b.Property<bool>("IsInRepo").HasColumnType("INTEGER");
+
+                b.Property<string>("Md5").HasColumnType("TEXT").HasMaxLength(32);
+
+                b.Property<string>("OriginalFileName").HasColumnType("TEXT");
+
+                b.Property<string>("Sha1").HasColumnType("TEXT").HasMaxLength(40);
+
+                b.Property<ulong?>("Size").HasColumnType("INTEGER");
+
+                b.Property<DateTime>("UpdatedOn").HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Md5");
+
+                b.HasIndex("Sha1");
+
+                b.HasIndex("Size");
+
+                b.ToTable("Disks");
+            });
+
             modelBuilder.Entity("RomRepoMgr.Database.Models.DbFile", b =>
             {
                 b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
@@ -55,6 +84,27 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Size");
 
                 b.ToTable("Files");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.DiskByMachine", b =>
+            {
+                b.Property<ulong>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+
+                b.Property<ulong>("DiskId").HasColumnType("INTEGER");
+
+                b.Property<ulong>("MachineId").HasColumnType("INTEGER");
+
+                b.Property<string>("Name").IsRequired().HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("DiskId");
+
+                b.HasIndex("MachineId");
+
+                b.HasIndex("Name");
+
+                b.ToTable("DisksByMachines");
             });
 
             modelBuilder.Entity("RomRepoMgr.Database.Models.FileByMachine", b =>
@@ -146,6 +196,15 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasIndex("Version");
 
                 b.ToTable("RomSets");
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.DiskByMachine", b =>
+            {
+                b.HasOne("RomRepoMgr.Database.Models.DbDisk", "Disk").WithMany("Machines").HasForeignKey("DiskId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
+
+                b.HasOne("RomRepoMgr.Database.Models.Machine", "Machine").WithMany("Disks").HasForeignKey("MachineId").
+                  OnDelete(DeleteBehavior.Cascade).IsRequired();
             });
 
             modelBuilder.Entity("RomRepoMgr.Database.Models.FileByMachine", b =>
