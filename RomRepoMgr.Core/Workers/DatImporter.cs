@@ -581,11 +581,21 @@ namespace RomRepoMgr.Core.Workers
                         Version       = romSet.Version,
                         TotalMachines = romSet.Machines.Count,
                         CompleteMachines =
-                            romSet.Machines.Count(m => m.Files.All(f => f.File.IsInRepo) &&
+                            romSet.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                       m.Files.All(f => f.File.IsInRepo)) +
+                            romSet.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                       m.Disks.All(f => f.Disk.IsInRepo)) +
+                            romSet.Machines.Count(m => m.Files.Count > 0                 && m.Disks.Count > 0 &&
+                                                       m.Files.All(f => f.File.IsInRepo) &&
                                                        m.Disks.All(f => f.Disk.IsInRepo)),
                         IncompleteMachines =
-                            romSet.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo) ||
-                                                       m.Disks.Any(f => !f.Disk.IsInRepo)),
+                            romSet.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                       m.Files.Any(f => !f.File.IsInRepo)) +
+                            romSet.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                       m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                            romSet.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                                       (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                        m.Disks.Any(f => !f.Disk.IsInRepo))),
                         TotalRoms = romSet.Machines.Sum(m => m.Files.Count) + romSet.Machines.Sum(m => m.Disks.Count),
                         HaveRoms = romSet.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
                                    romSet.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)),

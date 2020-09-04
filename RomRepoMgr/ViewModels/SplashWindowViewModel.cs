@@ -317,23 +317,33 @@ namespace RomRepoMgr.ViewModels
                                           ThenBy(r => r.Date).ThenBy(r => r.Description).ThenBy(r => r.Comment).
                                           ThenBy(r => r.Filename).Select(r => new RomSetModel
                                           {
-                                              Id            = r.Id,
-                                              Author        = r.Author,
-                                              Comment       = r.Comment,
-                                              Date          = r.Date,
-                                              Description   = r.Description,
-                                              Filename      = r.Filename,
-                                              Homepage      = r.Homepage,
-                                              Name          = r.Name,
-                                              Sha384        = r.Sha384,
-                                              Version       = r.Version,
+                                              Id = r.Id,
+                                              Author = r.Author,
+                                              Comment = r.Comment,
+                                              Date = r.Date,
+                                              Description = r.Description,
+                                              Filename = r.Filename,
+                                              Homepage = r.Homepage,
+                                              Name = r.Name,
+                                              Sha384 = r.Sha384,
+                                              Version = r.Version,
                                               TotalMachines = r.Machines.Count,
                                               CompleteMachines =
-                                                  r.Machines.Count(m => m.Files.All(f => f.File.IsInRepo) &&
+                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                                        m.Files.All(f => f.File.IsInRepo)) +
+                                                  r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                                        m.Disks.All(f => f.Disk.IsInRepo)) +
+                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                                                        m.Files.All(f => f.File.IsInRepo) &&
                                                                         m.Disks.All(f => f.Disk.IsInRepo)),
                                               IncompleteMachines =
-                                                  r.Machines.Count(m => m.Files.Any(f => !f.File.IsInRepo) ||
-                                                                        m.Disks.Any(f => !f.Disk.IsInRepo)),
+                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                                        m.Files.Any(f => !f.File.IsInRepo)) +
+                                                  r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                                        m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                                                        (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                         m.Disks.Any(f => !f.Disk.IsInRepo))),
                                               TotalRoms = r.Machines.Sum(m => m.Files.Count) +
                                                           r.Machines.Sum(m => m.Disks.Count),
                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
