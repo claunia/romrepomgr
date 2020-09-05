@@ -52,7 +52,8 @@
                     <TextBlock Text="{Binding RomSetLabel}" />
                 </TabItem.Header>
                 <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible"
-                          SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}">
+                          SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}" CanUserSortColumns="True"
+                          CanUserResizeColumns="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding Name}" Width="Auto" IsReadOnly="True">
                             <DataGridTextColumn.Header>
