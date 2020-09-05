@@ -704,5 +704,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("FilesystemMenuUmountText", resourceCulture);
             }
         }
+        
+        internal static string RomSetCategoryLabel {
+            get {
+                return ResourceManager.GetString("RomSetCategoryLabel", resourceCulture);
+            }
+        }
     }
 }

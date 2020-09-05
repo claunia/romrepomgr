@@ -38,31 +38,40 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" /> <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" /> <RowDefinition Height="*" /> <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
                 <TextBlock Text="{Binding PathLabel}" FontWeight="Bold" /> <TextBlock Text="{Binding FolderPath}" />
             </StackPanel>
-            <CheckBox Grid.Row="1" IsChecked="{Binding AllFilesChecked}" IsEnabled="{Binding IsReady}">
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" /> <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding CategoryLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding Category}" Padding="5" />
+            </Grid>
+            <CheckBox Grid.Row="2" IsChecked="{Binding AllFilesChecked}" IsEnabled="{Binding IsReady}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding AllFilesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
-            <CheckBox Grid.Row="2" IsChecked="{Binding RecursiveChecked}" IsEnabled="{Binding IsReady}">
+            <CheckBox Grid.Row="3" IsChecked="{Binding RecursiveChecked}" IsEnabled="{Binding IsReady}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding RecursiveLabel}" />
                 </CheckBox.Content>
             </CheckBox>
-            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontWeight="Bold" HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="4" Minimum="{Binding ProgressMinimum}" Maximum="{Binding ProgressMaximum}"
+            <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" FontWeight="Bold" HorizontalAlignment="Center" />
+            <ProgressBar Grid.Row="5" Minimum="{Binding ProgressMinimum}" Maximum="{Binding ProgressMaximum}"
                          Value="{Binding ProgressValue}" IsIndeterminate="{Binding ProgressIsIndeterminate}"
                          IsVisible="{Binding ProgressVisible}" />
-            <StackPanel Grid.Row="5" IsVisible="{Binding Progress2Visible}">
+            <StackPanel Grid.Row="6" IsVisible="{Binding Progress2Visible}">
                 <TextBlock Text="{Binding Status2Message}" />
                 <ProgressBar Minimum="{Binding Progress2Minimum}" Maximum="{Binding Progress2Maximum}"
                              Value="{Binding Progress2Value}" IsIndeterminate="{Binding Progress2IsIndeterminate}" />
             </StackPanel>
-            <DataGrid Grid.Row="6" Items="{Binding ImportResults}" HorizontalScrollBarVisibility="Visible"
+            <DataGrid Grid.Row="7" Items="{Binding ImportResults}" HorizontalScrollBarVisibility="Visible"
                       IsVisible="{Binding IsImporting}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Filename}" Width="Auto" IsReadOnly="True">
@@ -77,7 +86,7 @@
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Grid.Row="7" Orientation="Horizontal" IsVisible="{Binding IsReady}" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="8" Orientation="Horizontal" IsVisible="{Binding IsReady}" HorizontalAlignment="Right">
                 <Button HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanClose}"
                         Command="{Binding CloseCommand}">
                     <TextBlock Text="{Binding CloseLabel}" />

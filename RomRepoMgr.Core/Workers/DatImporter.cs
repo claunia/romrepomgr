@@ -43,14 +43,18 @@ namespace RomRepoMgr.Core.Workers
 {
     public sealed class DatImporter
     {
+        readonly string _category;
         readonly string _datFilesPath;
         readonly string _datPath;
         bool            _aborted;
 
-        public DatImporter(string datPath)
+        public DatImporter(string datPath, string category)
         {
             _datPath      = datPath;
             _datFilesPath = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
+
+            if(!string.IsNullOrWhiteSpace(category))
+                _category = category;
         }
 
         public void Import()
@@ -109,7 +113,8 @@ namespace RomRepoMgr.Core.Workers
                     Sha384      = datHash,
                     Version     = datFile.Header.Version,
                     CreatedOn   = DateTime.UtcNow,
-                    UpdatedOn   = DateTime.UtcNow
+                    UpdatedOn   = DateTime.UtcNow,
+                    Category    = _category
                 };
 
                 Context.Singleton.RomSets.Add(romSet);
@@ -747,7 +752,8 @@ namespace RomRepoMgr.Core.Workers
                                    romSet.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
                         MissRoms = romSet.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
                                    romSet.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                   romSet.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                                   romSet.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo)),
+                        Category = _category
                     }
                 });
             }

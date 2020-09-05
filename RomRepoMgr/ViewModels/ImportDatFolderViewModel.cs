@@ -46,6 +46,7 @@ namespace RomRepoMgr.ViewModels
         bool                     _allFilesChecked;
         bool                     _canClose;
         bool                     _canStart;
+        string                   _category;
         string[]                 _datFiles;
         bool                     _isImporting;
         bool                     _isReady;
@@ -76,6 +77,7 @@ namespace RomRepoMgr.ViewModels
         }
 
         public string PathLabel      => Localization.PathLabel;
+        public string CategoryLabel  => Localization.RomSetCategoryLabel;
         public string FolderPath     { get; }
         public string AllFilesLabel  => Localization.AllFilesLabel;
         public string RecursiveLabel => Localization.RecursiveLabel;
@@ -184,6 +186,12 @@ namespace RomRepoMgr.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isImporting, value);
         }
 
+        public string Category
+        {
+            get => _category;
+            set => this.RaiseAndSetIfChanged(ref _category, value);
+        }
+
         [NotNull]
         public string Title => Localization.ImportDatFolderTitle;
 
@@ -286,7 +294,7 @@ namespace RomRepoMgr.ViewModels
             StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
             ProgressValue = _listPosition;
 
-            var _worker = new DatImporter(_datFiles[_listPosition]);
+            var _worker = new DatImporter(_datFiles[_listPosition], Category);
             _worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
             _worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
             _worker.SetMessage               += OnWorkerOnSetMessage;

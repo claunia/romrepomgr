@@ -120,6 +120,8 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Filename);
 
                 entity.HasIndex(e => e.Sha384);
+
+                entity.HasIndex(e => e.Category);
             });
 
             modelBuilder.Entity<Machine>(entity =>

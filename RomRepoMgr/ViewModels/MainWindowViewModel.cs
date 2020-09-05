@@ -73,6 +73,7 @@ namespace RomRepoMgr.ViewModels
         public string RomSetNameLabel => Localization.RomSetNameLabel;
         public string RomSetVersionLabel => Localization.RomSetVersionLabel;
         public string RomSetAuthorLabel => Localization.RomSetAuthorLabel;
+        public string RomSetCategoryLabel => Localization.RomSetCategoryLabel;
         public string RomSetDateLabel => Localization.RomSetDateLabel;
         public string RomSetDescriptionLabel => Localization.RomSetDescriptionLabel;
         public string RomSetCommentLabel => Localization.RomSetCommentLabel;

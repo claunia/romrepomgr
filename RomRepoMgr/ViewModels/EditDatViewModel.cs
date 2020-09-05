@@ -40,6 +40,7 @@ namespace RomRepoMgr.ViewModels
         readonly RomSetModel _romSet;
         readonly EditDat     _view;
         string               _author;
+        string               _category;
         string               _comment;
         string               _date;
         string               _description;
@@ -56,6 +57,7 @@ namespace RomRepoMgr.ViewModels
             _version      = romSet.Version;
             _author       = romSet.Author;
             _comment      = romSet.Comment;
+            _category     = romSet.Category;
             _date         = romSet.Date;
             _description  = romSet.Description;
             _homepage     = romSet.Homepage;
@@ -67,6 +69,7 @@ namespace RomRepoMgr.ViewModels
         public string NameLabel               => Localization.RomSetNameLabel;
         public string VersionLabel            => Localization.RomSetVersionLabel;
         public string AuthorLabel             => Localization.RomSetAuthorLabel;
+        public string CategoryLabel           => Localization.RomSetCategoryLabel;
         public string CommentLabel            => Localization.RomSetCommentLabel;
         public string DateLabel               => Localization.RomSetDateLabel;
         public string DescriptionLabel        => Localization.RomSetDescriptionLabel;
@@ -146,6 +149,18 @@ namespace RomRepoMgr.ViewModels
             }
         }
 
+        public string Category
+        {
+            get => _category;
+            set
+            {
+                if(value != _category)
+                    Modified = true;
+
+                this.RaiseAndSetIfChanged(ref _category, value);
+            }
+        }
+
         public string Date
         {
             get => _date;
@@ -195,6 +210,7 @@ namespace RomRepoMgr.ViewModels
 
             romSetDb.Author      = Author;
             romSetDb.Comment     = Comment;
+            romSetDb.Category    = Category;
             romSetDb.Date        = Date;
             romSetDb.Description = Description;
             romSetDb.Homepage    = Homepage;
@@ -210,6 +226,7 @@ namespace RomRepoMgr.ViewModels
                 {
                     Author             = Author,
                     Comment            = Comment,
+                    Category           = Category,
                     Date               = Date,
                     Description        = Description,
                     Homepage           = Homepage,

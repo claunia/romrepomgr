@@ -69,6 +69,11 @@
                                 <TextBlock Text="{Binding RomSetAuthorLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Category}" Width="Auto" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{Binding RomSetCategoryLabel}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
                         <DataGridTextColumn Binding="{Binding Date}" Width="Auto" IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetDateLabel}" />

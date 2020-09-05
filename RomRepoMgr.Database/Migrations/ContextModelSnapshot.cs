@@ -221,6 +221,8 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.Property<string>("Author").HasColumnType("TEXT");
 
+                b.Property<string>("Category").HasColumnType("TEXT");
+
                 b.Property<string>("Comment").HasColumnType("TEXT");
 
                 b.Property<DateTime>("CreatedOn").HasColumnType("TEXT");
@@ -244,6 +246,8 @@ namespace RomRepoMgr.Database.Migrations
                 b.HasKey("Id");
 
                 b.HasIndex("Author");
+
+                b.HasIndex("Category");
 
                 b.HasIndex("Comment");
 

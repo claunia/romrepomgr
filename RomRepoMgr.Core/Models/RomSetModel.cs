@@ -43,5 +43,6 @@ namespace RomRepoMgr.Core.Models
         public long   HaveRoms           { get; set; }
         public long   MissRoms           { get; set; }
         public long   Id                 { get; set; }
+        public string Category           { get; set; }
     }
 }

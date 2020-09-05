@@ -352,7 +352,8 @@ namespace RomRepoMgr.ViewModels
                                                          r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
                                                          r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                                                         r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo)),
+                                              Category = r.Category
                                           }).ToList()
                     });
 

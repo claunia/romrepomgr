@@ -57,7 +57,7 @@ namespace RomRepoMgr.ViewModels
             IndeterminateProgress            =  true;
             ProgressVisible                  =  false;
             ErrorVisible                     =  false;
-            _worker                          =  new DatImporter(datPath);
+            _worker                          =  new DatImporter(datPath, null);
             _worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
             _worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
             _worker.SetMessage               += OnWorkerOnSetMessage;

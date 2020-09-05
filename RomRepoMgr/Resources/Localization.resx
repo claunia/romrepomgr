@@ -349,4 +349,7 @@ Do you want to delete the file?</value>
   <data name="FilesystemMenuUmountText" xml:space="preserve">
     <value>_Umount</value>
   </data>
+  <data name="RomSetCategoryLabel" xml:space="preserve">
+    <value>Category</value>
+  </data>
 </root>

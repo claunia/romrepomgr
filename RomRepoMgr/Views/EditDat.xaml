@@ -40,7 +40,7 @@
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
@@ -74,11 +74,20 @@
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="{Binding CategoryLabel}" FontWeight="Bold" Padding="5" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{Binding Category}" Padding="5" />
+            </Grid>
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
                            Text="{Binding CommentLabel}" FontWeight="Bold" Padding="5" />
                 <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                          Text="{Binding Comment}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="4">
+            <Grid Grid.Row="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -87,7 +96,7 @@
                 <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Date}"
                          Padding="5" />
             </Grid>
-            <Grid Grid.Row="5">
+            <Grid Grid.Row="6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -96,7 +105,7 @@
                 <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                          Text="{Binding Description}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="6">
+            <Grid Grid.Row="7">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -105,7 +114,7 @@
                 <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                          Text="{Binding Homepage}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="7">
+            <Grid Grid.Row="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -114,7 +123,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding TotalMachines}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="8">
+            <Grid Grid.Row="9">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -123,7 +132,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding CompleteMachines}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="9">
+            <Grid Grid.Row="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -132,7 +141,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding IncompleteMachines}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="10">
+            <Grid Grid.Row="11">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -141,7 +150,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding TotalRoms}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="11">
+            <Grid Grid.Row="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -150,7 +159,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding HaveRoms}" Padding="5" />
             </Grid>
-            <Grid Grid.Row="12">
+            <Grid Grid.Row="13">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -159,7 +168,7 @@
                 <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Text="{Binding MissRoms}" Padding="5" />
             </Grid>
-            <StackPanel Grid.Row="13" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="14" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding SaveCommand}"
                         IsVisible="{Binding Modified}">
                     <TextBlock Text="{Binding SaveLabel}" />
