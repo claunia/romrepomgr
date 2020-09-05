@@ -255,7 +255,7 @@ namespace RomRepoMgr.ViewModels
                     if(!Directory.Exists(dbPathFolder))
                         Directory.CreateDirectory(dbPathFolder);
 
-                    _ = Context.Singleton;
+                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
                     Dispatcher.UIThread.Post(MigrateDatabase);
                 }
@@ -283,7 +283,9 @@ namespace RomRepoMgr.ViewModels
             {
                 try
                 {
-                    Context.Singleton.Database.Migrate();
+                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+                    ctx.Database.Migrate();
 
                     Dispatcher.UIThread.Post(LoadRomSets);
                 }
@@ -311,50 +313,52 @@ namespace RomRepoMgr.ViewModels
             {
                 try
                 {
+                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
                     GotRomSets?.Invoke(this, new RomSetsEventArgs
                     {
-                        RomSets = Context.Singleton.RomSets.OrderBy(r => r.Name).ThenBy(r => r.Version).
-                                          ThenBy(r => r.Date).ThenBy(r => r.Description).ThenBy(r => r.Comment).
-                                          ThenBy(r => r.Filename).Select(r => new RomSetModel
-                                          {
-                                              Id = r.Id,
-                                              Author = r.Author,
-                                              Comment = r.Comment,
-                                              Date = r.Date,
-                                              Description = r.Description,
-                                              Filename = r.Filename,
-                                              Homepage = r.Homepage,
-                                              Name = r.Name,
-                                              Sha384 = r.Sha384,
-                                              Version = r.Version,
-                                              TotalMachines = r.Machines.Count,
-                                              CompleteMachines =
-                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
-                                                                        m.Files.All(f => f.File.IsInRepo)) +
-                                                  r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
-                                                                        m.Disks.All(f => f.Disk.IsInRepo)) +
-                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
-                                                                        m.Files.All(f => f.File.IsInRepo) &&
-                                                                        m.Disks.All(f => f.Disk.IsInRepo)),
-                                              IncompleteMachines =
-                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
-                                                                        m.Files.Any(f => !f.File.IsInRepo)) +
-                                                  r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
-                                                                        m.Disks.Any(f => !f.Disk.IsInRepo)) +
-                                                  r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
-                                                                        (m.Files.Any(f => !f.File.IsInRepo) ||
-                                                                         m.Disks.Any(f => !f.Disk.IsInRepo))),
-                                              TotalRoms = r.Machines.Sum(m => m.Files.Count) +
-                                                          r.Machines.Sum(m => m.Disks.Count) +
-                                                          r.Machines.Sum(m => m.Medias.Count),
-                                              HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
-                                              MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                                         r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo)),
-                                              Category = r.Category
-                                          }).ToList()
+                        RomSets = ctx.RomSets.OrderBy(r => r.Name).ThenBy(r => r.Version).ThenBy(r => r.Date).
+                                      ThenBy(r => r.Description).ThenBy(r => r.Comment).ThenBy(r => r.Filename).
+                                      Select(r => new RomSetModel
+                                      {
+                                          Id = r.Id,
+                                          Author = r.Author,
+                                          Comment = r.Comment,
+                                          Date = r.Date,
+                                          Description = r.Description,
+                                          Filename = r.Filename,
+                                          Homepage = r.Homepage,
+                                          Name = r.Name,
+                                          Sha384 = r.Sha384,
+                                          Version = r.Version,
+                                          TotalMachines = r.Machines.Count,
+                                          CompleteMachines =
+                                              r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                                    m.Files.All(f => f.File.IsInRepo)) +
+                                              r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                                    m.Disks.All(f => f.Disk.IsInRepo)) +
+                                              r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                                                    m.Files.All(f => f.File.IsInRepo) &&
+                                                                    m.Disks.All(f => f.Disk.IsInRepo)),
+                                          IncompleteMachines =
+                                              r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                                                    m.Files.Any(f => !f.File.IsInRepo)) +
+                                              r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                                                    m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                                              r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                                                    (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                     m.Disks.Any(f => !f.Disk.IsInRepo))),
+                                          TotalRoms = r.Machines.Sum(m => m.Files.Count) +
+                                                      r.Machines.Sum(m => m.Disks.Count) +
+                                                      r.Machines.Sum(m => m.Medias.Count),
+                                          HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                                     r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                                     r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                                          MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                                     r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                                     r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo)),
+                                          Category = r.Category
+                                      }).ToList()
                     });
 
                     Dispatcher.UIThread.Post(LoadMainWindow);

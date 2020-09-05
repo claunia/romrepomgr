@@ -321,10 +321,7 @@ namespace RomRepoMgr.ViewModels
         void ExecuteSaveCommand()
         {
             if(_databaseChanged)
-            {
                 Settings.Settings.Current.DatabasePath = DatabasePath;
-                Context.ReplaceSingleton(DatabasePath);
-            }
 
             if(_repositoryChanged)
                 Settings.Settings.Current.RepositoryPath = RepositoryPath;

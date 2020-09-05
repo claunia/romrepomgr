@@ -203,7 +203,9 @@ namespace RomRepoMgr.ViewModels
 
         async void ExecuteSaveCommand()
         {
-            RomSet romSetDb = await Context.Singleton.RomSets.FindAsync(_romSet.Id);
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            RomSet romSetDb = await ctx.RomSets.FindAsync(_romSet.Id);
 
             if(romSetDb == null)
                 return;
@@ -218,7 +220,7 @@ namespace RomRepoMgr.ViewModels
             romSetDb.Version     = Version;
             romSetDb.UpdatedOn   = DateTime.UtcNow;
 
-            await Context.Singleton.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
 
             RomSetModified?.Invoke(this, new RomSetEventArgs
             {

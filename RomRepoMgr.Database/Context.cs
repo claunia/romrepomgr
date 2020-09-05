@@ -23,36 +23,15 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
-using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RomRepoMgr.Database.Models;
-using RomRepoMgr.Database.Resources;
 
 namespace RomRepoMgr.Database
 {
     public sealed class Context : DbContext
     {
-        static Context _singleton;
-
         public Context(DbContextOptions options) : base(options) {}
-
-        public static Context Singleton
-        {
-            get
-            {
-                if(_singleton != null)
-                    return _singleton;
-
-                if(Settings.Settings.Current?.DatabasePath is null)
-                    throw new ArgumentNullException(nameof(Settings.Settings.Current.DatabasePath),
-                                                    Localization.Settings_not_initialized);
-
-                _singleton = Create(Settings.Settings.Current.DatabasePath);
-
-                return _singleton;
-            }
-        }
 
         public DbSet<DbFile>         Files            { get; set; }
         public DbSet<RomSet>         RomSets          { get; set; }
@@ -62,8 +41,6 @@ namespace RomRepoMgr.Database
         public DbSet<DiskByMachine>  DisksByMachines  { get; set; }
         public DbSet<DbMedia>        Medias           { get; set; }
         public DbSet<MediaByMachine> MediasByMachines { get; set; }
-
-        public static void ReplaceSingleton(string dbPath) => _singleton = Create(dbPath);
 
         public static Context Create(string dbPath)
         {

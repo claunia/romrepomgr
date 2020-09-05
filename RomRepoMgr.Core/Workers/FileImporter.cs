@@ -19,6 +19,7 @@ namespace RomRepoMgr.Core.Workers
     public class FileImporter
     {
         const    long                        BUFFER_SIZE = 131072;
+        readonly Context                     _ctx;
         readonly bool                        _deleteAfterImport;
         readonly List<DbDisk>                _newDisks;
         readonly List<DbFile>                _newFiles;
@@ -48,6 +49,7 @@ namespace RomRepoMgr.Core.Workers
             _onlyKnown             = onlyKnown;
             _deleteAfterImport     = deleteAfterImport;
             _position              = 0;
+            _ctx                   = Context.Create(Settings.Settings.Current.DatabasePath);
         }
 
         public event EventHandler                           SetIndeterminateProgress2;
@@ -355,13 +357,13 @@ namespace RomRepoMgr.Core.Workers
 
                 bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
-                dbFile ??= Context.Singleton.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
-                                                                        f.Sha384 == checksums[ChecksumType.Sha384] ||
-                                                                        f.Sha256 == checksums[ChecksumType.Sha256] ||
-                                                                        f.Sha1   == checksums[ChecksumType.Sha1]   ||
-                                                                        f.Md5    == checksums[ChecksumType.Md5]    ||
-                                                                        f.Crc32  == checksums[ChecksumType.Crc32]) &&
-                                                                       f.Size == uSize);
+                dbFile ??= _ctx.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
+                                                           f.Sha384 == checksums[ChecksumType.Sha384] ||
+                                                           f.Sha256 == checksums[ChecksumType.Sha256] ||
+                                                           f.Sha1   == checksums[ChecksumType.Sha1]   ||
+                                                           f.Md5    == checksums[ChecksumType.Md5]    ||
+                                                           f.Crc32  == checksums[ChecksumType.Crc32]) &&
+                                                          f.Size == uSize);
 
                 if(dbFile == null)
                 {
@@ -634,8 +636,8 @@ namespace RomRepoMgr.Core.Workers
                    md5 != null)
                     knownDisk = _pendingDisksByMd5.TryGetValue(md5, out dbDisk);
 
-                dbDisk ??= Context.Singleton.Disks.FirstOrDefault(d => (d.Sha1 != null && d.Sha1 == sha1) ||
-                                                                       (d.Md5  != null && d.Md5  == sha1));
+                dbDisk ??= _ctx.Disks.FirstOrDefault(d => (d.Sha1 != null && d.Sha1 == sha1) ||
+                                                          (d.Md5  != null && d.Md5  == sha1));
 
                 if(dbDisk == null)
                 {
@@ -937,9 +939,9 @@ namespace RomRepoMgr.Core.Workers
                    md5 != null)
                     knownMedia = _pendingMediasByMd5.TryGetValue(md5, out dbMedia);
 
-                dbMedia ??= Context.Singleton.Medias.FirstOrDefault(d => (d.Sha256 != null && d.Sha256 == sha256) ||
-                                                                         (d.Sha1   != null && d.Sha1   == sha1)   ||
-                                                                         (d.Md5    != null && d.Md5    == sha1));
+                dbMedia ??= _ctx.Medias.FirstOrDefault(d => (d.Sha256 != null && d.Sha256 == sha256) ||
+                                                            (d.Sha1   != null && d.Sha1   == sha1)   ||
+                                                            (d.Md5    != null && d.Md5    == sha1));
 
                 if(dbMedia == null)
                 {
@@ -1179,9 +1181,9 @@ namespace RomRepoMgr.Core.Workers
                 Message = Localization.SavingChangesToDatabase
             });
 
-            Context.Singleton.Files.AddRange(_newFiles);
-            Context.Singleton.Disks.AddRange(_newDisks);
-            Context.Singleton.SaveChanges();
+            _ctx.Files.AddRange(_newFiles);
+            _ctx.Disks.AddRange(_newDisks);
+            _ctx.SaveChanges();
 
             _newFiles.Clear();
             _newDisks.Clear();

@@ -59,20 +59,22 @@ namespace RomRepoMgr.ViewModels
 
         internal void OnOpened() => Task.Run(() =>
         {
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.RetrievingRomSetFromDatabase);
 
-            RomSet romSet = Context.Singleton.RomSets.Find(_romSetId);
+            RomSet romSet = ctx.RomSets.Find(_romSetId);
 
             if(romSet == null)
                 return;
 
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingRomSetFromDatabase);
 
-            Context.Singleton.RomSets.Remove(romSet);
+            ctx.RomSets.Remove(romSet);
 
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.SavingChangesToDatabase);
 
-            Context.Singleton.SaveChanges();
+            ctx.SaveChanges();
 
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingDatFileFromRepo);
 

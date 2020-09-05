@@ -61,6 +61,8 @@ namespace RomRepoMgr.Core.Workers
         {
             try
             {
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
                 SetMessage?.Invoke(this, new MessageEventArgs
@@ -117,8 +119,8 @@ namespace RomRepoMgr.Core.Workers
                     Category    = _category
                 };
 
-                Context.Singleton.RomSets.Add(romSet);
-                Context.Singleton.SaveChanges();
+                ctx.RomSets.Add(romSet);
+                ctx.SaveChanges();
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
@@ -170,7 +172,7 @@ namespace RomRepoMgr.Core.Workers
 
                     machines[name] = machine;
 
-                    Context.Singleton.Machines.Add(machine);
+                    ctx.Machines.Add(machine);
                     position++;
                 }
 
@@ -181,7 +183,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                Context.Singleton.SaveChanges();
+                ctx.SaveChanges();
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
@@ -339,14 +341,13 @@ namespace RomRepoMgr.Core.Workers
                             file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
                     }
 
-                    file ??=
-                        Context.Singleton.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
-                                                                     (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
-                                                                     (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
-                                                                     (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
-                                                                     (rom.MD5    != null && f.Md5    == rom.MD5)    ||
-                                                                     (rom.CRC    != null && f.Crc32  == rom.CRC)) &&
-                                                                    f.Size == uSize);
+                    file ??= ctx.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
+                                                            (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
+                                                            (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
+                                                            (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
+                                                            (rom.MD5    != null && f.Md5    == rom.MD5)    ||
+                                                            (rom.CRC    != null && f.Crc32  == rom.CRC)) &&
+                                                           f.Size == uSize);
 
                     if(file == null)
                     {
@@ -440,10 +441,10 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                Context.Singleton.Files.AddRange(newFiles);
-                Context.Singleton.FilesByMachines.AddRange(newFilesByMachine);
+                ctx.Files.AddRange(newFiles);
+                ctx.FilesByMachines.AddRange(newFilesByMachine);
 
-                Context.Singleton.SaveChanges();
+                ctx.SaveChanges();
 
                 pendingFilesBySha512.Clear();
                 pendingFilesBySha384.Clear();
@@ -508,8 +509,8 @@ namespace RomRepoMgr.Core.Workers
                        dbDisk   == null)
                         pendingDisksByMd5.TryGetValue(disk.MD5, out dbDisk);
 
-                    dbDisk ??= Context.Singleton.Disks.FirstOrDefault(f => (disk.SHA1 != null && f.Sha1 == disk.SHA1) ||
-                                                                           (disk.MD5  != null && f.Md5  == disk.MD5));
+                    dbDisk ??= ctx.Disks.FirstOrDefault(f => (disk.SHA1 != null && f.Sha1 == disk.SHA1) ||
+                                                             (disk.MD5  != null && f.Md5  == disk.MD5));
 
                     if(dbDisk == null)
                     {
@@ -561,10 +562,10 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                Context.Singleton.Disks.AddRange(newDisks);
-                Context.Singleton.DisksByMachines.AddRange(newDisksByMachine);
+                ctx.Disks.AddRange(newDisks);
+                ctx.DisksByMachines.AddRange(newDisksByMachine);
 
-                Context.Singleton.SaveChanges();
+                ctx.SaveChanges();
 
                 pendingDisksBySha1.Clear();
                 pendingDisksByMd5.Clear();
@@ -630,12 +631,9 @@ namespace RomRepoMgr.Core.Workers
                        dbMedia   == null)
                         pendingMediasByMd5.TryGetValue(media.MD5, out dbMedia);
 
-                    dbMedia ??=
-                        Context.Singleton.Medias.FirstOrDefault(f =>
-                                                                    (media.SHA256 != null &&
-                                                                     f.Sha256     == media.SHA256)               ||
-                                                                    (media.SHA1 != null && f.Sha1 == media.SHA1) ||
-                                                                    (media.MD5  != null && f.Md5  == media.MD5));
+                    dbMedia ??= ctx.Medias.FirstOrDefault(f => (media.SHA256 != null && f.Sha256 == media.SHA256) ||
+                                                               (media.SHA1   != null && f.Sha1   == media.SHA1)   ||
+                                                               (media.MD5    != null && f.Md5    == media.MD5));
 
                     // TODO: SpamSum
                     if(dbMedia == null)
@@ -699,10 +697,10 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                Context.Singleton.Medias.AddRange(newMedias);
-                Context.Singleton.MediasByMachines.AddRange(newMediasByMachine);
+                ctx.Medias.AddRange(newMedias);
+                ctx.MediasByMachines.AddRange(newMediasByMachine);
 
-                Context.Singleton.SaveChanges();
+                ctx.SaveChanges();
 
                 pendingMediasBySha256.Clear();
                 pendingMediasBySha1.Clear();
@@ -712,7 +710,7 @@ namespace RomRepoMgr.Core.Workers
 
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
 
-                romSet = Context.Singleton.RomSets.Find(romSet.Id);
+                romSet = ctx.RomSets.Find(romSet.Id);
 
                 RomSetAdded?.Invoke(this, new RomSetEventArgs
                 {

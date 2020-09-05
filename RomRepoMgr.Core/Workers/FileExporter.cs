@@ -50,7 +50,9 @@ namespace RomRepoMgr.Core.Workers
                 Message = Localization.RetrievingRomSetFromDatabase
             });
 
-            RomSet romSet = Context.Singleton.RomSets.Find(_romSetId);
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+            RomSet romSet = ctx.RomSets.Find(_romSetId);
 
             if(romSet == null)
             {
@@ -69,7 +71,7 @@ namespace RomRepoMgr.Core.Workers
                 Message = Localization.ExportingRoms
             });
 
-            _machines = Context.Singleton.Machines.Where(m => m.RomSet.Id == _romSetId).ToArray();
+            _machines = ctx.Machines.Where(m => m.RomSet.Id == _romSetId).ToArray();
 
             SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
             {
@@ -107,12 +109,14 @@ namespace RomRepoMgr.Core.Workers
                 Message = machine.Name
             });
 
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
             string machineName = machine.Name;
 
-            Dictionary<string, MediaByMachine> mediasByMachine = Context.Singleton.MediasByMachines.
-                                                                         Where(f => f.Machine.Id == machine.Id &&
-                                                                                   f.Media.IsInRepo).
-                                                                         ToDictionary(f => f.Name);
+            Dictionary<string, MediaByMachine> mediasByMachine = ctx.MediasByMachines.
+                                                                     Where(f => f.Machine.Id == machine.Id &&
+                                                                               f.Media.IsInRepo).
+                                                                     ToDictionary(f => f.Name);
 
             if(mediasByMachine.Count > 0)
             {
@@ -312,10 +316,10 @@ namespace RomRepoMgr.Core.Workers
                 }
             }
 
-            Dictionary<string, DiskByMachine> disksByMachine = Context.Singleton.DisksByMachines.
-                                                                       Where(f => f.Machine.Id == machine.Id &&
-                                                                                 f.Disk.IsInRepo).
-                                                                       ToDictionary(f => f.Name);
+            Dictionary<string, DiskByMachine> disksByMachine = ctx.DisksByMachines.
+                                                                   Where(f => f.Machine.Id == machine.Id &&
+                                                                              f.Disk.IsInRepo).
+                                                                   ToDictionary(f => f.Name);
 
             if(disksByMachine.Count > 0)
             {
@@ -476,9 +480,8 @@ namespace RomRepoMgr.Core.Workers
                 }
             }
 
-            _filesByMachine = Context.Singleton.FilesByMachines.
-                                      Where(f => f.Machine.Id == machine.Id && f.File.IsInRepo).
-                                      ToDictionary(f => f.Name);
+            _filesByMachine = ctx.FilesByMachines.Where(f => f.Machine.Id == machine.Id && f.File.IsInRepo).
+                                  ToDictionary(f => f.Name);
 
             if(_filesByMachine.Count == 0)
             {
