@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Aaru.Checksums;
+using EFCore.BulkExtensions;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
@@ -165,14 +166,13 @@ namespace RomRepoMgr.Core.Workers
                     var machine = new Machine
                     {
                         Name      = name,
-                        RomSet    = romSet,
+                        RomSetId  = romSet.Id,
                         CreatedOn = DateTime.UtcNow,
                         UpdatedOn = DateTime.UtcNow
                     };
 
                     machines[name] = machine;
 
-                    ctx.Machines.Add(machine);
                     position++;
                 }
 
@@ -183,6 +183,7 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
+                ctx.BulkInsert(machines.Values.ToList(), b => b.SetOutputIdentity = true);
                 ctx.SaveChanges();
 
                 SetMessage?.Invoke(this, new MessageEventArgs
@@ -441,8 +442,15 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                ctx.Files.AddRange(newFiles);
-                ctx.FilesByMachines.AddRange(newFilesByMachine);
+                ctx.BulkInsert(newFiles, b => b.SetOutputIdentity = true);
+
+                foreach(FileByMachine fbm in newFilesByMachine)
+                {
+                    fbm.FileId    = fbm.File.Id;
+                    fbm.MachineId = fbm.Machine.Id;
+                }
+
+                ctx.BulkInsert(newFilesByMachine);
 
                 ctx.SaveChanges();
 
@@ -562,8 +570,15 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                ctx.Disks.AddRange(newDisks);
-                ctx.DisksByMachines.AddRange(newDisksByMachine);
+                ctx.BulkInsert(newDisks, b => b.SetOutputIdentity = true);
+
+                foreach(DiskByMachine dbm in newDisksByMachine)
+                {
+                    dbm.DiskId    = dbm.Disk.Id;
+                    dbm.MachineId = dbm.Machine.Id;
+                }
+
+                ctx.BulkInsert(newDisksByMachine);
 
                 ctx.SaveChanges();
 
@@ -697,8 +712,15 @@ namespace RomRepoMgr.Core.Workers
 
                 SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-                ctx.Medias.AddRange(newMedias);
-                ctx.MediasByMachines.AddRange(newMediasByMachine);
+                ctx.BulkInsert(newMedias, b => b.SetOutputIdentity = true);
+
+                foreach(MediaByMachine mbm in newMediasByMachine)
+                {
+                    mbm.MediaId   = mbm.Media.Id;
+                    mbm.MachineId = mbm.Machine.Id;
+                }
+
+                ctx.BulkInsert(newMediasByMachine);
 
                 ctx.SaveChanges();
 

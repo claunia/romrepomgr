@@ -36,6 +36,8 @@ namespace RomRepoMgr.Database.Models
         [Required]
         public virtual Machine Machine { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Name { get;     set; }
+        public ulong MediaId   { get; set; }
+        public ulong MachineId { get; set; }
     }
 }

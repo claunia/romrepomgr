@@ -33,9 +33,10 @@ namespace RomRepoMgr.Database.Models
         [Required]
         public string Name { get; set; }
         [Required]
-        public virtual RomSet RomSet { get;                      set; }
-        public virtual ICollection<FileByMachine>  Files  { get; set; }
-        public virtual ICollection<DiskByMachine>  Disks  { get; set; }
-        public virtual ICollection<MediaByMachine> Medias { get; set; }
+        public virtual RomSet RomSet { get;                        set; }
+        public virtual ICollection<FileByMachine>  Files    { get; set; }
+        public virtual ICollection<DiskByMachine>  Disks    { get; set; }
+        public virtual ICollection<MediaByMachine> Medias   { get; set; }
+        public         long                        RomSetId { get; set; }
     }
 }
