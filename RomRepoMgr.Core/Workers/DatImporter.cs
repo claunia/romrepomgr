@@ -25,12 +25,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using Aaru.Checksums;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
@@ -196,31 +198,339 @@ namespace RomRepoMgr.Core.Workers
                 List<Disk>  disks  = new List<Disk>();
                 List<Media> medias = new List<Media>();
 
-                foreach(List<DatItem> values in datFile.Items.Values)
+                string tmpRomCrc32Table    = Guid.NewGuid().ToString();
+                string tmpRomMd5Table      = Guid.NewGuid().ToString();
+                string tmpRomSha1Table     = Guid.NewGuid().ToString();
+                string tmpRomSha256Table   = Guid.NewGuid().ToString();
+                string tmpRomSha384Table   = Guid.NewGuid().ToString();
+                string tmpRomSha512Table   = Guid.NewGuid().ToString();
+                string tmpDiskMd5Table     = Guid.NewGuid().ToString();
+                string tmpDiskSha1Table    = Guid.NewGuid().ToString();
+                string tmpMediaMd5Table    = Guid.NewGuid().ToString();
+                string tmpMediaSha1Table   = Guid.NewGuid().ToString();
+                string tmpMediaSha256Table = Guid.NewGuid().ToString();
+
+                DbConnection dbConnection = ctx.Database.GetDbConnection();
+                dbConnection.Open();
+
+                position = 0;
+
+                SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
                 {
-                    foreach(DatItem item in values)
+                    Minimum = 0,
+                    Maximum = datFile.Items.Values.Count
+                });
+
+                using(DbTransaction dbTransaction = dbConnection.BeginTransaction())
+                {
+                    DbCommand dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomCrc32Table}\" (\"Size\" INTEGER NOT NULL, \"Crc32\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomMd5Table}\" (\"Size\" INTEGER NOT NULL, \"Md5\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomSha1Table}\" (\"Size\" INTEGER NOT NULL, \"Sha1\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomSha256Table}\" (\"Size\" INTEGER NOT NULL, \"Sha256\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomSha384Table}\" (\"Size\" INTEGER NOT NULL, \"Sha384\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc = dbConnection.CreateCommand();
+
+                    dbcc.CommandText =
+                        $"CREATE TABLE \"{tmpRomSha512Table}\" (\"Size\" INTEGER NOT NULL, \"Sha512\" TEXT NOT NULL);";
+
+                    dbcc.ExecuteNonQuery();
+                    dbcc             = dbConnection.CreateCommand();
+                    dbcc.CommandText = $"CREATE TABLE \"{tmpDiskMd5Table}\" (\"Md5\" TEXT NOT NULL);";
+                    dbcc.ExecuteNonQuery();
+                    dbcc             = dbConnection.CreateCommand();
+                    dbcc.CommandText = $"CREATE TABLE \"{tmpDiskSha1Table}\" (\"Sha1\" TEXT NOT NULL);";
+                    dbcc.ExecuteNonQuery();
+                    dbcc             = dbConnection.CreateCommand();
+                    dbcc.CommandText = $"CREATE TABLE \"{tmpMediaMd5Table}\" (\"Md5\" TEXT NOT NULL);";
+                    dbcc.ExecuteNonQuery();
+                    dbcc             = dbConnection.CreateCommand();
+                    dbcc.CommandText = $"CREATE TABLE \"{tmpMediaSha1Table}\" (\"Sha1\" TEXT NOT NULL);";
+                    dbcc.ExecuteNonQuery();
+                    dbcc             = dbConnection.CreateCommand();
+                    dbcc.CommandText = $"CREATE TABLE \"{tmpMediaSha256Table}\" (\"Sha256\" TEXT NOT NULL);";
+                    dbcc.ExecuteNonQuery();
+
+                    foreach(List<DatItem> values in datFile.Items.Values)
                     {
-                        switch(item)
+                        SetProgress?.Invoke(this, new ProgressEventArgs
                         {
-                            case Rom rom:
-                                roms.Add(rom);
+                            Value = position
+                        });
 
-                                continue;
-                            case Disk disk:
-                                disks.Add(disk);
+                        foreach(DatItem item in values)
+                        {
+                            switch(item)
+                            {
+                                case Rom rom:
+                                    if(rom.CRC != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
 
-                                continue;
-                            case Media media:
-                                medias.Add(media);
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomCrc32Table}\" (\"Size\", \"Crc32\") VALUES (\"{(ulong)rom.Size}\", \"{rom.CRC}\");";
 
-                                continue;
-                            default:
-                                Console.WriteLine(item);
+                                        dbcc.ExecuteNonQuery();
+                                    }
 
-                                continue;
+                                    if(rom.MD5 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomMd5Table}\" (\"Size\", \"Md5\") VALUES (\"{(ulong)rom.Size}\", \"{rom.MD5}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(rom.SHA1 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomSha1Table}\" (\"Size\", \"Sha1\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA1}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(rom.SHA256 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomSha256Table}\" (\"Size\", \"Sha256\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA256}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(rom.SHA384 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomSha384Table}\" (\"Size\", \"Sha384\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA384}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(rom.SHA512 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpRomSha512Table}\" (\"Size\", \"Sha512\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA512}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    roms.Add(rom);
+
+                                    continue;
+                                case Disk disk:
+                                    if(disk.MD5 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpDiskMd5Table}\" (\"Md5\") VALUES (\"{disk.MD5}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(disk.SHA1 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpDiskSha1Table}\" (\"Sha1\") VALUES (\"{disk.SHA1}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    disks.Add(disk);
+
+                                    continue;
+                                case Media media:
+                                    if(media.MD5 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpMediaMd5Table}\" (\"Md5\") VALUES (\"{media.MD5}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(media.SHA1 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpMediaSha1Table}\" (\"Sha1\") VALUES (\"{media.SHA1}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    if(media.SHA256 != null)
+                                    {
+                                        dbcc = dbConnection.CreateCommand();
+
+                                        dbcc.CommandText =
+                                            $"INSERT INTO \"{tmpMediaSha256Table}\" (\"Sha256\") VALUES (\"{media.SHA256}\");";
+
+                                        dbcc.ExecuteNonQuery();
+                                    }
+
+                                    medias.Add(media);
+
+                                    continue;
+                                default:
+                                    Console.WriteLine(item);
+
+                                    continue;
+                            }
                         }
+
+                        position++;
                     }
+
+                    SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+                    dbTransaction.Commit();
                 }
+
+                List<DbFile> pendingFilesByCrcList = ctx.Files.
+                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Size = t.Size AND f.Crc32 = t.Crc32").
+                                                         ToList();
+
+                List<DbFile> pendingFilesByMd5List = ctx.Files.
+                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Size = t.Size AND f.Md5 = t.Md5").
+                                                         ToList();
+
+                List<DbFile> pendingFilesBySha1List = ctx.Files.
+                                                          FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Size = t.Size AND f.Sha1 = t.Sha1").
+                                                          ToList();
+
+                List<DbFile> pendingFilesBySha256List = ctx.Files.
+                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Size = t.Size AND f.Sha256 = t.Sha256").
+                                                            ToList();
+
+                List<DbFile> pendingFilesBySha384List = ctx.Files.
+                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Size = t.Size AND f.Sha384 = t.Sha384").
+                                                            ToList();
+
+                List<DbFile> pendingFilesBySha512List = ctx.Files.
+                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Size = t.Size AND f.Sha512 = t.Sha512").
+                                                            ToList();
+
+                Dictionary<string, DbDisk> pendingDisksByMd5 = ctx.Disks.
+                                                                   FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5").
+                                                                   ToDictionary(f => f.Md5);
+
+                Dictionary<string, DbDisk> pendingDisksBySha1 = ctx.Disks.
+                                                                    FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
+                                                                    ToDictionary(f => f.Sha1);
+
+                Dictionary<string, DbMedia> pendingMediasByMd5 = ctx.Medias.
+                                                                     FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5").
+                                                                     ToDictionary(f => f.Md5);
+
+                Dictionary<string, DbMedia> pendingMediasBySha1 = ctx.Medias.
+                                                                      FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
+                                                                      ToDictionary(f => f.Sha1);
+
+                Dictionary<string, DbMedia> pendingMediasBySha256 = ctx.Medias.
+                                                                        FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256").
+                                                                        ToDictionary(f => f.Sha256);
+
+                Dictionary<string, DbFile> pendingFilesByCrc    = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesByMd5    = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha1   = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha256 = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha384 = new Dictionary<string, DbFile>();
+                Dictionary<string, DbFile> pendingFilesBySha512 = new Dictionary<string, DbFile>();
+                List<DbFile>               pendingFiles         = new List<DbFile>();
+
+                // This is because of hash collisions.
+                foreach(DbFile item in pendingFilesByCrcList)
+                    if(pendingFilesByCrc.ContainsKey(item.Crc32))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesByCrc[item.Crc32] = item;
+
+                foreach(DbFile item in pendingFilesByMd5List)
+                    if(pendingFilesByMd5.ContainsKey(item.Md5))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesByMd5[item.Md5] = item;
+
+                foreach(DbFile item in pendingFilesBySha1List)
+                    if(pendingFilesBySha1.ContainsKey(item.Sha1))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesBySha1[item.Sha1] = item;
+
+                foreach(DbFile item in pendingFilesBySha256List)
+                    if(pendingFilesBySha256.ContainsKey(item.Sha256))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesBySha256[item.Sha256] = item;
+
+                foreach(DbFile item in pendingFilesBySha384List)
+                    if(pendingFilesBySha384.ContainsKey(item.Sha384))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesBySha384[item.Sha384] = item;
+
+                foreach(DbFile item in pendingFilesBySha512List)
+                    if(pendingFilesBySha512.ContainsKey(item.Sha512))
+                        pendingFiles.Add(item);
+                    else
+                        pendingFilesBySha512[item.Sha512] = item;
+
+                // Clear some memory
+                pendingFilesByCrcList.Clear();
+                pendingFilesByMd5List.Clear();
+                pendingFilesBySha1List.Clear();
+                pendingFilesBySha256List.Clear();
+                pendingFilesBySha384List.Clear();
+                pendingFilesBySha512List.Clear();
+
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomCrc32Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomMd5Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha1Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha256Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha384Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha512Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskMd5Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskSha1Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaMd5Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha1Table}]");
+                ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha256Table}]");
 
                 SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
                 {
@@ -235,15 +545,8 @@ namespace RomRepoMgr.Core.Workers
 
                 position = 0;
 
-                Dictionary<string, DbFile> pendingFilesBySha512 = new Dictionary<string, DbFile>();
-                Dictionary<string, DbFile> pendingFilesBySha384 = new Dictionary<string, DbFile>();
-                Dictionary<string, DbFile> pendingFilesBySha256 = new Dictionary<string, DbFile>();
-                Dictionary<string, DbFile> pendingFilesBySha1   = new Dictionary<string, DbFile>();
-                Dictionary<string, DbFile> pendingFilesByMd5    = new Dictionary<string, DbFile>();
-                Dictionary<string, DbFile> pendingFilesByCrc    = new Dictionary<string, DbFile>();
-                List<DbFile>               pendingFiles         = new List<DbFile>();
-                List<DbFile>               newFiles             = new List<DbFile>();
-                List<FileByMachine>        newFilesByMachine    = new List<FileByMachine>();
+                List<DbFile>        newFiles          = new List<DbFile>();
+                List<FileByMachine> newFilesByMachine = new List<FileByMachine>();
 
                 foreach(Rom rom in roms)
                 {
@@ -346,14 +649,6 @@ namespace RomRepoMgr.Core.Workers
                            rom.CRC != null)
                             file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
                     }
-
-                    file ??= ctx.Files.FirstOrDefault(f => ((rom.SHA512 != null && f.Sha512 == rom.SHA512) ||
-                                                            (rom.SHA384 != null && f.Sha384 == rom.SHA384) ||
-                                                            (rom.SHA256 != null && f.Sha256 == rom.SHA256) ||
-                                                            (rom.SHA1   != null && f.Sha1   == rom.SHA1)   ||
-                                                            (rom.MD5    != null && f.Md5    == rom.MD5)    ||
-                                                            (rom.CRC    != null && f.Crc32  == rom.CRC)) &&
-                                                           f.Size == uSize);
 
                     if(file == null)
                     {
@@ -509,10 +804,8 @@ namespace RomRepoMgr.Core.Workers
 
                 position = 0;
 
-                Dictionary<string, DbDisk> pendingDisksBySha1 = new Dictionary<string, DbDisk>();
-                Dictionary<string, DbDisk> pendingDisksByMd5  = new Dictionary<string, DbDisk>();
-                List<DbDisk>               newDisks           = new List<DbDisk>();
-                List<DiskByMachine>        newDisksByMachine  = new List<DiskByMachine>();
+                List<DbDisk>        newDisks          = new List<DbDisk>();
+                List<DiskByMachine> newDisksByMachine = new List<DiskByMachine>();
 
                 foreach(Disk disk in disks)
                 {
@@ -548,9 +841,6 @@ namespace RomRepoMgr.Core.Workers
                     if(disk.MD5 != null &&
                        dbDisk   == null)
                         pendingDisksByMd5.TryGetValue(disk.MD5, out dbDisk);
-
-                    dbDisk ??= ctx.Disks.FirstOrDefault(f => (disk.SHA1 != null && f.Sha1 == disk.SHA1) ||
-                                                             (disk.MD5  != null && f.Md5  == disk.MD5));
 
                     if(dbDisk == null)
                     {
@@ -632,11 +922,8 @@ namespace RomRepoMgr.Core.Workers
 
                 position = 0;
 
-                Dictionary<string, DbMedia> pendingMediasBySha256 = new Dictionary<string, DbMedia>();
-                Dictionary<string, DbMedia> pendingMediasBySha1   = new Dictionary<string, DbMedia>();
-                Dictionary<string, DbMedia> pendingMediasByMd5    = new Dictionary<string, DbMedia>();
-                List<DbMedia>               newMedias             = new List<DbMedia>();
-                List<MediaByMachine>        newMediasByMachine    = new List<MediaByMachine>();
+                List<DbMedia>        newMedias          = new List<DbMedia>();
+                List<MediaByMachine> newMediasByMachine = new List<MediaByMachine>();
 
                 foreach(Media media in medias)
                 {
@@ -677,10 +964,6 @@ namespace RomRepoMgr.Core.Workers
                     if(media.MD5 != null &&
                        dbMedia   == null)
                         pendingMediasByMd5.TryGetValue(media.MD5, out dbMedia);
-
-                    dbMedia ??= ctx.Medias.FirstOrDefault(f => (media.SHA256 != null && f.Sha256 == media.SHA256) ||
-                                                               (media.SHA1   != null && f.Sha1   == media.SHA1)   ||
-                                                               (media.MD5    != null && f.Md5    == media.MD5));
 
                     // TODO: SpamSum
                     if(dbMedia == null)
