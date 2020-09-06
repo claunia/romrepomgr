@@ -276,7 +276,7 @@ namespace RomRepoMgr.Core.Filesystem
                         (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
                     IndexNumber    = file.Id,
                     LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                    LastWriteTime  = (ulong)file.UpdatedOn.ToFileTimeUtc()
+                    LastWriteTime  = (ulong)(file.FileLastModification?.ToFileTimeUtc() ?? file.UpdatedOn.ToFileTimeUtc())
                 };
 
                 fileNode = new FileNode
@@ -473,7 +473,7 @@ namespace RomRepoMgr.Core.Filesystem
                                 (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
                             IndexNumber    = file.Value.Id,
                             LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                            LastWriteTime  = (ulong)file.Value.UpdatedOn.ToFileTimeUtc()
+                            LastWriteTime  = (ulong)(file.Value.FileLastModification?.ToFileTimeUtc() ?? file.Value.UpdatedOn.ToFileTimeUtc())
                         }
                     }));
 

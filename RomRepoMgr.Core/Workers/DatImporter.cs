@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Aaru.Checksums;
@@ -211,6 +212,10 @@ namespace RomRepoMgr.Core.Workers
                                 continue;
                             case Media media:
                                 medias.Add(media);
+
+                                continue;
+                            default:
+                                Console.WriteLine(item);
 
                                 continue;
                         }
@@ -410,11 +415,21 @@ namespace RomRepoMgr.Core.Workers
                         file.UpdatedOn = DateTime.UtcNow;
                     }
 
+                    DateTime? fileModificationDate = null;
+
+                    if(!string.IsNullOrEmpty(rom.Date))
+                    {
+                        if(DateTime.TryParseExact(rom.Date, @"yyyy\\M\\d H:mm", CultureInfo.InvariantCulture,
+                                                  DateTimeStyles.AssumeUniversal, out DateTime date))
+                            fileModificationDate = date;
+                    }
+
                     newFilesByMachine.Add(new FileByMachine
                     {
-                        File    = file,
-                        Machine = machine,
-                        Name    = rom.Name
+                        File                 = file,
+                        Machine              = machine,
+                        Name                 = rom.Name,
+                        FileLastModification = fileModificationDate
                     });
 
                     if(hashCollision)

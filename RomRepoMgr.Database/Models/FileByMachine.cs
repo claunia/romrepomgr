@@ -23,6 +23,7 @@
 // Copyright © 2020 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace RomRepoMgr.Database.Models
@@ -36,8 +37,9 @@ namespace RomRepoMgr.Database.Models
         [Required]
         public virtual Machine Machine { get; set; }
         [Required]
-        public string Name { get;     set; }
-        public ulong FileId    { get; set; }
-        public ulong MachineId { get; set; }
+        public string Name { get;                    set; }
+        public ulong     FileId               { get; set; }
+        public ulong     MachineId            { get; set; }
+        public DateTime? FileLastModification { get; set; }
     }
 }

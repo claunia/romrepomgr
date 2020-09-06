@@ -248,7 +248,8 @@ namespace RomRepoMgr.Core.Filesystem
                     Sha512    = machineFile.File.Sha512,
                     Size      = machineFile.File.Size,
                     CreatedOn = machineFile.File.CreatedOn,
-                    UpdatedOn = machineFile.File.UpdatedOn
+                    UpdatedOn = machineFile.File.UpdatedOn,
+                    FileLastModification = machineFile.FileLastModification
                 };
 
                 cachedMachineFiles[machineFile.Name] = cachedFile;
@@ -682,16 +683,17 @@ namespace RomRepoMgr.Core.Filesystem
 
     internal sealed class CachedFile
     {
-        public ulong    Id        { get; set; }
-        public ulong    Size      { get; set; }
-        public string   Crc32     { get; set; }
-        public string   Md5       { get; set; }
-        public string   Sha1      { get; set; }
-        public string   Sha256    { get; set; }
-        public string   Sha384    { get; set; }
-        public string   Sha512    { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
+        public ulong     Id                   { get; set; }
+        public ulong     Size                 { get; set; }
+        public string    Crc32                { get; set; }
+        public string    Md5                  { get; set; }
+        public string    Sha1                 { get; set; }
+        public string    Sha256               { get; set; }
+        public string    Sha384               { get; set; }
+        public string    Sha512               { get; set; }
+        public DateTime  CreatedOn            { get; set; }
+        public DateTime  UpdatedOn            { get; set; }
+        public DateTime? FileLastModification { get; set; }
     }
 
     internal sealed class CachedDisk
