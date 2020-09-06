@@ -424,12 +424,29 @@ namespace RomRepoMgr.Core.Workers
                             fileModificationDate = date;
                     }
 
+                    string filename;
+                    string path = null;
+
+                    if(rom.Name.Contains('\\'))
+                    {
+                        filename = Path.GetFileName(rom.Name.Replace('\\', '/'));
+                        path     = Path.GetDirectoryName(rom.Name.Replace('\\', '/'));
+                    }
+                    else if(rom.Name.Contains('/'))
+                    {
+                        filename = Path.GetFileName(rom.Name);
+                        path     = Path.GetDirectoryName(rom.Name);
+                    }
+                    else
+                        filename = rom.Name;
+
                     newFilesByMachine.Add(new FileByMachine
                     {
                         File                 = file,
                         Machine              = machine,
-                        Name                 = rom.Name,
-                        FileLastModification = fileModificationDate
+                        Name                 = filename,
+                        FileLastModification = fileModificationDate,
+                        Path                 = path
                     });
 
                     if(hashCollision)

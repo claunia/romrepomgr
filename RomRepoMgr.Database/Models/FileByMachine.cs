@@ -41,5 +41,7 @@ namespace RomRepoMgr.Database.Models
         public ulong     FileId               { get; set; }
         public ulong     MachineId            { get; set; }
         public DateTime? FileLastModification { get; set; }
+        [StringLength(4096)]
+        public string Path { get; set; }
     }
 }
