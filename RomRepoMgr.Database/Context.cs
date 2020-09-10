@@ -41,6 +41,7 @@ namespace RomRepoMgr.Database
         public DbSet<DiskByMachine>  DisksByMachines  { get; set; }
         public DbSet<DbMedia>        Medias           { get; set; }
         public DbSet<MediaByMachine> MediasByMachines { get; set; }
+        public DbSet<RomSetStat>     RomSetStats      { get; set; }
 
         public static Context Create(string dbPath)
         {
@@ -159,6 +160,11 @@ namespace RomRepoMgr.Database
                 entity.HasOne(e => e.Machine).WithMany(e => e.Medias).OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Media).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<RomSetStat>(entity =>
+            {
+                entity.HasOne(e => e.RomSet).WithOne(e => e.Statistics);
             });
         }
     }

@@ -272,6 +272,27 @@ namespace RomRepoMgr.Database.Migrations
                 b.ToTable("RomSets");
             });
 
+            modelBuilder.Entity("RomRepoMgr.Database.Models.RomSetStat", b =>
+            {
+                b.Property<long>("RomSetId").HasColumnType("INTEGER");
+
+                b.Property<long>("CompleteMachines").HasColumnType("INTEGER");
+
+                b.Property<long>("HaveRoms").HasColumnType("INTEGER");
+
+                b.Property<long>("IncompleteMachines").HasColumnType("INTEGER");
+
+                b.Property<long>("MissRoms").HasColumnType("INTEGER");
+
+                b.Property<long>("TotalMachines").HasColumnType("INTEGER");
+
+                b.Property<long>("TotalRoms").HasColumnType("INTEGER");
+
+                b.HasKey("RomSetId");
+
+                b.ToTable("RomSetStats");
+            });
+
             modelBuilder.Entity("RomRepoMgr.Database.Models.DiskByMachine", b =>
             {
                 b.HasOne("RomRepoMgr.Database.Models.DbDisk", "Disk").WithMany("Machines").HasForeignKey("DiskId").
@@ -303,6 +324,13 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.HasOne("RomRepoMgr.Database.Models.DbMedia", "Media").WithMany("Machines").HasForeignKey("MediaId").
                   OnDelete(DeleteBehavior.Cascade).IsRequired();
+            });
+
+            modelBuilder.Entity("RomRepoMgr.Database.Models.RomSetStat", b =>
+            {
+                b.HasOne("RomRepoMgr.Database.Models.RomSet", "RomSet").WithOne("Statistics").
+                  HasForeignKey("RomRepoMgr.Database.Models.RomSetStat", "RomSetId").OnDelete(DeleteBehavior.Cascade).
+                  IsRequired();
             });
             #pragma warning restore 612, 618
         }

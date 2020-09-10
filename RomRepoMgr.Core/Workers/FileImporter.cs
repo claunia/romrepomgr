@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RomRepoMgr.Core.Aaru;
 using RomRepoMgr.Core.EventArgs;
@@ -929,7 +930,7 @@ namespace RomRepoMgr.Core.Workers
                 bool    knownMediaWasBigger = false;
 
                 if(sha256 != null)
-                    knownMedia = _pendingMediasBySha1.TryGetValue(sha256, out dbMedia);
+                    knownMedia = _pendingMediasBySha256.TryGetValue(sha256, out dbMedia);
 
                 if(!knownMedia &&
                    sha1 != null)
@@ -1183,10 +1184,44 @@ namespace RomRepoMgr.Core.Workers
 
             _ctx.Files.AddRange(_newFiles);
             _ctx.Disks.AddRange(_newDisks);
+            _ctx.Medias.AddRange(_newMedias);
+            _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
+
+            _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id).Select(r => new RomSetStat
+            {
+                RomSetId      = r.Id,
+                TotalMachines = r.Machines.Count,
+                CompleteMachines =
+                    r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                          m.Files.All(f => f.File.IsInRepo)) +
+                    r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                          m.Disks.All(f => f.Disk.IsInRepo)) +
+                    r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 && m.Files.All(f => f.File.IsInRepo) &&
+                                          m.Disks.All(f => f.Disk.IsInRepo)),
+                IncompleteMachines =
+                    r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                          m.Files.Any(f => !f.File.IsInRepo)) +
+                    r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                          m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                    r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                          (m.Files.Any(f => !f.File.IsInRepo) || m.Disks.Any(f => !f.Disk.IsInRepo))),
+                TotalRoms = r.Machines.Sum(m => m.Files.Count) + r.Machines.Sum(m => m.Disks.Count) +
+                            r.Machines.Sum(m => m.Medias.Count),
+                HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                           r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                           r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                           r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                           r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+            }));
+
+            // TODO: Refresh main view
+
             _ctx.SaveChanges();
 
             _newFiles.Clear();
             _newDisks.Clear();
+            _newMedias.Clear();
         }
 
         string GetArchiveFormat(string path, out long counter)

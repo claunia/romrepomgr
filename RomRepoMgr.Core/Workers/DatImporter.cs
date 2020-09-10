@@ -1045,51 +1045,65 @@ namespace RomRepoMgr.Core.Workers
                 newMedias.Clear();
                 newMediasByMachine.Clear();
 
-                WorkFinished?.Invoke(this, System.EventArgs.Empty);
+                RomSetStat stats = ctx.RomSets.Where(r => r.Id == romSet.Id).Select(r => new RomSetStat
+                {
+                    RomSetId      = r.Id,
+                    TotalMachines = r.Machines.Count,
+                    CompleteMachines =
+                        r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                              m.Files.All(f => f.File.IsInRepo)) +
+                        r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                              m.Disks.All(f => f.Disk.IsInRepo)) +
+                        r.Machines.Count(m => m.Files.Count > 0                 && m.Disks.Count > 0 &&
+                                              m.Files.All(f => f.File.IsInRepo) && m.Disks.All(f => f.Disk.IsInRepo)),
+                    IncompleteMachines =
+                        r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count == 0 &&
+                                              m.Files.Any(f => !f.File.IsInRepo)) +
+                        r.Machines.Count(m => m.Disks.Count > 0 && m.Files.Count == 0 &&
+                                              m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                        r.Machines.Count(m => m.Files.Count > 0 && m.Disks.Count > 0 &&
+                                              (m.Files.Any(f => !f.File.IsInRepo) ||
+                                               m.Disks.Any(f => !f.Disk.IsInRepo))),
+                    TotalRoms = r.Machines.Sum(m => m.Files.Count) + r.Machines.Sum(m => m.Disks.Count) +
+                                r.Machines.Sum(m => m.Medias.Count),
+                    HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                               r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                               r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                    MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                               r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                               r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                }).FirstOrDefault();
 
-                romSet = ctx.RomSets.Find(romSet.Id);
+                RomSetStat oldStats = ctx.RomSetStats.Find(stats.RomSetId);
+
+                if(oldStats != null)
+                    ctx.Remove(oldStats);
+
+                ctx.RomSetStats.Add(stats);
+
+                WorkFinished?.Invoke(this, System.EventArgs.Empty);
 
                 RomSetAdded?.Invoke(this, new RomSetEventArgs
                 {
                     RomSet = new RomSetModel
                     {
-                        Id            = romSet.Id,
-                        Author        = romSet.Author,
-                        Comment       = romSet.Comment,
-                        Date          = romSet.Date,
-                        Description   = romSet.Description,
-                        Filename      = romSet.Filename,
-                        Homepage      = romSet.Homepage,
-                        Name          = romSet.Name,
-                        Sha384        = romSet.Sha384,
-                        Version       = romSet.Version,
-                        TotalMachines = romSet.Machines?.Count ?? 0,
-                        CompleteMachines =
-                            romSet.Machines?.Count(m => m.Files?.Count > 0 && m.Disks == null &&
-                                                        m.Files.All(f => f.File.IsInRepo)) ??
-                            0 + romSet.Machines?.Count(m => m.Disks?.Count > 0 && m.Files == null &&
-                                                            m.Disks.All(f => f.Disk.IsInRepo)) ?? 0 +
-                            romSet.Machines?.Count(m => m.Files?.Count > 0                && m.Disks?.Count > 0 &&
-                                                        m.Files.All(f => f.File.IsInRepo) &&
-                                                        m.Disks.All(f => f.Disk.IsInRepo)) ?? 0,
-                        IncompleteMachines =
-                            romSet.Machines?.Count(m => m.Files?.Count > 0 && m.Disks == null &&
-                                                        m.Files.Any(f => !f.File.IsInRepo)) ??
-                            0 + romSet.Machines?.Count(m => m.Disks?.Count > 0 && m.Files == null &&
-                                                            m.Disks.Any(f => !f.Disk.IsInRepo)) ?? 0 +
-                            romSet.Machines?.Count(m => m.Files?.Count > 0 && m.Disks?.Count > 0 &&
-                                                        (m.Files.Any(f => !f.File.IsInRepo) ||
-                                                         m.Disks.Any(f => !f.Disk.IsInRepo))) ?? 0,
-                        TotalRoms = romSet.Machines?.Sum(m => m.Files?.Count ?? 0) ??
-                                    0 + romSet.Machines?.Sum(m => m.Disks?.Count ?? 0) ??
-                                    0 + romSet.Machines?.Sum(m => m.Medias?.Count ?? 0) ?? 0,
-                        HaveRoms = romSet.Machines?.Sum(m => m.Files?.Count(f => f.File.IsInRepo) ?? 0) ??
-                                   0 + romSet.Machines?.Sum(m => m.Disks?.Count(f => f.Disk.IsInRepo) ?? 0) ??
-                                   0 + romSet.Machines?.Sum(m => m.Medias?.Count(f => f.Media.IsInRepo) ?? 0) ?? 0,
-                        MissRoms = romSet.Machines?.Sum(m => m.Files?.Count(f => !f.File.IsInRepo) ?? 0) ??
-                                   0 + romSet.Machines?.Sum(m => m.Disks?.Count(f => !f.Disk.IsInRepo) ?? 0) ??
-                                   0 + romSet.Machines?.Sum(m => m.Medias?.Count(f => !f.Media.IsInRepo) ?? 0) ?? 0,
-                        Category = _category
+                        Id                 = romSet.Id,
+                        Author             = romSet.Author,
+                        Comment            = romSet.Comment,
+                        Date               = romSet.Date,
+                        Description        = romSet.Description,
+                        Filename           = romSet.Filename,
+                        Homepage           = romSet.Homepage,
+                        Name               = romSet.Name,
+                        Sha384             = romSet.Sha384,
+                        Version            = romSet.Version,
+                        TotalMachines      = stats.TotalMachines,
+                        CompleteMachines   = stats.CompleteMachines,
+                        IncompleteMachines = stats.IncompleteMachines,
+                        TotalRoms          = stats.TotalRoms,
+                        HaveRoms           = stats.HaveRoms,
+                        MissRoms           = stats.MissRoms,
+                        Category           = romSet.Category
                     }
                 });
             }

@@ -40,8 +40,9 @@ namespace RomRepoMgr.Database.Models
         [Required]
         public string Filename { get; set; }
         [Required, StringLength(96, MinimumLength = 96)]
-        public string Sha384 { get;   set; }
-        public string Category { get; set; }
+        public string Sha384 { get;                 set; }
+        public         string     Category   { get; set; }
+        public virtual RomSetStat Statistics { get; set; }
 
         public virtual ICollection<Machine> Machines { get; set; }
     }
