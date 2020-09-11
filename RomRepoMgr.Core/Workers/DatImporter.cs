@@ -1120,6 +1120,8 @@ namespace RomRepoMgr.Core.Workers
 
                 ctx.RomSetStats.Add(stats);
 
+                ctx.SaveChanges();
+
                 WorkFinished?.Invoke(this, System.EventArgs.Empty);
 
                 RomSetAdded?.Invoke(this, new RomSetEventArgs
