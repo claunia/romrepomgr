@@ -89,6 +89,18 @@ namespace RomRepoMgr.Database.Migrations
 
                 b.HasIndex("Size");
 
+                b.HasIndex("Crc32", "Size");
+
+                b.HasIndex("Md5", "Size");
+
+                b.HasIndex("Sha1", "Size");
+
+                b.HasIndex("Sha256", "Size");
+
+                b.HasIndex("Sha384", "Size");
+
+                b.HasIndex("Sha512", "Size");
+
                 b.ToTable("Files");
             });
 

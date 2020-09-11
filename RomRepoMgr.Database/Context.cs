@@ -77,6 +77,42 @@ namespace RomRepoMgr.Database
                 entity.HasIndex(e => e.Size);
 
                 entity.HasIndex(e => e.IsInRepo);
+
+                entity.HasIndex(e => new
+                {
+                    e.Crc32,
+                    e.Size
+                });
+
+                entity.HasIndex(e => new
+                {
+                    e.Md5,
+                    e.Size
+                });
+
+                entity.HasIndex(e => new
+                {
+                    e.Sha1,
+                    e.Size
+                });
+
+                entity.HasIndex(e => new
+                {
+                    e.Sha256,
+                    e.Size
+                });
+
+                entity.HasIndex(e => new
+                {
+                    e.Sha384,
+                    e.Size
+                });
+
+                entity.HasIndex(e => new
+                {
+                    e.Sha512,
+                    e.Size
+                });
             });
 
             modelBuilder.Entity<RomSet>(entity =>
