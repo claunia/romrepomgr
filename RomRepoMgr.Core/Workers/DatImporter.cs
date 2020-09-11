@@ -210,6 +210,18 @@ namespace RomRepoMgr.Core.Workers
                 string tmpMediaSha1Table   = Guid.NewGuid().ToString();
                 string tmpMediaSha256Table = Guid.NewGuid().ToString();
 
+                bool romsHaveCrc      = false;
+                bool romsHaveMd5      = false;
+                bool romsHaveSha1     = false;
+                bool romsHaveSha256   = false;
+                bool romsHaveSha384   = false;
+                bool romsHaveSha512   = false;
+                bool disksHaveMd5     = false;
+                bool disksHaveSha1    = false;
+                bool mediasHaveMd5    = false;
+                bool mediasHaveSha1   = false;
+                bool mediasHaveSha256 = false;
+
                 DbConnection dbConnection = ctx.Database.GetDbConnection();
                 dbConnection.Open();
 
@@ -295,6 +307,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomCrc32Table}\" (\"Size\", \"Crc32\") VALUES (\"{(ulong)rom.Size}\", \"{rom.CRC}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveCrc = true;
                                     }
 
                                     if(rom.MD5 != null)
@@ -305,6 +319,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomMd5Table}\" (\"Size\", \"Md5\") VALUES (\"{(ulong)rom.Size}\", \"{rom.MD5}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveMd5 = true;
                                     }
 
                                     if(rom.SHA1 != null)
@@ -315,6 +331,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomSha1Table}\" (\"Size\", \"Sha1\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA1}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveSha1 = true;
                                     }
 
                                     if(rom.SHA256 != null)
@@ -325,6 +343,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomSha256Table}\" (\"Size\", \"Sha256\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA256}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveSha256 = true;
                                     }
 
                                     if(rom.SHA384 != null)
@@ -335,6 +355,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomSha384Table}\" (\"Size\", \"Sha384\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA384}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveSha384 = true;
                                     }
 
                                     if(rom.SHA512 != null)
@@ -345,6 +367,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpRomSha512Table}\" (\"Size\", \"Sha512\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA512}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        romsHaveSha512 = true;
                                     }
 
                                     roms.Add(rom);
@@ -359,6 +383,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpDiskMd5Table}\" (\"Md5\") VALUES (\"{disk.MD5}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        disksHaveMd5 = true;
                                     }
 
                                     if(disk.SHA1 != null)
@@ -369,6 +395,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpDiskSha1Table}\" (\"Sha1\") VALUES (\"{disk.SHA1}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        disksHaveSha1 = true;
                                     }
 
                                     disks.Add(disk);
@@ -383,6 +411,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpMediaMd5Table}\" (\"Md5\") VALUES (\"{media.MD5}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        mediasHaveMd5 = true;
                                     }
 
                                     if(media.SHA1 != null)
@@ -393,6 +423,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpMediaSha1Table}\" (\"Sha1\") VALUES (\"{media.SHA1}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        mediasHaveSha1 = true;
                                     }
 
                                     if(media.SHA256 != null)
@@ -403,6 +435,8 @@ namespace RomRepoMgr.Core.Workers
                                             $"INSERT INTO \"{tmpMediaSha256Table}\" (\"Sha256\") VALUES (\"{media.SHA256}\");";
 
                                         dbcc.ExecuteNonQuery();
+
+                                        mediasHaveSha256 = true;
                                     }
 
                                     medias.Add(media);
@@ -423,49 +457,54 @@ namespace RomRepoMgr.Core.Workers
                     dbTransaction.Commit();
                 }
 
-                List<DbFile> pendingFilesByCrcList = ctx.Files.
-                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Size = t.Size AND f.Crc32 = t.Crc32").
-                                                         ToList();
+                List<DbFile> pendingFilesByCrcList = romsHaveCrc ? ctx.Files.
+                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Size = t.Size AND f.Crc32 = t.Crc32").
+                                                                       ToList() : new List<DbFile>();
 
-                List<DbFile> pendingFilesByMd5List = ctx.Files.
-                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Size = t.Size AND f.Md5 = t.Md5").
-                                                         ToList();
+                List<DbFile> pendingFilesByMd5List = romsHaveMd5 ? ctx.Files.
+                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Size = t.Size AND f.Md5 = t.Md5").
+                                                                       ToList() : new List<DbFile>();
 
-                List<DbFile> pendingFilesBySha1List = ctx.Files.
-                                                          FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Size = t.Size AND f.Sha1 = t.Sha1").
-                                                          ToList();
+                List<DbFile> pendingFilesBySha1List = romsHaveSha1 ? ctx.Files.
+                                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Size = t.Size AND f.Sha1 = t.Sha1").
+                                                                         ToList() : new List<DbFile>();
 
-                List<DbFile> pendingFilesBySha256List = ctx.Files.
-                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Size = t.Size AND f.Sha256 = t.Sha256").
-                                                            ToList();
+                List<DbFile> pendingFilesBySha256List = romsHaveSha256 ? ctx.Files.
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Size = t.Size AND f.Sha256 = t.Sha256").
+                                                                             ToList() : new List<DbFile>();
 
-                List<DbFile> pendingFilesBySha384List = ctx.Files.
-                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Size = t.Size AND f.Sha384 = t.Sha384").
-                                                            ToList();
+                List<DbFile> pendingFilesBySha384List = romsHaveSha384 ? ctx.Files.
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Size = t.Size AND f.Sha384 = t.Sha384").
+                                                                             ToList() : new List<DbFile>();
 
-                List<DbFile> pendingFilesBySha512List = ctx.Files.
-                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Size = t.Size AND f.Sha512 = t.Sha512").
-                                                            ToList();
+                List<DbFile> pendingFilesBySha512List = romsHaveSha512 ? ctx.Files.
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Size = t.Size AND f.Sha512 = t.Sha512").
+                                                                             ToList() : new List<DbFile>();
 
-                Dictionary<string, DbDisk> pendingDisksByMd5 = ctx.Disks.
-                                                                   FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5").
-                                                                   ToDictionary(f => f.Md5);
+                Dictionary<string, DbDisk> pendingDisksByMd5 = disksHaveMd5 ? ctx.Disks.
+                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5").
+                                                                       ToDictionary(f => f.Md5)
+                                                                   : new Dictionary<string, DbDisk>();
 
-                Dictionary<string, DbDisk> pendingDisksBySha1 = ctx.Disks.
-                                                                    FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
-                                                                    ToDictionary(f => f.Sha1);
+                Dictionary<string, DbDisk> pendingDisksBySha1 = disksHaveSha1 ? ctx.Disks.
+                                                                        FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
+                                                                        ToDictionary(f => f.Sha1)
+                                                                    : new Dictionary<string, DbDisk>();
 
-                Dictionary<string, DbMedia> pendingMediasByMd5 = ctx.Medias.
-                                                                     FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5").
-                                                                     ToDictionary(f => f.Md5);
+                Dictionary<string, DbMedia> pendingMediasByMd5 = mediasHaveMd5 ? ctx.Medias.
+                                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5").
+                                                                         ToDictionary(f => f.Md5)
+                                                                     : new Dictionary<string, DbMedia>();
 
-                Dictionary<string, DbMedia> pendingMediasBySha1 = ctx.Medias.
-                                                                      FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
-                                                                      ToDictionary(f => f.Sha1);
+                Dictionary<string, DbMedia> pendingMediasBySha1 = mediasHaveSha1 ? ctx.Medias.
+                                                                          FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1").
+                                                                          ToDictionary(f => f.Sha1)
+                                                                      : new Dictionary<string, DbMedia>();
 
-                Dictionary<string, DbMedia> pendingMediasBySha256 = ctx.Medias.
-                                                                        FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256").
-                                                                        ToDictionary(f => f.Sha256);
+                Dictionary<string, DbMedia> pendingMediasBySha256 = mediasHaveSha256 ? ctx.Medias.
+                                                                            FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256").
+                                                                            ToDictionary(f => f.Sha256)
+                                                                        : new Dictionary<string, DbMedia>();
 
                 Dictionary<string, DbFile> pendingFilesByCrc    = new Dictionary<string, DbFile>();
                 Dictionary<string, DbFile> pendingFilesByMd5    = new Dictionary<string, DbFile>();
