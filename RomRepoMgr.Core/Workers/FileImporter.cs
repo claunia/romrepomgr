@@ -75,7 +75,7 @@ namespace RomRepoMgr.Core.Workers
                     Message = Localization.EnumeratingFiles
                 });
 
-                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(p => p).ToArray();
                 _totalFiles += files.LongLength;
 
                 SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
