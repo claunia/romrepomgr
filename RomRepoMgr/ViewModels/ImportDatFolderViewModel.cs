@@ -281,7 +281,7 @@ namespace RomRepoMgr.ViewModels
         {
             if(_listPosition >= _datFiles.Length)
             {
-                Progress2Visible = true;
+                Progress2Visible = false;
                 ProgressVisible  = true;
                 StatusMessage    = Localization.Finished;
                 CanClose         = true;
