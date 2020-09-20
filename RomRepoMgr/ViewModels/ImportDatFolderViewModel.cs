@@ -233,7 +233,7 @@ namespace RomRepoMgr.ViewModels
             {
                 _datFiles = Directory.GetFiles(FolderPath, "*.*",
                                                _recursiveChecked ? SearchOption.AllDirectories
-                                                   : SearchOption.TopDirectoryOnly);
+                                                   : SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray();
             }
             else
             {
@@ -245,7 +245,7 @@ namespace RomRepoMgr.ViewModels
                                                    _recursiveChecked ? SearchOption.AllDirectories
                                                        : SearchOption.TopDirectoryOnly);
 
-                _datFiles = dats.Concat(xmls).ToArray();
+                _datFiles = dats.Concat(xmls).OrderBy(f => f).ToArray();
             }
 
             Dispatcher.UIThread.Post(() =>
