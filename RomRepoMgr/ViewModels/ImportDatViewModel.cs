@@ -126,9 +126,9 @@ namespace RomRepoMgr.ViewModels
         public string                      CloseLabel   => Localization.CloseLabel;
         public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
-        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+        void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
-            StatusMessage   = Localization.Finished;
+            StatusMessage   = args.Message;
             ProgressVisible = false;
             CanClose        = true;
         });

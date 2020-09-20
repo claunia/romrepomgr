@@ -305,12 +305,12 @@ namespace RomRepoMgr.ViewModels
             Task.Run(_worker.Import);
         }
 
-        void OnWorkerOnWorkFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+        void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
         {
             ImportResults.Add(new ImportDatFolderItem
             {
                 Filename = Path.GetFileName(_datFiles[_listPosition]),
-                Status   = Localization.OK
+                Status   = args.Message
             });
 
             _listPosition++;

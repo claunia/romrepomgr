@@ -386,5 +386,11 @@ namespace RomRepoMgr.Core.Resources {
                 return ResourceManager.GetString("NotAnAaruFormatFile", resourceCulture);
             }
         }
+        
+        internal static string DatImportSuccess {
+            get {
+                return ResourceManager.GetString("DatImportSuccess", resourceCulture);
+            }
+        }
     }
 }

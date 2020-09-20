@@ -1118,7 +1118,10 @@ namespace RomRepoMgr.Core.Workers
 
                 ctx.SaveChanges();
 
-                WorkFinished?.Invoke(this, System.EventArgs.Empty);
+                WorkFinished?.Invoke(this, new MessageEventArgs
+                {
+                    Message = string.Format(Localization.DatImportSuccess, stats.TotalMachines, stats.TotalRoms)
+                });
 
                 RomSetAdded?.Invoke(this, new RomSetEventArgs
                 {
@@ -1160,7 +1163,7 @@ namespace RomRepoMgr.Core.Workers
         public void Abort() => _aborted = true;
 
         public event EventHandler                          SetIndeterminateProgress;
-        public event EventHandler                          WorkFinished;
+        public event EventHandler<MessageEventArgs>        WorkFinished;
         public event EventHandler<ErrorEventArgs>          ErrorOccurred;
         public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
         public event EventHandler<ProgressEventArgs>       SetProgress;
