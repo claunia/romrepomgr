@@ -454,27 +454,27 @@ namespace RomRepoMgr.Core.Workers
                 }
 
                 List<DbFile> pendingFilesByCrcList = romsHaveCrc ? ctx.Files.
-                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Size = t.Size AND f.Crc32 = t.Crc32").
+                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Crc32 = t.Crc32 AND f.Size = t.Size").
                                                                        ToList() : new List<DbFile>();
 
                 List<DbFile> pendingFilesByMd5List = romsHaveMd5 ? ctx.Files.
-                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Size = t.Size AND f.Md5 = t.Md5").
+                                                                       FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Md5 = t.Md5 AND f.Size = t.Size").
                                                                        ToList() : new List<DbFile>();
 
                 List<DbFile> pendingFilesBySha1List = romsHaveSha1 ? ctx.Files.
-                                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Size = t.Size AND f.Sha1 = t.Sha1").
+                                                                         FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Sha1 = t.Sha1 AND f.Size = t.Size").
                                                                          ToList() : new List<DbFile>();
 
                 List<DbFile> pendingFilesBySha256List = romsHaveSha256 ? ctx.Files.
-                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Size = t.Size AND f.Sha256 = t.Sha256").
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Sha256 = t.Sha256 AND f.Size = t.Size").
                                                                              ToList() : new List<DbFile>();
 
                 List<DbFile> pendingFilesBySha384List = romsHaveSha384 ? ctx.Files.
-                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Size = t.Size AND f.Sha384 = t.Sha384").
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Sha384 = t.Sha384 AND f.Size = t.Size").
                                                                              ToList() : new List<DbFile>();
 
                 List<DbFile> pendingFilesBySha512List = romsHaveSha512 ? ctx.Files.
-                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Size = t.Size AND f.Sha512 = t.Sha512").
+                                                                             FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Sha512 = t.Sha512 AND f.Size = t.Size").
                                                                              ToList() : new List<DbFile>();
 
                 Dictionary<string, DbDisk> pendingDisksByMd5 = disksHaveMd5 ? ctx.Disks.
