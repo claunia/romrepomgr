@@ -305,7 +305,7 @@
     <value>Importar _carpeta</value>
   </data>
   <data name="RomsMenuText" xml:space="preserve">
-    <value>__ROMs</value>
+    <value>_ROMs</value>
   </data>
   <data name="SaveLabel" xml:space="preserve">
     <value>Guardar</value>
@@ -342,5 +342,8 @@
   </data>
   <data name="FilesystemMenuUmountText" xml:space="preserve">
     <value>_Desmontar</value>
+  </data>
+  <data name="RomSetCategoryLabel" xml:space="preserve">
+    <value>Categoría</value>
   </data>
 </root>
