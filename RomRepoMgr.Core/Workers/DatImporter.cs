@@ -442,10 +442,6 @@ namespace RomRepoMgr.Core.Workers
                                     medias.Add(media);
 
                                     continue;
-                                default:
-                                    Console.WriteLine(item);
-
-                                    continue;
                             }
                         }
 
