@@ -1182,9 +1182,14 @@ namespace RomRepoMgr.Core.Workers
                 Message = Localization.SavingChangesToDatabase
             });
 
+            _ctx.SaveChanges();
+
             _ctx.Files.AddRange(_newFiles);
             _ctx.Disks.AddRange(_newDisks);
             _ctx.Medias.AddRange(_newMedias);
+
+            _ctx.SaveChanges();
+
             _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
 
             _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id).Select(r => new RomSetStat
