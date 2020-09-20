@@ -749,6 +749,8 @@ namespace RomRepoMgr.Core.Workers
 
                     if(!string.IsNullOrEmpty(rom.Date))
                     {
+                        rom.Date = rom.Date.Replace("/", "\\");
+
                         if(DateTime.TryParseExact(rom.Date, @"yyyy\\M\\d H:mm", CultureInfo.InvariantCulture,
                                                   DateTimeStyles.AssumeUniversal, out DateTime date))
                             fileModificationDate = date;
