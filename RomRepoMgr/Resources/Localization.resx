@@ -352,4 +352,26 @@ Do you want to delete the file?</value>
   <data name="RomSetCategoryLabel" xml:space="preserve">
     <value>Category</value>
   </data>
+  <data name="DatabaseMenuText" xml:space="preserve">
+    <value>Database</value>
+  </data>
+  <data name="DatabaseMenuUpdateStatsText" xml:space="preserve">
+    <value>Update statistics</value>
+  </data>
+  <data name="UpdateStatsConfirmationDialogText" xml:space="preserve">
+    <value>Do you want to update ROM set statistics in database?
+This will take a long time...</value>
+  </data>
+  <data name="UpdateStatsTitle" xml:space="preserve">
+    <value>Updating ROM sets statistics</value>
+  </data>
+  <data name="CalculatingStatisticsForRomSet" xml:space="preserve">
+    <value>Calculating statistics for {0} - {1} ({2})</value>
+  </data>
+  <data name="RemovingOldStatistics" xml:space="preserve">
+    <value>Removing old statistics</value>
+  </data>
+  <data name="RetrievingRomSetsFromDatabase" xml:space="preserve">
+    <value>Retrieving ROM sets from database...</value>
+  </data>
 </root>

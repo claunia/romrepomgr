@@ -65,6 +65,7 @@ namespace RomRepoMgr.ViewModels
             ExportRomsCommand      = ReactiveCommand.Create(ExecuteExportRomsCommand);
             MountCommand           = ReactiveCommand.Create(ExecuteMountCommand);
             UmountCommand          = ReactiveCommand.Create(ExecuteUmountCommand);
+            UpdateStatsCommand     = ReactiveCommand.Create(ExecuteUpdateStatsCommand);
             RomSets                = new ObservableCollection<RomSetModel>(romSets);
         }
 
@@ -101,6 +102,8 @@ namespace RomRepoMgr.ViewModels
         public string HelpMenuText => Localization.HelpMenuText;
         public string HelpMenuAboutText => Localization.HelpMenuAboutText;
         public string FilesystemMenuUmountText => Localization.FilesystemMenuUmountText;
+        public string DatabaseMenuText => Localization.DatabaseMenuText;
+        public string DatabaseMenuUpdateStatsText => Localization.DatabaseMenuUpdateStatsText;
 
         public bool NativeMenuSupported =>
             NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
@@ -118,6 +121,7 @@ namespace RomRepoMgr.ViewModels
         public ReactiveCommand<Unit, Unit> ExportRomsCommand      { get; }
         public ReactiveCommand<Unit, Unit> MountCommand           { get; }
         public ReactiveCommand<Unit, Unit> UmountCommand          { get; }
+        public ReactiveCommand<Unit, Unit> UpdateStatsCommand     { get; }
 
         public Vfs Vfs
         {
@@ -347,5 +351,21 @@ namespace RomRepoMgr.ViewModels
         void VfsOnUmounted(object sender, EventArgs e) => Vfs = null;
 
         void ExecuteUmountCommand() => Vfs?.Umount();
+
+        async void ExecuteUpdateStatsCommand()
+        {
+            ButtonResult result = await MessageBoxManager.
+                                        GetMessageBoxStandardWindow(Localization.DatabaseMenuUpdateStatsText,
+                                                                    Localization.UpdateStatsConfirmationDialogText,
+                                                                    ButtonEnum.YesNo, Icon.Database).ShowDialog(_view);
+
+            if(result == ButtonResult.No)
+                return;
+
+            var view      = new UpdateStats();
+            var viewModel = new UpdateStatsViewModel(view);
+            view.DataContext = viewModel;
+            await view.ShowDialog(_view);
+        }
     }
 }

@@ -346,4 +346,26 @@
   <data name="RomSetCategoryLabel" xml:space="preserve">
     <value>Categoría</value>
   </data>
+  <data name="RetrievingRomSetsFromDatabase" xml:space="preserve">
+    <value>Recuperando sets de ROMs de la base de datos...</value>
+  </data>
+  <data name="RemovingOldStatistics" xml:space="preserve">
+    <value>Eliminando estadísticas antiguas</value>
+  </data>
+  <data name="CalculatingStatisticsForRomSet" xml:space="preserve">
+    <value>Calculando estadísticas para {0} - {1} ({2})</value>
+  </data>
+  <data name="DatabaseMenuText" xml:space="preserve">
+    <value>Base de datos</value>
+  </data>
+  <data name="DatabaseMenuUpdateStatsText" xml:space="preserve">
+    <value>Actualizar estadísticas</value>
+  </data>
+  <data name="UpdateStatsConfirmationDialogText" xml:space="preserve">
+    <value>¿Quieres actualizar las estadísticas de los sets de ROMs en la base de datos?
+Tardará mucho tiempo...</value>
+  </data>
+  <data name="UpdateStatsTitle" xml:space="preserve">
+    <value>Actualizando estadísticas de sets de ROMs</value>
+  </data>
 </root>

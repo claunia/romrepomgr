@@ -710,5 +710,47 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("RomSetCategoryLabel", resourceCulture);
             }
         }
+        
+        internal static string DatabaseMenuText {
+            get {
+                return ResourceManager.GetString("DatabaseMenuText", resourceCulture);
+            }
+        }
+        
+        internal static string DatabaseMenuUpdateStatsText {
+            get {
+                return ResourceManager.GetString("DatabaseMenuUpdateStatsText", resourceCulture);
+            }
+        }
+        
+        internal static string UpdateStatsConfirmationDialogText {
+            get {
+                return ResourceManager.GetString("UpdateStatsConfirmationDialogText", resourceCulture);
+            }
+        }
+        
+        internal static string UpdateStatsTitle {
+            get {
+                return ResourceManager.GetString("UpdateStatsTitle", resourceCulture);
+            }
+        }
+        
+        internal static string CalculatingStatisticsForRomSet {
+            get {
+                return ResourceManager.GetString("CalculatingStatisticsForRomSet", resourceCulture);
+            }
+        }
+        
+        internal static string RemovingOldStatistics {
+            get {
+                return ResourceManager.GetString("RemovingOldStatistics", resourceCulture);
+            }
+        }
+        
+        internal static string RetrievingRomSetsFromDatabase {
+            get {
+                return ResourceManager.GetString("RetrievingRomSetsFromDatabase", resourceCulture);
+            }
+        }
     }
 }

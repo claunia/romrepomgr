@@ -41,6 +41,10 @@
                 <MenuItem Header="{Binding RomSetsMenuDeleteText}" Command="{Binding DeleteRomSetCommand}" />
                 <Separator />
             </MenuItem>
+            <MenuItem Header="{Binding DatabaseMenuText}">
+                <MenuItem Header="{Binding DatabaseMenuUpdateStatsText}" Command="{Binding UpdateStatsCommand}" />
+                <Separator />
+            </MenuItem>
             <MenuItem Header="{Binding HelpMenuText}">
                 <MenuItem Header="{Binding HelpMenuAboutText}" Name="AboutMenuItem"
                           IsVisible="{Binding !NativeMenuSupported}" Command="{Binding AboutCommand}" />
