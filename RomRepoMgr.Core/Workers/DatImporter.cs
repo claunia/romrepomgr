@@ -40,6 +40,7 @@ using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.Library.DatFiles;
 using SabreTools.Library.DatItems;
+using SabreTools.Library.IO;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 using Machine = RomRepoMgr.Database.Models.Machine;
 
@@ -74,7 +75,8 @@ namespace RomRepoMgr.Core.Workers
                     Message = Localization.ParsinDatFile
                 });
 
-                var datFile = DatFile.CreateAndParse(_datPath);
+                var     datFile = DatFile.Create();
+                datFile.Parse(new ParentablePath(_datPath), throwOnError: true);
 
                 SetMessage?.Invoke(this, new MessageEventArgs
                 {
