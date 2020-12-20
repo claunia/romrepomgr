@@ -11,7 +11,8 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
-using SabreTools.Library.FileTypes;
+using SabreTools.FileTypes.Aaru;
+using SabreTools.FileTypes.CHD;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
 
