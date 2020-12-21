@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using Mono.Fuse.NETStandard;
 using Mono.Unix.Native;
@@ -12,6 +13,8 @@ using RomRepoMgr.Database.Models;
 namespace RomRepoMgr.Core.Filesystem
 {
     // TODO: Last handle goes negative
+    [SupportedOSPlatform("Linux")]
+    [SupportedOSPlatform("macOS")]
     public sealed class Fuse : FileSystem
     {
         readonly ConcurrentDictionary<long, List<DirectoryEntry>> _directoryCache;

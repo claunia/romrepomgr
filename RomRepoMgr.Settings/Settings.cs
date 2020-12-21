@@ -116,11 +116,11 @@ namespace RomRepoMgr.Settings
                 #if !NETSTANDARD2_0
 
                     // In case of Windows settings will be saved in the registry: HKLM/SOFTWARE/Claunia.com/RomRepoMgr
-                    case PlatformID.Win32NT when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.Win32S when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.Win32Windows when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.WinCE when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.WindowsPhone when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
+                    case PlatformID.Win32NT when OperatingSystem.IsWindows():
+                    case PlatformID.Win32S when OperatingSystem.IsWindows():
+                    case PlatformID.Win32Windows when OperatingSystem.IsWindows():
+                    case PlatformID.WinCE when OperatingSystem.IsWindows():
+                    case PlatformID.WindowsPhone when OperatingSystem.IsWindows():
                     {
                         RegistryKey parentKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Claunia.com");
 
@@ -235,11 +235,11 @@ namespace RomRepoMgr.Settings
                 #if !NETSTANDARD2_0
 
                     // In case of Windows settings will be saved in the registry: HKLM/SOFTWARE/Claunia.com/RomRepoMgr
-                    case PlatformID.Win32NT when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.Win32S when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.Win32Windows when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.WinCE when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                    case PlatformID.WindowsPhone when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
+                    case PlatformID.Win32NT when OperatingSystem.IsWindows():
+                    case PlatformID.Win32S when OperatingSystem.IsWindows():
+                    case PlatformID.Win32Windows when OperatingSystem.IsWindows():
+                    case PlatformID.WinCE when OperatingSystem.IsWindows():
+                    case PlatformID.WindowsPhone when OperatingSystem.IsWindows():
                     {
                         RegistryKey parentKey = Registry.CurrentUser.OpenSubKey("SOFTWARE", true)?.
                                                          CreateSubKey("Claunia.com");

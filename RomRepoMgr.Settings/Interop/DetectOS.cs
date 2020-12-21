@@ -73,7 +73,7 @@ namespace Aaru.CommonTypes.Interop
         {
             get
             {
-                if(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if(!OperatingSystem.IsWindows())
                     return Environment.UserName == "root";
 
                 bool            isAdmin;

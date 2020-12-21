@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using Fsp;
 using Fsp.Interop;
@@ -12,6 +13,7 @@ using FileInfo = Fsp.Interop.FileInfo;
 
 namespace RomRepoMgr.Core.Filesystem
 {
+    [SupportedOSPlatform("windows")]
     public class Winfsp : FileSystemBase
     {
         readonly Vfs   _vfs;

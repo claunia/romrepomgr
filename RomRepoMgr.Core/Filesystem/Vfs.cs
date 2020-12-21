@@ -41,7 +41,9 @@ namespace RomRepoMgr.Core.Filesystem
             _lastHandle         = 0;
         }
 
-        public static bool IsAvailable => Winfsp.IsAvailable || Fuse.IsAvailable;
+        public static bool IsAvailable => OperatingSystem.IsMacOS() ||
+                                          OperatingSystem.IsLinux() ? Fuse.IsAvailable
+                                              : OperatingSystem.IsWindows() && Winfsp.IsAvailable;
 
         public void Dispose() => Umount();
 
@@ -49,7 +51,7 @@ namespace RomRepoMgr.Core.Filesystem
 
         public void MountTo(string mountPoint)
         {
-            if(Fuse.IsAvailable)
+            if((OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()) && Fuse.IsAvailable)
             {
                 _fuse = new Fuse(this)
                 {
@@ -63,7 +65,7 @@ namespace RomRepoMgr.Core.Filesystem
                     CleanUp();
                 });
             }
-            else if(Winfsp.IsAvailable)
+            else if(OperatingSystem.IsWindows() && Winfsp.IsAvailable)
             {
                 _winfsp = new Winfsp(this);
                 bool ret = _winfsp.Mount(mountPoint);
@@ -80,10 +82,17 @@ namespace RomRepoMgr.Core.Filesystem
 
         public void Umount()
         {
-            _fuse?.Umount();
-            _fuse = null;
-            _winfsp?.Umount();
-            _winfsp = null;
+            if(OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
+            {
+                _fuse?.Umount();
+                _fuse = null;
+            }
+
+            if(OperatingSystem.IsWindows())
+            {
+                _winfsp?.Umount();
+                _winfsp = null;
+            }
 
             CleanUp();
         }
@@ -112,7 +121,7 @@ namespace RomRepoMgr.Core.Filesystem
         }
 
         internal string[] SplitPath(string path) =>
-            path.Split(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\\" : "/",
+            path.Split(OperatingSystem.IsWindows() ? "\\" : "/",
                        StringSplitOptions.RemoveEmptyEntries);
 
         void FillRootDirectoryCache()
@@ -125,7 +134,7 @@ namespace RomRepoMgr.Core.Filesystem
             {
                 string name;
 
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if(OperatingSystem.IsWindows())
                 {
                     name = set.Name.Replace('/', '∕').Replace('<', '\uFF1C').Replace('>', '\uFF1E').
                                Replace(':', '\uFF1A').Replace('"', '\u2033').Replace('\\', '＼').Replace('|', '｜').
