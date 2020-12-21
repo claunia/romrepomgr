@@ -25,7 +25,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using Aaru.CommonTypes.Interop;
 using Claunia.PropertyList;
@@ -47,7 +46,7 @@ namespace RomRepoMgr.Settings
     {
         const string XDG_CONFIG_HOME          = "XDG_CONFIG_HOME";
         const string XDG_CONFIG_HOME_RESOLVED = ".config";
-        /// <summary>Current statistcs</summary>
+        /// <summary>Current statistics</summary>
         public static SetSettings Current;
         public static bool UnArUsable { get; set; }
 
