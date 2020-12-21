@@ -4,6 +4,3 @@
 [submodule "winfsp"]
 	path = winfsp
 	url = https://github.com/billziss-gh/winfsp/
-[submodule "EFCore.BulkExtensions"]
-	path = EFCore.BulkExtensions
-	url = https://github.com/claunia/EFCore.BulkExtensions

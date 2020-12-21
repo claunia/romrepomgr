@@ -7,17 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DotNetZip" Version="1.13.8" />
+      <PackageReference Include="DotNetZip" Version="1.15.0" />
+      <PackageReference Include="EFCore.BulkExtensions" Version="3.2.7" />
       <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0" />
       <PackageReference Include="SharpCompress" Version="0.26.0" />
-      <PackageReference Include="System.Security.Principal.Windows" Version="4.7.0" />
+      <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
       <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
       <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
-      <ProjectReference Include="..\SabreTools\SabreTools.Library\SabreTools.Library.csproj" />
       <ProjectReference Include="..\winfsp-netcore\winfsp-netcore.csproj" />
     </ItemGroup>
 

@@ -52,13 +52,10 @@ namespace Aaru.CommonTypes.Interop
         {
             Assembly assembly = typeof(GCSettings).Assembly;
 
-            string[] assemblyPath = assembly.CodeBase?.Split(new[]
+            string[] assemblyPath = assembly.Location.Split(new[]
             {
                 '/', '\\'
             }, StringSplitOptions.RemoveEmptyEntries);
-
-            if(assemblyPath is null)
-                return null;
 
             int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
 
