@@ -29,8 +29,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Avalonia.Platform;
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.PlatformAbstractions;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
@@ -131,28 +134,21 @@ namespace RomRepoMgr.ViewModels
                 }
             };
 
-            switch(RuntimeEnvironment.OperatingSystemPlatform)
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                case Platform.Unknown: return;
-                case Platform.Windows:
-                    process.StartInfo.FileName  = "cmd";
-                    process.StartInfo.Arguments = $"/c start {process.StartInfo.Arguments.Replace("&", "^&")}";
+                process.StartInfo.FileName  = "cmd";
+                process.StartInfo.Arguments = $"/c start {process.StartInfo.Arguments.Replace("&", "^&")}";
+            }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+                process.StartInfo.FileName = "xdg-open";
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                process.StartInfo.FileName = "open";
+            else
+            {
+                if(Debugger.IsAttached) throw new ArgumentOutOfRangeException();
 
-                    break;
-                case Platform.FreeBSD:
-                case Platform.Linux:
-                    process.StartInfo.FileName = "xdg-open";
-
-                    break;
-                case Platform.Darwin:
-                    process.StartInfo.FileName = "open";
-
-                    break;
-                default:
-                    if(Debugger.IsAttached)
-                        throw new ArgumentOutOfRangeException();
-
-                    return;
+                return;
             }
 
             process.Start();

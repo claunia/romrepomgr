@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>9</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <Compile Update="**\*.xaml.cs">
