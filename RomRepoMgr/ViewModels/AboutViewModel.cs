@@ -20,7 +20,7 @@
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2020-2021 Natalia Portillo
+// Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
 using System;
@@ -95,7 +95,7 @@ namespace RomRepoMgr.ViewModels
         [NotNull]
         public string SuiteName => "ROM Repository Manager";
         [NotNull]
-        public string Copyright => "© 2020-2021 Natalia Portillo";
+        public string Copyright => "© 2020-2024 Natalia Portillo";
         [NotNull]
         public string Website => "https://www.claunia.com";
         [NotNull]

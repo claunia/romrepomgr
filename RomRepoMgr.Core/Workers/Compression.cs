@@ -20,7 +20,7 @@
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2017-2021 Natalia Portillo
+// Copyright © 2017-2024 Natalia Portillo
 *******************************************************************************/
 
 using System;
