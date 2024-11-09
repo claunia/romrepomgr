@@ -10,7 +10,7 @@
     <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="EFCore.BulkExtensions" Version="8.1.1" />
     <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
-    <PackageReference Include="SharpCompress" Version="0.26.0"/>
+    <PackageReference Include="SharpCompress" Version="0.38.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
   </ItemGroup>
 
