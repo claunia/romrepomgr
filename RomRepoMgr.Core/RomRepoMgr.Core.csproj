@@ -12,13 +12,13 @@
     <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
     <PackageReference Include="SharpCompress" Version="0.38.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
+    <PackageReference Include="winfsp.net" Version="2.1.24255" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
     <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
-    <ProjectReference Include="..\winfsp-netcore\winfsp-netcore.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
