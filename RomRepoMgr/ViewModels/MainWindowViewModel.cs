@@ -33,8 +33,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Filesystem;
@@ -233,12 +233,12 @@ public class MainWindowViewModel : ViewModelBase
         if(SelectedRomSet == null) return;
 
         ButtonResult result = await MessageBoxManager
-                                   .GetMessageBoxStandardWindow(Localization.DeleteRomSetMsgBoxTitle,
-                                                                string.Format(Localization.DeleteRomSetMsgBoxCaption,
-                                                                              SelectedRomSet.Name),
-                                                                ButtonEnum.YesNo,
-                                                                Icon.Database)
-                                   .ShowDialog(_view);
+                                   .GetMessageBoxStandard(Localization.DeleteRomSetMsgBoxTitle,
+                                                          string.Format(Localization.DeleteRomSetMsgBoxCaption,
+                                                                        SelectedRomSet.Name),
+                                                          ButtonEnum.YesNo,
+                                                          Icon.Database)
+                                   .ShowWindowDialogAsync(_view);
 
         if(result == ButtonResult.No) return;
 
@@ -343,11 +343,11 @@ public class MainWindowViewModel : ViewModelBase
     async void ExecuteUpdateStatsCommand()
     {
         ButtonResult result = await MessageBoxManager
-                                   .GetMessageBoxStandardWindow(Localization.DatabaseMenuUpdateStatsText,
-                                                                Localization.UpdateStatsConfirmationDialogText,
-                                                                ButtonEnum.YesNo,
-                                                                Icon.Database)
-                                   .ShowDialog(_view);
+                                   .GetMessageBoxStandard(Localization.DatabaseMenuUpdateStatsText,
+                                                          Localization.UpdateStatsConfirmationDialogText,
+                                                          ButtonEnum.YesNo,
+                                                          Icon.Database)
+                                   .ShowWindowDialogAsync(_view);
 
         if(result == ButtonResult.No) return;
 

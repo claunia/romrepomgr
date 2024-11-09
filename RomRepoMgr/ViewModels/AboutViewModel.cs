@@ -143,7 +143,7 @@ public sealed class AboutViewModel : ViewModelBase
     {
         /*            var dialog = new LicenseDialog();
                     dialog.DataContext = new LicenseViewModel(dialog);
-                    dialog.ShowDialog(_view);*/
+                    dialog.ShowWindowDialogAsync(_view);*/
     }
 
     void ExecuteCloseCommand() => _view.Close();

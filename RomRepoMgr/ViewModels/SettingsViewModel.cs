@@ -29,9 +29,9 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
 using Microsoft.EntityFrameworkCore;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
@@ -154,9 +154,8 @@ public sealed class SettingsViewModel : ViewModelBase
         UnArVersion = "";
         UnArPath    = "";
 
-        await MessageBoxManager
-             .GetMessageBoxStandardWindow(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error)
-             .ShowDialog(_view);
+        await MessageBoxManager.GetMessageBoxStandard(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error)
+                               .ShowWindowDialogAsync(_view);
     }
 
     void CheckUnArFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
@@ -230,11 +229,11 @@ public sealed class SettingsViewModel : ViewModelBase
         if(File.Exists(result))
         {
             ButtonResult btnResult = await MessageBoxManager
-                                          .GetMessageBoxStandardWindow(Localization.DatabaseFileExistsMsgBoxTitle,
-                                                                       Localization.DatabaseFileTryOpenCaption,
-                                                                       ButtonEnum.YesNo,
-                                                                       Icon.Database)
-                                          .ShowDialog(_view);
+                                          .GetMessageBoxStandard(Localization.DatabaseFileExistsMsgBoxTitle,
+                                                                 Localization.DatabaseFileTryOpenCaption,
+                                                                 ButtonEnum.YesNo,
+                                                                 Icon.Database)
+                                          .ShowWindowDialogAsync(_view);
 
             if(btnResult == ButtonResult.Yes)
             {
@@ -246,11 +245,11 @@ public sealed class SettingsViewModel : ViewModelBase
                 catch(Exception)
                 {
                     btnResult = await MessageBoxManager
-                                     .GetMessageBoxStandardWindow(Localization.DatabaseFileUnusableMsgBoxTitle,
-                                                                  Localization.DatabaseFileUnusableDeleteMsgBoxCaption,
-                                                                  ButtonEnum.YesNo,
-                                                                  Icon.Error)
-                                     .ShowDialog(_view);
+                                     .GetMessageBoxStandard(Localization.DatabaseFileUnusableMsgBoxTitle,
+                                                            Localization.DatabaseFileUnusableDeleteMsgBoxCaption,
+                                                            ButtonEnum.YesNo,
+                                                            Icon.Error)
+                                     .ShowWindowDialogAsync(_view);
 
                     if(btnResult == ButtonResult.No) return;
 
@@ -261,11 +260,11 @@ public sealed class SettingsViewModel : ViewModelBase
                     catch(Exception)
                     {
                         await MessageBoxManager
-                             .GetMessageBoxStandardWindow(Localization.DatabaseFileCannotDeleteTitle,
-                                                          Localization.DatabaseFileCannotDeleteCaption,
-                                                          ButtonEnum.Ok,
-                                                          Icon.Error)
-                             .ShowDialog(_view);
+                             .GetMessageBoxStandard(Localization.DatabaseFileCannotDeleteTitle,
+                                                    Localization.DatabaseFileCannotDeleteCaption,
+                                                    ButtonEnum.Ok,
+                                                    Icon.Error)
+                             .ShowWindowDialogAsync(_view);
 
                         return;
                     }
@@ -274,11 +273,11 @@ public sealed class SettingsViewModel : ViewModelBase
             else
             {
                 btnResult = await MessageBoxManager
-                                 .GetMessageBoxStandardWindow(Localization.DatabaseFileExistsMsgBoxTitle,
-                                                              Localization.DatabaseFileDeleteCaption,
-                                                              ButtonEnum.YesNo,
-                                                              Icon.Error)
-                                 .ShowDialog(_view);
+                                 .GetMessageBoxStandard(Localization.DatabaseFileExistsMsgBoxTitle,
+                                                        Localization.DatabaseFileDeleteCaption,
+                                                        ButtonEnum.YesNo,
+                                                        Icon.Error)
+                                 .ShowWindowDialogAsync(_view);
 
                 if(btnResult == ButtonResult.No) return;
 
@@ -289,11 +288,11 @@ public sealed class SettingsViewModel : ViewModelBase
                 catch(Exception)
                 {
                     await MessageBoxManager
-                         .GetMessageBoxStandardWindow(Localization.DatabaseFileCannotDeleteTitle,
-                                                      Localization.DatabaseFileCannotDeleteCaption,
-                                                      ButtonEnum.Ok,
-                                                      Icon.Error)
-                         .ShowDialog(_view);
+                         .GetMessageBoxStandard(Localization.DatabaseFileCannotDeleteTitle,
+                                                Localization.DatabaseFileCannotDeleteCaption,
+                                                ButtonEnum.Ok,
+                                                Icon.Error)
+                         .ShowWindowDialogAsync(_view);
 
                     return;
                 }
@@ -308,11 +307,11 @@ public sealed class SettingsViewModel : ViewModelBase
         catch(Exception)
         {
             await MessageBoxManager
-                 .GetMessageBoxStandardWindow(Localization.DatabaseFileUnusableMsgBoxTitle,
-                                              Localization.DatabaseFileUnusableMsgBoxCaption,
-                                              ButtonEnum.Ok,
-                                              Icon.Error)
-                 .ShowDialog(_view);
+                 .GetMessageBoxStandard(Localization.DatabaseFileUnusableMsgBoxTitle,
+                                        Localization.DatabaseFileUnusableMsgBoxCaption,
+                                        ButtonEnum.Ok,
+                                        Icon.Error)
+                 .ShowWindowDialogAsync(_view);
 
             return;
         }
