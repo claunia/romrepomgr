@@ -31,7 +31,7 @@ using System.Reactive;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Resources;
@@ -71,45 +71,35 @@ public sealed class AboutViewModel : ViewModelBase
 
                 if(name is null || version is null) continue;
 
-                Assemblies.Add(new AssemblyModel
+                Dispatcher.UIThread.Post(() =>
                 {
-                    Name    = name,
-                    Version = version
+                    Assemblies.Add(new AssemblyModel
+                    {
+                        Name    = name,
+                        Version = version
+                    });
                 });
             }
         });
     }
 
-    [NotNull]
-    public string AboutLabel => Localization.AboutLabel;
-    [NotNull]
-    public string LibrariesLabel => Localization.LibrariesLabel;
-    [NotNull]
-    public string AuthorsLabel => Localization.AuthorsLabel;
-    [NotNull]
-    public string Title => Localization.AboutTitle;
-    [NotNull]
-    public string SoftwareName => "RomRepoMgr";
-    [NotNull]
-    public string SuiteName => "ROM Repository Manager";
-    [NotNull]
-    public string Copyright => "© 2020-2024 Natalia Portillo";
-    [NotNull]
-    public string Website => "https://www.claunia.com";
-    [NotNull]
-    public string License => Localization.LicenseLabel;
-    [NotNull]
-    public string CloseLabel => Localization.CloseLabel;
-    [NotNull]
-    public string AssembliesLibraryText => Localization.AssembliesLibraryText;
-    [NotNull]
-    public string AssembliesVersionText => Localization.AssembliesVersionText;
-    [NotNull]
-    public string Authors => Localization.AuthorsText;
-    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
-    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
-    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }
-    public ObservableCollection<AssemblyModel> Assemblies     { get; }
+    public string                              AboutLabel            => Localization.AboutLabel;
+    public string                              LibrariesLabel        => Localization.LibrariesLabel;
+    public string                              AuthorsLabel          => Localization.AuthorsLabel;
+    public string                              Title                 => Localization.AboutTitle;
+    public string                              SoftwareName          => "RomRepoMgr";
+    public string                              SuiteName             => "ROM Repository Manager";
+    public string                              Copyright             => "© 2020-2024 Natalia Portillo";
+    public string                              Website               => "https://www.claunia.com";
+    public string                              License               => Localization.LicenseLabel;
+    public string                              CloseLabel            => Localization.CloseLabel;
+    public string                              AssembliesLibraryText => Localization.AssembliesLibraryText;
+    public string                              AssembliesVersionText => Localization.AssembliesVersionText;
+    public string                              Authors               => Localization.AuthorsText;
+    public ReactiveCommand<Unit, Unit>         WebsiteCommand        { get; }
+    public ReactiveCommand<Unit, Unit>         LicenseCommand        { get; }
+    public ReactiveCommand<Unit, Unit>         CloseCommand          { get; }
+    public ObservableCollection<AssemblyModel> Assemblies            { get; }
 
     public string VersionText
     {

@@ -27,7 +27,6 @@ using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core;
 using RomRepoMgr.Core.EventArgs;
@@ -63,7 +62,6 @@ public sealed class ExportDatViewModel : ViewModelBase
         _worker.FailedWithText   += OnWorkerOnFailedWithText;
     }
 
-    [NotNull]
     public string Title => Localization.ExportDatTitle;
 
     public string StatusMessage

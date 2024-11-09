@@ -6,18 +6,16 @@
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Styles>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml" />
-        <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseLight.xaml" />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Default.xaml" />
+        <FluentTheme />
     </Application.Styles>
     <NativeMenu.Menu>
         <NativeMenu>
             <NativeMenuItem Header="_About"
-                            Clicked="OnAboutClicked" />
+                            Click="OnAboutClicked" />
             <NativeMenuItem Header="_Preferences"
-                            Clicked="OnPreferencesClicked" />
+                            Click="OnPreferencesClicked" />
             <NativeMenuItem Header="_Quit"
-                            Clicked="OnQuitClicked" />
+                            Click="OnQuitClicked" />
         </NativeMenu>
     </NativeMenu.Menu>
 </Application>

@@ -98,7 +98,7 @@
                              IsIndeterminate="{Binding Progress2IsIndeterminate}" />
             </StackPanel>
             <DataGrid Grid.Row="7"
-                      Items="{Binding ImportResults}"
+                      ItemsSource="{Binding ImportResults}"
                       HorizontalScrollBarVisibility="Visible"
                       IsVisible="{Binding IsImporting}">
                 <DataGrid.Columns>

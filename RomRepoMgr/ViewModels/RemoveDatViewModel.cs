@@ -26,7 +26,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core;
 using RomRepoMgr.Database;
@@ -48,7 +47,6 @@ public sealed class RemoveDatViewModel : ViewModelBase
         _romSetId = romSetId;
     }
 
-    [NotNull]
     public string Title => Localization.RemoveDatTitle;
 
     public string StatusMessage

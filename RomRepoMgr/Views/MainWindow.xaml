@@ -78,7 +78,7 @@
                 <TabItem.Header>
                     <TextBlock Text="{Binding RomSetLabel}" />
                 </TabItem.Header>
-                <DataGrid Items="{Binding RomSets}"
+                <DataGrid ItemsSource="{Binding RomSets}"
                           HorizontalScrollBarVisibility="Visible"
                           SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}"
                           CanUserSortColumns="True"

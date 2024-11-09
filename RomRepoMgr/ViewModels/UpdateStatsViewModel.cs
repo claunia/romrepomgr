@@ -29,7 +29,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
@@ -61,8 +60,7 @@ public sealed class UpdateStatsViewModel : ViewModelBase
         RomSets               = new ObservableCollection<RomSetModel>();
     }
 
-    [NotNull]
-    public string Title => Localization.UpdateStatsTitle;
+    public string Title                         => Localization.UpdateStatsTitle;
     public string RomSetNameLabel               => Localization.RomSetNameLabel;
     public string RomSetVersionLabel            => Localization.RomSetVersionLabel;
     public string RomSetAuthorLabel             => Localization.RomSetAuthorLabel;

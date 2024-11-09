@@ -27,7 +27,6 @@ using System;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
@@ -66,7 +65,6 @@ public sealed class ImportDatViewModel : ViewModelBase
         _worker.WorkFinished             += OnWorkerOnWorkFinished;
     }
 
-    [NotNull]
     public string Title => Localization.ImportDatTitle;
 
     public string StatusMessage

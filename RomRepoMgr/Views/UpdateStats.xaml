@@ -57,7 +57,7 @@
                          HorizontalAlignment="Stretch"
                          IsVisible="{Binding ProgressVisible}" />
             <DataGrid Grid.Row="2"
-                      Items="{Binding RomSets}"
+                      ItemsSource="{Binding RomSets}"
                       HorizontalScrollBarVisibility="Visible"
                       SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}"
                       CanUserSortColumns="True"

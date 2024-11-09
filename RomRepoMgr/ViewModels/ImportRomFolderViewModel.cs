@@ -28,7 +28,6 @@ using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
@@ -199,7 +198,6 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isImporting, value);
     }
 
-    [NotNull]
     public string Title => Localization.ImportRomFolderTitle;
 
     public ObservableCollection<ImportRomItem> ImportResults       { get; }

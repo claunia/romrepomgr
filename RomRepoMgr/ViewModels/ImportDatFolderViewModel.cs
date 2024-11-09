@@ -30,7 +30,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
@@ -192,7 +191,6 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _category, value);
     }
 
-    [NotNull]
     public string Title => Localization.ImportDatFolderTitle;
 
     public ObservableCollection<ImportDatFolderItem> ImportResults       { get; }

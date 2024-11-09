@@ -29,7 +29,6 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using JetBrains.Annotations;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -150,7 +149,7 @@ public sealed class SettingsViewModel : ViewModelBase
         Task.Run(() => worker.CheckUnAr(UnArPath));
     }
 
-    async void CheckUnArFailed(object sender, [NotNull] ErrorEventArgs args)
+    async void CheckUnArFailed(object sender, ErrorEventArgs args)
     {
         UnArVersion = "";
         UnArPath    = "";
