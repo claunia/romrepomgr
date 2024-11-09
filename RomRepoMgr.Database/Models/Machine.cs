@@ -26,17 +26,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Models;
+
+public class Machine : BaseModel<ulong>
 {
-    public class Machine : BaseModel<ulong>
-    {
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public virtual RomSet RomSet { get;                        set; }
-        public virtual ICollection<FileByMachine>  Files    { get; set; }
-        public virtual ICollection<DiskByMachine>  Disks    { get; set; }
-        public virtual ICollection<MediaByMachine> Medias   { get; set; }
-        public         long                        RomSetId { get; set; }
-    }
+    [Required]
+    public string Name { get; set; }
+    [Required]
+    public virtual RomSet RomSet { get;                        set; }
+    public virtual ICollection<FileByMachine>  Files    { get; set; }
+    public virtual ICollection<DiskByMachine>  Disks    { get; set; }
+    public virtual ICollection<MediaByMachine> Medias   { get; set; }
+    public         long                        RomSetId { get; set; }
 }

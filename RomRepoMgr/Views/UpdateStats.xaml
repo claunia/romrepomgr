@@ -24,12 +24,19 @@
 // Copyright © 2020-2024 Natalia Portillo
 // ****************************************************************************/
 -->
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" x:Class="RomRepoMgr.Views.UpdateStats" Icon="/Assets/avalonia-logo.ico" CanResize="False"
-        Title="{Binding Title}" WindowStartupLocation="CenterOwner">
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="RomRepoMgr.Views.UpdateStats"
+        Icon="/Assets/avalonia-logo.ico"
+        CanResize="False"
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:UpdateStatsViewModel />
     </Design.DataContext>
@@ -39,88 +46,127 @@
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="{Binding StatusMessage}" HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="1" IsIndeterminate="{Binding IndeterminateProgress}"
-                         Maximum="{Binding MaximumValue}" Minimum="{Binding MinimumValue}"
-                         Value="{Binding CurrentValue}" HorizontalAlignment="Stretch"
+            <TextBlock Grid.Row="0"
+                       Text="{Binding StatusMessage}"
+                       HorizontalAlignment="Center" />
+            <ProgressBar Grid.Row="1"
+                         IsIndeterminate="{Binding IndeterminateProgress}"
+                         Maximum="{Binding MaximumValue}"
+                         Minimum="{Binding MinimumValue}"
+                         Value="{Binding CurrentValue}"
+                         HorizontalAlignment="Stretch"
                          IsVisible="{Binding ProgressVisible}" />
-            <DataGrid Grid.Row="2" Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible"
-                      SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}" CanUserSortColumns="True"
+            <DataGrid Grid.Row="2"
+                      Items="{Binding RomSets}"
+                      HorizontalScrollBarVisibility="Visible"
+                      SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}"
+                      CanUserSortColumns="True"
                       CanUserResizeColumns="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Name}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Name}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetNameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Version}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Version}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetVersionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Author}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Author}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetAuthorLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Category}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Category}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetCategoryLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Date}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Date}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetDateLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Description}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Description}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetDescriptionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Comment}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Comment}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetCommentLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Homepage}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Homepage}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetHomepageLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding TotalMachines}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding TotalMachines}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetTotalMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding CompleteMachines}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding CompleteMachines}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetCompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding IncompleteMachines}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding IncompleteMachines}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetIncompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding TotalRoms}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding TotalRoms}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetTotalRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding HaveRoms}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding HaveRoms}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetHaveRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding MissRoms}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding MissRoms}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding RomSetMissRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanClose}"
+            <Button Grid.Row="3"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding CanClose}"
                     Command="{Binding CloseCommand}">
                 <TextBlock Text="{Binding CloseLabel}" />
             </Button>

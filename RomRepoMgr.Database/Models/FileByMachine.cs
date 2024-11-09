@@ -26,22 +26,21 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Models;
+
+public class FileByMachine
 {
-    public class FileByMachine
-    {
-        [Key]
-        public ulong Id { get; set; }
-        [Required]
-        public virtual DbFile File { get; set; }
-        [Required]
-        public virtual Machine Machine { get; set; }
-        [Required]
-        public string Name { get;                    set; }
-        public ulong     FileId               { get; set; }
-        public ulong     MachineId            { get; set; }
-        public DateTime? FileLastModification { get; set; }
-        [StringLength(4096)]
-        public string Path { get; set; }
-    }
+    [Key]
+    public ulong Id { get; set; }
+    [Required]
+    public virtual DbFile File { get; set; }
+    [Required]
+    public virtual Machine Machine { get; set; }
+    [Required]
+    public string Name { get;                    set; }
+    public ulong     FileId               { get; set; }
+    public ulong     MachineId            { get; set; }
+    public DateTime? FileLastModification { get; set; }
+    [StringLength(4096)]
+    public string Path { get; set; }
 }

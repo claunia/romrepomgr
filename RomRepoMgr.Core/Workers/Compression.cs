@@ -32,207 +32,217 @@ using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
-namespace RomRepoMgr.Core.Workers
+namespace RomRepoMgr.Core.Workers;
+
+public sealed class Compression
 {
-    public sealed class Compression
+    const long BUFFER_SIZE = 131072;
+
+    public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
+    public event EventHandler<ProgressEventArgs>       SetProgress;
+    public event EventHandler<MessageEventArgs>        FinishedWithText;
+    public event EventHandler<ErrorEventArgs>          FailedWithText;
+
+    public void CompressFile(string source, string destination)
     {
-        const long BUFFER_SIZE = 131072;
+        var    inFs    = new FileStream(source,      FileMode.Open,      FileAccess.Read);
+        var    outFs   = new FileStream(destination, FileMode.CreateNew, FileAccess.Write);
+        Stream zStream = new LZipStream(outFs, CompressionMode.Compress);
 
-        public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
-        public event EventHandler<ProgressEventArgs>       SetProgress;
-        public event EventHandler<MessageEventArgs>        FinishedWithText;
-        public event EventHandler<ErrorEventArgs>          FailedWithText;
+        var buffer = new byte[BUFFER_SIZE];
 
-        public void CompressFile(string source, string destination)
+        SetProgressBounds?.Invoke(this,
+                                  new ProgressBoundsEventArgs
+                                  {
+                                      Minimum = 0,
+                                      Maximum = inFs.Length
+                                  });
+
+        while(inFs.Position + BUFFER_SIZE <= inFs.Length)
         {
-            var    inFs    = new FileStream(source, FileMode.Open, FileAccess.Read);
-            var    outFs   = new FileStream(destination, FileMode.CreateNew, FileAccess.Write);
-            Stream zStream = new LZipStream(outFs, CompressionMode.Compress);
-
-            byte[] buffer = new byte[BUFFER_SIZE];
-
-            SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
-            {
-                Minimum = 0,
-                Maximum = inFs.Length
-            });
-
-            while(inFs.Position + BUFFER_SIZE <= inFs.Length)
-            {
-                SetProgress?.Invoke(this, new ProgressEventArgs
-                {
-                    Value = inFs.Position
-                });
-
-                inFs.Read(buffer, 0, buffer.Length);
-                zStream.Write(buffer, 0, buffer.Length);
-            }
-
-            buffer = new byte[inFs.Length - inFs.Position];
-
-            SetProgressBounds?.Invoke(this, new ProgressBoundsEventArgs
-            {
-                Minimum = 0,
-                Maximum = inFs.Length
-            });
+            SetProgress?.Invoke(this,
+                                new ProgressEventArgs
+                                {
+                                    Value = inFs.Position
+                                });
 
             inFs.Read(buffer, 0, buffer.Length);
             zStream.Write(buffer, 0, buffer.Length);
-
-            inFs.Close();
-            zStream.Close();
-            outFs.Dispose();
         }
 
-        public void DecompressFile(string source, string destination)
+        buffer = new byte[inFs.Length - inFs.Position];
+
+        SetProgressBounds?.Invoke(this,
+                                  new ProgressBoundsEventArgs
+                                  {
+                                      Minimum = 0,
+                                      Maximum = inFs.Length
+                                  });
+
+        inFs.Read(buffer, 0, buffer.Length);
+        zStream.Write(buffer, 0, buffer.Length);
+
+        inFs.Close();
+        zStream.Close();
+        outFs.Dispose();
+    }
+
+    public void DecompressFile(string source, string destination)
+    {
+        var    inFs    = new FileStream(source,      FileMode.Open,   FileAccess.Read);
+        var    outFs   = new FileStream(destination, FileMode.Create, FileAccess.Write);
+        Stream zStream = new LZipStream(inFs, CompressionMode.Decompress);
+
+        zStream.CopyTo(outFs);
+
+        outFs.Close();
+        zStream.Close();
+        inFs.Close();
+    }
+
+    public bool CheckUnAr(string unArPath)
+    {
+        if(string.IsNullOrWhiteSpace(unArPath))
         {
-            var    inFs    = new FileStream(source, FileMode.Open, FileAccess.Read);
-            var    outFs   = new FileStream(destination, FileMode.Create, FileAccess.Write);
-            Stream zStream = new LZipStream(inFs, CompressionMode.Decompress);
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.UnArPathNotSet
+                                   });
 
-            zStream.CopyTo(outFs);
-
-            outFs.Close();
-            zStream.Close();
-            inFs.Close();
+            return false;
         }
 
-        public bool CheckUnAr(string unArPath)
+        string unarFolder   = Path.GetDirectoryName(unArPath);
+        string extension    = Path.GetExtension(unArPath);
+        string unarfilename = Path.GetFileNameWithoutExtension(unArPath);
+        string lsarfilename = unarfilename.Replace("unar", "lsar");
+        string unarPath     = Path.Combine(unarFolder, unarfilename + extension);
+        string lsarPath     = Path.Combine(unarFolder, lsarfilename + extension);
+
+        if(!File.Exists(unarPath))
         {
-            if(string.IsNullOrWhiteSpace(unArPath))
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.UnArPathNotSet
-                });
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = string.Format(Localization.CannotFindUnArAtPath, unarPath)
+                                   });
 
-                return false;
-            }
+            return false;
+        }
 
-            string unarFolder   = Path.GetDirectoryName(unArPath);
-            string extension    = Path.GetExtension(unArPath);
-            string unarfilename = Path.GetFileNameWithoutExtension(unArPath);
-            string lsarfilename = unarfilename.Replace("unar", "lsar");
-            string unarPath     = Path.Combine(unarFolder, unarfilename + extension);
-            string lsarPath     = Path.Combine(unarFolder, lsarfilename + extension);
+        if(!File.Exists(lsarPath))
+        {
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.CannotFindLsAr
+                                   });
 
-            if(!File.Exists(unarPath))
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = string.Format(Localization.CannotFindUnArAtPath, unarPath)
-                });
+            return false;
+        }
 
-                return false;
-            }
+        string unarOut, lsarOut;
 
-            if(!File.Exists(lsarPath))
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.CannotFindLsAr
-                });
-
-                return false;
-            }
-
-            string unarOut, lsarOut;
-
-            try
-            {
-                var unarProcess = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName               = unarPath,
-                        CreateNoWindow         = true,
-                        RedirectStandardOutput = true,
-                        UseShellExecute        = false
-                    }
-                };
-
-                unarProcess.Start();
-                unarProcess.WaitForExit();
-                unarOut = unarProcess.StandardOutput.ReadToEnd();
-            }
-            catch
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.CannotRunUnAr
-                });
-
-                return false;
-            }
-
-            try
-            {
-                var lsarProcess = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName               = lsarPath,
-                        CreateNoWindow         = true,
-                        RedirectStandardOutput = true,
-                        UseShellExecute        = false
-                    }
-                };
-
-                lsarProcess.Start();
-                lsarProcess.WaitForExit();
-                lsarOut = lsarProcess.StandardOutput.ReadToEnd();
-            }
-            catch
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.CannotRunLsAr
-                });
-
-                return false;
-            }
-
-            if(!unarOut.StartsWith("unar ", StringComparison.CurrentCulture))
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.NotCorrectUnAr
-                });
-
-                return false;
-            }
-
-            if(!lsarOut.StartsWith("lsar ", StringComparison.CurrentCulture))
-            {
-                FailedWithText?.Invoke(this, new ErrorEventArgs
-                {
-                    Message = Localization.NotCorrectLsAr
-                });
-
-                return false;
-            }
-
-            var versionProcess = new Process
+        try
+        {
+            var unarProcess = new Process
             {
                 StartInfo =
                 {
                     FileName               = unarPath,
                     CreateNoWindow         = true,
                     RedirectStandardOutput = true,
-                    UseShellExecute        = false,
-                    Arguments              = "-v"
+                    UseShellExecute        = false
                 }
             };
 
-            versionProcess.Start();
-            versionProcess.WaitForExit();
-
-            FinishedWithText?.Invoke(this, new MessageEventArgs
-            {
-                Message = versionProcess.StandardOutput.ReadToEnd().TrimEnd('\n')
-            });
-
-            return true;
+            unarProcess.Start();
+            unarProcess.WaitForExit();
+            unarOut = unarProcess.StandardOutput.ReadToEnd();
         }
+        catch
+        {
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.CannotRunUnAr
+                                   });
+
+            return false;
+        }
+
+        try
+        {
+            var lsarProcess = new Process
+            {
+                StartInfo =
+                {
+                    FileName               = lsarPath,
+                    CreateNoWindow         = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute        = false
+                }
+            };
+
+            lsarProcess.Start();
+            lsarProcess.WaitForExit();
+            lsarOut = lsarProcess.StandardOutput.ReadToEnd();
+        }
+        catch
+        {
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.CannotRunLsAr
+                                   });
+
+            return false;
+        }
+
+        if(!unarOut.StartsWith("unar ", StringComparison.CurrentCulture))
+        {
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.NotCorrectUnAr
+                                   });
+
+            return false;
+        }
+
+        if(!lsarOut.StartsWith("lsar ", StringComparison.CurrentCulture))
+        {
+            FailedWithText?.Invoke(this,
+                                   new ErrorEventArgs
+                                   {
+                                       Message = Localization.NotCorrectLsAr
+                                   });
+
+            return false;
+        }
+
+        var versionProcess = new Process
+        {
+            StartInfo =
+            {
+                FileName               = unarPath,
+                CreateNoWindow         = true,
+                RedirectStandardOutput = true,
+                UseShellExecute        = false,
+                Arguments              = "-v"
+            }
+        };
+
+        versionProcess.Start();
+        versionProcess.WaitForExit();
+
+        FinishedWithText?.Invoke(this,
+                                 new MessageEventArgs
+                                 {
+                                     Message = versionProcess.StandardOutput.ReadToEnd().TrimEnd('\n')
+                                 });
+
+        return true;
     }
 }

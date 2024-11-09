@@ -25,10 +25,9 @@
 
 using RomRepoMgr.Core.Models;
 
-namespace RomRepoMgr.Core.EventArgs
+namespace RomRepoMgr.Core.EventArgs;
+
+public sealed class ImportedRomItemEventArgs : System.EventArgs
 {
-    public sealed class ImportedRomItemEventArgs : System.EventArgs
-    {
-        public ImportRomItem Item { get; set; }
-    }
+    public ImportRomItem Item { get; set; }
 }

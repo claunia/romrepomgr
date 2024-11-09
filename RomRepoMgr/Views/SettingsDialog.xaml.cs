@@ -26,12 +26,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace RomRepoMgr.Views
-{
-    public sealed class SettingsDialog : Window
-    {
-        public SettingsDialog() => InitializeComponent();
+namespace RomRepoMgr.Views;
 
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-    }
+public sealed class SettingsDialog : Window
+{
+    public SettingsDialog() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

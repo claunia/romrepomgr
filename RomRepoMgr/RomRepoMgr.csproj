@@ -1,44 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>default</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <Compile Update="**\*.xaml.cs">
-            <DependentUpon>%(Filename)</DependentUpon>
-        </Compile>
-        <AvaloniaResource Include="**\*.xaml">
-            <SubType>Designer</SubType>
-        </AvaloniaResource>
-        <AvaloniaResource Include="Assets\**" />
-        <Compile Update="Resources\Localization.Designer.cs">
-          <DesignTime>True</DesignTime>
-          <AutoGen>True</AutoGen>
-          <DependentUpon>Localization.resx</DependentUpon>
-        </Compile>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.0-rc1" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.0-rc1" />
-        <PackageReference Include="Avalonia.Desktop" Version="0.10.0-rc1" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0-rc1" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0-rc1" />
-        <PackageReference Include="MessageBox.Avalonia" Version="0.10.7-rc1" />
-        <PackageReference Include="Svg.Skia.Avalonia" Version="0.10.0-preview7" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
-      <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
-      <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj" />
-      <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
-      <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj" />
-      <ProjectReference Include="..\SabreTools\SabreTools.IO\SabreTools.IO.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <EmbeddedResource Update="Resources\Localization.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Localization.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>default</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="**\*.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <AvaloniaResource Include="**\*.xaml">
+      <SubType>Designer</SubType>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Assets\**"/>
+    <Compile Update="Resources\Localization.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Localization.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.0-rc1"/>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.0-rc1"/>
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.0-rc1"/>
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0-rc1"/>
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0-rc1"/>
+    <PackageReference Include="MessageBox.Avalonia" Version="0.10.7-rc1"/>
+    <PackageReference Include="Svg.Skia.Avalonia" Version="0.10.0-preview7"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
+    <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
+    <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.IO\SabreTools.IO.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Localization.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

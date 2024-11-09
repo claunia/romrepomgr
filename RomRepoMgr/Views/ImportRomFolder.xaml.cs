@@ -26,12 +26,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace RomRepoMgr.Views
-{
-    public sealed class ImportRomFolder : Window
-    {
-        public ImportRomFolder() => InitializeComponent();
+namespace RomRepoMgr.Views;
 
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-    }
+public sealed class ImportRomFolder : Window
+{
+    public ImportRomFolder() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

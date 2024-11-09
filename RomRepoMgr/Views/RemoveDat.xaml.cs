@@ -28,18 +28,17 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using RomRepoMgr.ViewModels;
 
-namespace RomRepoMgr.Views
+namespace RomRepoMgr.Views;
+
+public sealed class RemoveDat : Window
 {
-    public sealed class RemoveDat : Window
+    public RemoveDat() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    protected override void OnOpened(EventArgs e)
     {
-        public RemoveDat() => InitializeComponent();
-
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-        protected override void OnOpened(EventArgs e)
-        {
-            base.OnOpened(e);
-            (DataContext as RemoveDatViewModel)?.OnOpened();
-        }
+        base.OnOpened(e);
+        (DataContext as RemoveDatViewModel)?.OnOpened();
     }
 }

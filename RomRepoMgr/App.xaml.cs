@@ -34,79 +34,77 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.ViewModels;
 using RomRepoMgr.Views;
 
-namespace RomRepoMgr
+namespace RomRepoMgr;
+
+public class App : Application
 {
-    public class App : Application
+    List<RomSetModel> _romSets;
+
+    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+
+    public override void OnFrameworkInitializationCompleted()
     {
-        List<RomSetModel> _romSets;
-
-        public override void Initialize() => AvaloniaXamlLoader.Load(this);
-
-        public override void OnFrameworkInitializationCompleted()
+        if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                var splashWindow = new SplashWindow();
-                var swvm         = new SplashWindowViewModel();
-                swvm.WorkFinished        += OnSplashFinished;
-                swvm.GotRomSets          += OnGotRomSets;
-                splashWindow.DataContext =  swvm;
-                desktop.MainWindow       =  splashWindow;
-            }
-
-            base.OnFrameworkInitializationCompleted();
+            var splashWindow = new SplashWindow();
+            var swvm         = new SplashWindowViewModel();
+            swvm.WorkFinished        += OnSplashFinished;
+            swvm.GotRomSets          += OnGotRomSets;
+            splashWindow.DataContext =  swvm;
+            desktop.MainWindow       =  splashWindow;
         }
 
-        void OnGotRomSets(object sender, RomSetsEventArgs e) => _romSets = e.RomSets;
+        base.OnFrameworkInitializationCompleted();
+    }
 
-        void OnSplashFinished(object sender, EventArgs e)
-        {
-            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop))
-                return;
+    void OnGotRomSets(object sender, RomSetsEventArgs e) => _romSets = e.RomSets;
 
-            // Ensure not exit
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+    void OnSplashFinished(object sender, EventArgs e)
+    {
+        if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)) return;
 
-            // Close splash window
-            desktop.MainWindow.Close();
+        // Ensure not exit
+        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            // Create and show main window
-            desktop.MainWindow             = new MainWindow();
-            desktop.MainWindow.DataContext = new MainWindowViewModel(desktop.MainWindow as MainWindow, _romSets);
-            desktop.MainWindow.Show();
+        // Close splash window
+        desktop.MainWindow.Close();
 
-            // Now can close when all windows are closed
-            desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
-        }
+        // Create and show main window
+        desktop.MainWindow             = new MainWindow();
+        desktop.MainWindow.DataContext = new MainWindowViewModel(desktop.MainWindow as MainWindow, _romSets);
+        desktop.MainWindow.Show();
 
-        void OnAboutClicked(object sender, EventArgs args)
-        {
-            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
-               !(desktop.MainWindow is MainWindow mainWindow)                            ||
-               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
-                return;
+        // Now can close when all windows are closed
+        desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+    }
 
-            mainWindowViewModel.ExecuteAboutCommand();
-        }
+    void OnAboutClicked(object sender, EventArgs args)
+    {
+        if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+           !(desktop.MainWindow is MainWindow mainWindow)                            ||
+           !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+            return;
 
-        void OnQuitClicked(object sender, EventArgs args)
-        {
-            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
-               !(desktop.MainWindow is MainWindow mainWindow)                            ||
-               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
-                return;
+        mainWindowViewModel.ExecuteAboutCommand();
+    }
 
-            mainWindowViewModel.ExecuteExitCommand();
-        }
+    void OnQuitClicked(object sender, EventArgs args)
+    {
+        if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+           !(desktop.MainWindow is MainWindow mainWindow)                            ||
+           !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+            return;
 
-        void OnPreferencesClicked(object sender, EventArgs args)
-        {
-            if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
-               !(desktop.MainWindow is MainWindow mainWindow)                            ||
-               !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
-                return;
+        mainWindowViewModel.ExecuteExitCommand();
+    }
 
-            mainWindowViewModel.ExecuteSettingsCommand();
-        }
+    void OnPreferencesClicked(object sender, EventArgs args)
+    {
+        if(!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) ||
+           !(desktop.MainWindow is MainWindow mainWindow)                            ||
+           !(mainWindow.DataContext is MainWindowViewModel mainWindowViewModel))
+            return;
+
+        mainWindowViewModel.ExecuteSettingsCommand();
     }
 }

@@ -25,10 +25,9 @@
 
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace RomRepoMgr.Database
+namespace RomRepoMgr.Database;
+
+public class ContextFactory : IDesignTimeDbContextFactory<Context>
 {
-    public class ContextFactory : IDesignTimeDbContextFactory<Context>
-    {
-        public Context CreateDbContext(string[] args) => Context.Create("romrepo.db");
-    }
+    public Context CreateDbContext(string[] args) => Context.Create("romrepo.db");
 }

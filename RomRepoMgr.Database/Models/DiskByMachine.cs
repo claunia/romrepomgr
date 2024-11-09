@@ -25,19 +25,18 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Models;
+
+public class DiskByMachine
 {
-    public class DiskByMachine
-    {
-        [Key]
-        public ulong Id { get; set; }
-        [Required]
-        public virtual DbDisk Disk { get; set; }
-        [Required]
-        public virtual Machine Machine { get; set; }
-        [Required]
-        public string Name { get;     set; }
-        public ulong DiskId    { get; set; }
-        public ulong MachineId { get; set; }
-    }
+    [Key]
+    public ulong Id { get; set; }
+    [Required]
+    public virtual DbDisk Disk { get; set; }
+    [Required]
+    public virtual Machine Machine { get; set; }
+    [Required]
+    public string Name { get;     set; }
+    public ulong DiskId    { get; set; }
+    public ulong MachineId { get; set; }
 }

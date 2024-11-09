@@ -27,181 +27,177 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RomRepoMgr.Database.Models;
 
-namespace RomRepoMgr.Database
+namespace RomRepoMgr.Database;
+
+public sealed class Context : DbContext
 {
-    public sealed class Context : DbContext
+    public Context(DbContextOptions options) : base(options) {}
+
+    public DbSet<DbFile>         Files            { get; set; }
+    public DbSet<RomSet>         RomSets          { get; set; }
+    public DbSet<Machine>        Machines         { get; set; }
+    public DbSet<FileByMachine>  FilesByMachines  { get; set; }
+    public DbSet<DbDisk>         Disks            { get; set; }
+    public DbSet<DiskByMachine>  DisksByMachines  { get; set; }
+    public DbSet<DbMedia>        Medias           { get; set; }
+    public DbSet<MediaByMachine> MediasByMachines { get; set; }
+    public DbSet<RomSetStat>     RomSetStats      { get; set; }
+
+    public static Context Create(string dbPath)
     {
-        public Context(DbContextOptions options) : base(options) {}
+        var optionsBuilder = new DbContextOptionsBuilder();
 
-        public DbSet<DbFile>         Files            { get; set; }
-        public DbSet<RomSet>         RomSets          { get; set; }
-        public DbSet<Machine>        Machines         { get; set; }
-        public DbSet<FileByMachine>  FilesByMachines  { get; set; }
-        public DbSet<DbDisk>         Disks            { get; set; }
-        public DbSet<DiskByMachine>  DisksByMachines  { get; set; }
-        public DbSet<DbMedia>        Medias           { get; set; }
-        public DbSet<MediaByMachine> MediasByMachines { get; set; }
-        public DbSet<RomSetStat>     RomSetStats      { get; set; }
+        optionsBuilder.UseLazyLoadingProxies()
+#if DEBUG
+                      .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
+#endif
+                      .UseSqlite($"Data Source={dbPath}");
 
-        public static Context Create(string dbPath)
+        return new Context(optionsBuilder.Options);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<DbFile>(entity =>
         {
-            var optionsBuilder = new DbContextOptionsBuilder();
+            entity.HasIndex(e => e.Crc32);
 
-            optionsBuilder.UseLazyLoadingProxies()
-                       #if DEBUG
-                          .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                       #endif
-                          .UseSqlite($"Data Source={dbPath}");
+            entity.HasIndex(e => e.Md5);
 
-            return new Context(optionsBuilder.Options);
-        }
+            entity.HasIndex(e => e.Sha1);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+            entity.HasIndex(e => e.Sha256);
+
+            entity.HasIndex(e => e.Sha384);
+
+            entity.HasIndex(e => e.Sha512);
+
+            entity.HasIndex(e => e.Size);
+
+            entity.HasIndex(e => e.IsInRepo);
+
+            entity.HasIndex(e => new
+            {
+                e.Crc32,
+                e.Size
+            });
+
+            entity.HasIndex(e => new
+            {
+                e.Md5,
+                e.Size
+            });
+
+            entity.HasIndex(e => new
+            {
+                e.Sha1,
+                e.Size
+            });
+
+            entity.HasIndex(e => new
+            {
+                e.Sha256,
+                e.Size
+            });
+
+            entity.HasIndex(e => new
+            {
+                e.Sha384,
+                e.Size
+            });
+
+            entity.HasIndex(e => new
+            {
+                e.Sha512,
+                e.Size
+            });
+        });
+
+        modelBuilder.Entity<RomSet>(entity =>
         {
-            base.OnModelCreating(modelBuilder);
+            entity.HasIndex(e => e.Author);
 
-            modelBuilder.Entity<DbFile>(entity =>
-            {
-                entity.HasIndex(e => e.Crc32);
+            entity.HasIndex(e => e.Comment);
 
-                entity.HasIndex(e => e.Md5);
+            entity.HasIndex(e => e.Date);
 
-                entity.HasIndex(e => e.Sha1);
+            entity.HasIndex(e => e.Description);
 
-                entity.HasIndex(e => e.Sha256);
+            entity.HasIndex(e => e.Homepage);
 
-                entity.HasIndex(e => e.Sha384);
+            entity.HasIndex(e => e.Name);
 
-                entity.HasIndex(e => e.Sha512);
+            entity.HasIndex(e => e.Version);
 
-                entity.HasIndex(e => e.Size);
+            entity.HasIndex(e => e.Filename);
 
-                entity.HasIndex(e => e.IsInRepo);
+            entity.HasIndex(e => e.Sha384);
 
-                entity.HasIndex(e => new
-                {
-                    e.Crc32,
-                    e.Size
-                });
+            entity.HasIndex(e => e.Category);
+        });
 
-                entity.HasIndex(e => new
-                {
-                    e.Md5,
-                    e.Size
-                });
+        modelBuilder.Entity<Machine>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
 
-                entity.HasIndex(e => new
-                {
-                    e.Sha1,
-                    e.Size
-                });
+            entity.HasOne(e => e.RomSet).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+        });
 
-                entity.HasIndex(e => new
-                {
-                    e.Sha256,
-                    e.Size
-                });
+        modelBuilder.Entity<FileByMachine>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
 
-                entity.HasIndex(e => new
-                {
-                    e.Sha384,
-                    e.Size
-                });
+            entity.HasOne(e => e.Machine).WithMany(e => e.Files).OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasIndex(e => new
-                {
-                    e.Sha512,
-                    e.Size
-                });
-            });
+            entity.HasOne(e => e.File).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+        });
 
-            modelBuilder.Entity<RomSet>(entity =>
-            {
-                entity.HasIndex(e => e.Author);
+        modelBuilder.Entity<DbDisk>(entity =>
+        {
+            entity.HasIndex(e => e.Md5);
 
-                entity.HasIndex(e => e.Comment);
+            entity.HasIndex(e => e.Sha1);
 
-                entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => e.Size);
 
-                entity.HasIndex(e => e.Description);
+            entity.HasIndex(e => e.IsInRepo);
+        });
 
-                entity.HasIndex(e => e.Homepage);
+        modelBuilder.Entity<DiskByMachine>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
 
-                entity.HasIndex(e => e.Name);
+            entity.HasOne(e => e.Machine).WithMany(e => e.Disks).OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasIndex(e => e.Version);
+            entity.HasOne(e => e.Disk).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+        });
 
-                entity.HasIndex(e => e.Filename);
+        modelBuilder.Entity<DbMedia>(entity =>
+        {
+            entity.HasIndex(e => e.Md5);
 
-                entity.HasIndex(e => e.Sha384);
+            entity.HasIndex(e => e.Sha1);
 
-                entity.HasIndex(e => e.Category);
-            });
+            entity.HasIndex(e => e.Sha256);
 
-            modelBuilder.Entity<Machine>(entity =>
-            {
-                entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.SpamSum);
 
-                entity.HasOne(e => e.RomSet).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
-            });
+            entity.HasIndex(e => e.Size);
 
-            modelBuilder.Entity<FileByMachine>(entity =>
-            {
-                entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.IsInRepo);
+        });
 
-                entity.HasOne(e => e.Machine).WithMany(e => e.Files).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<MediaByMachine>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
 
-                entity.HasOne(e => e.File).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
-            });
+            entity.HasOne(e => e.Machine).WithMany(e => e.Medias).OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<DbDisk>(entity =>
-            {
-                entity.HasIndex(e => e.Md5);
+            entity.HasOne(e => e.Media).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
+        });
 
-                entity.HasIndex(e => e.Sha1);
-
-                entity.HasIndex(e => e.Size);
-
-                entity.HasIndex(e => e.IsInRepo);
-            });
-
-            modelBuilder.Entity<DiskByMachine>(entity =>
-            {
-                entity.HasIndex(e => e.Name);
-
-                entity.HasOne(e => e.Machine).WithMany(e => e.Disks).OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(e => e.Disk).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<DbMedia>(entity =>
-            {
-                entity.HasIndex(e => e.Md5);
-
-                entity.HasIndex(e => e.Sha1);
-
-                entity.HasIndex(e => e.Sha256);
-
-                entity.HasIndex(e => e.SpamSum);
-
-                entity.HasIndex(e => e.Size);
-
-                entity.HasIndex(e => e.IsInRepo);
-            });
-
-            modelBuilder.Entity<MediaByMachine>(entity =>
-            {
-                entity.HasIndex(e => e.Name);
-
-                entity.HasOne(e => e.Machine).WithMany(e => e.Medias).OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(e => e.Media).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<RomSetStat>(entity =>
-            {
-                entity.HasOne(e => e.RomSet).WithOne(e => e.Statistics);
-            });
-        }
+        modelBuilder.Entity<RomSetStat>(entity => { entity.HasOne(e => e.RomSet).WithOne(e => e.Statistics); });
     }
 }

@@ -28,18 +28,17 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using RomRepoMgr.ViewModels;
 
-namespace RomRepoMgr.Views
+namespace RomRepoMgr.Views;
+
+public sealed class ImportDatFolder : Window
 {
-    public sealed class ImportDatFolder : Window
+    public ImportDatFolder() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    protected override void OnOpened(EventArgs e)
     {
-        public ImportDatFolder() => InitializeComponent();
-
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-        protected override void OnOpened(EventArgs e)
-        {
-            base.OnOpened(e);
-            (DataContext as ImportDatFolderViewModel)?.OnOpened();
-        }
+        base.OnOpened(e);
+        (DataContext as ImportDatFolderViewModel)?.OnOpened();
     }
 }

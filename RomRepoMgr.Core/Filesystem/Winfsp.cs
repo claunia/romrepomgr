@@ -11,361 +11,262 @@ using Fsp.Interop;
 using RomRepoMgr.Database.Models;
 using FileInfo = Fsp.Interop.FileInfo;
 
-namespace RomRepoMgr.Core.Filesystem
+namespace RomRepoMgr.Core.Filesystem;
+
+[SupportedOSPlatform("windows")]
+public class Winfsp : FileSystemBase
 {
-    [SupportedOSPlatform("windows")]
-    public class Winfsp : FileSystemBase
+    readonly Vfs   _vfs;
+    FileSystemHost _host;
+
+    public Winfsp(Vfs vfs) => _vfs = vfs;
+
+    public static bool IsAvailable
     {
-        readonly Vfs   _vfs;
-        FileSystemHost _host;
-
-        public Winfsp(Vfs vfs) => _vfs = vfs;
-
-        public static bool IsAvailable
+        get
         {
-            get
+            try
             {
-                try
-                {
-                    Version winfspVersion = FileSystemHost.Version();
+                Version winfspVersion = FileSystemHost.Version();
 
-                    if(winfspVersion == null)
-                        return false;
+                if(winfspVersion == null) return false;
 
-                    return winfspVersion.Major == 1 && winfspVersion.Minor >= 7;
-                }
-                catch(Exception)
-                {
-                    return false;
-                }
+                return winfspVersion.Major == 1 && winfspVersion.Minor >= 7;
+            }
+            catch(Exception)
+            {
+                return false;
             }
         }
+    }
 
-        internal bool Mount(string mountPoint)
+    internal bool Mount(string mountPoint)
+    {
+        _host = new FileSystemHost(this)
         {
-            _host = new FileSystemHost(this)
+            SectorSize               = 512,
+            CasePreservedNames       = true,
+            CaseSensitiveSearch      = true,
+            FileSystemName           = "romrepomgrfs",
+            MaxComponentLength       = 255,
+            UnicodeOnDisk            = true,
+            SectorsPerAllocationUnit = 1
+        };
+
+        if(Directory.Exists(mountPoint)) Directory.Delete(mountPoint);
+
+        int ret = _host.Mount(mountPoint);
+
+        if(ret == STATUS_SUCCESS) return true;
+
+        _host = null;
+
+        return false;
+    }
+
+    internal void Umount() => _host?.Unmount();
+
+    public override int SetVolumeLabel(string volumeLabel, out VolumeInfo volumeInfo)
+    {
+        volumeInfo = default(VolumeInfo);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int Create(string     fileName, uint createOptions, uint grantedAccess, uint fileAttributes,
+                               byte[]     securityDescriptor, ulong allocationSize, out object fileNode,
+                               out object fileDesc, out FileInfo fileInfo, out string normalizedName)
+    {
+        fileNode       = default(object);
+        fileDesc       = default(object);
+        fileInfo       = default(FileInfo);
+        normalizedName = default(string);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int Overwrite(object fileNode, object fileDesc, uint fileAttributes, bool replaceFileAttributes,
+                                  ulong  allocationSize, out FileInfo fileInfo)
+    {
+        fileInfo = default(FileInfo);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int Write(object       fileNode,         object fileDesc, IntPtr buffer, ulong offset, uint length,
+                              bool         writeToEndOfFile, bool   constrainedIo, out uint bytesTransferred,
+                              out FileInfo fileInfo)
+    {
+        bytesTransferred = default(uint);
+        fileInfo         = default(FileInfo);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int SetBasicInfo(object fileNode, object fileDesc, uint fileAttributes, ulong creationTime,
+                                     ulong lastAccessTime, ulong lastWriteTime, ulong changeTime, out FileInfo fileInfo)
+    {
+        fileInfo = default(FileInfo);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int SetFileSize(object       fileNode, object fileDesc, ulong newSize, bool setAllocationSize,
+                                    out FileInfo fileInfo)
+    {
+        fileInfo = default(FileInfo);
+
+        return STATUS_MEDIA_WRITE_PROTECTED;
+    }
+
+    public override int CanDelete(object fileNode, object fileDesc, string fileName) => STATUS_MEDIA_WRITE_PROTECTED;
+
+    public override int Rename(object fileNode, object fileDesc, string fileName, string newFileName,
+                               bool   replaceIfExists) => STATUS_MEDIA_WRITE_PROTECTED;
+
+    public override int GetVolumeInfo(out VolumeInfo volumeInfo)
+    {
+        volumeInfo = new VolumeInfo();
+
+        _vfs.GetInfo(out _, out ulong totalSize);
+
+        volumeInfo.FreeSize  = 0;
+        volumeInfo.TotalSize = totalSize;
+
+        return STATUS_SUCCESS;
+    }
+
+    public override int Open(string     fileName, uint         createOptions, uint grantedAccess, out object fileNode,
+                             out object fileDesc, out FileInfo fileInfo,      out string normalizedName)
+    {
+        fileNode       = default(object);
+        fileDesc       = default(object);
+        fileInfo       = default(FileInfo);
+        normalizedName = default(string);
+
+        string[] pieces = _vfs.SplitPath(fileName);
+
+        // Root directory
+        if(pieces.Length == 0)
+        {
+            fileInfo = new FileInfo
             {
-                SectorSize               = 512,
-                CasePreservedNames       = true,
-                CaseSensitiveSearch      = true,
-                FileSystemName           = "romrepomgrfs",
-                MaxComponentLength       = 255,
-                UnicodeOnDisk            = true,
-                SectorsPerAllocationUnit = 1
+                CreationTime   = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                LastWriteTime  = (ulong)DateTime.UtcNow.ToFileTimeUtc()
             };
 
-            if(Directory.Exists(mountPoint))
-                Directory.Delete(mountPoint);
+            normalizedName = "";
 
-            int ret = _host.Mount(mountPoint);
-
-            if(ret == STATUS_SUCCESS)
-                return true;
-
-            _host = null;
-
-            return false;
-        }
-
-        internal void Umount() => _host?.Unmount();
-
-        public override int SetVolumeLabel(string volumeLabel, out VolumeInfo volumeInfo)
-        {
-            volumeInfo = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int Create(string fileName, uint createOptions, uint grantedAccess, uint fileAttributes,
-                                   byte[] securityDescriptor, ulong allocationSize, out object fileNode,
-                                   out object fileDesc, out FileInfo fileInfo, out string normalizedName)
-        {
-            fileNode       = default;
-            fileDesc       = default;
-            fileInfo       = default;
-            normalizedName = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int Overwrite(object fileNode, object fileDesc, uint fileAttributes, bool replaceFileAttributes,
-                                      ulong allocationSize, out FileInfo fileInfo)
-        {
-            fileInfo = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int Write(object fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
-                                  bool writeToEndOfFile, bool constrainedIo, out uint bytesTransferred,
-                                  out FileInfo fileInfo)
-        {
-            bytesTransferred = default;
-            fileInfo         = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int SetBasicInfo(object fileNode, object fileDesc, uint fileAttributes, ulong creationTime,
-                                         ulong lastAccessTime, ulong lastWriteTime, ulong changeTime,
-                                         out FileInfo fileInfo)
-        {
-            fileInfo = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int SetFileSize(object fileNode, object fileDesc, ulong newSize, bool setAllocationSize,
-                                        out FileInfo fileInfo)
-        {
-            fileInfo = default;
-
-            return STATUS_MEDIA_WRITE_PROTECTED;
-        }
-
-        public override int CanDelete(object fileNode, object fileDesc, string fileName) =>
-            STATUS_MEDIA_WRITE_PROTECTED;
-
-        public override int Rename(object fileNode, object fileDesc, string fileName, string newFileName,
-                                   bool replaceIfExists) => STATUS_MEDIA_WRITE_PROTECTED;
-
-        public override int GetVolumeInfo(out VolumeInfo volumeInfo)
-        {
-            volumeInfo = new VolumeInfo();
-
-            _vfs.GetInfo(out _, out ulong totalSize);
-
-            volumeInfo.FreeSize  = 0;
-            volumeInfo.TotalSize = totalSize;
+            fileNode = new FileNode
+            {
+                FileName    = normalizedName,
+                IsDirectory = true,
+                Info        = fileInfo,
+                Path        = fileName
+            };
 
             return STATUS_SUCCESS;
         }
 
-        public override int Open(string fileName, uint createOptions, uint grantedAccess, out object fileNode,
-                                 out object fileDesc, out FileInfo fileInfo, out string normalizedName)
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        RomSet romSet = _vfs.GetRomSet(romSetId);
+
+        if(romSet == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        // ROM Set
+        if(pieces.Length == 1)
         {
-            fileNode       = default;
-            fileDesc       = default;
-            fileInfo       = default;
-            normalizedName = default;
-
-            string[] pieces = _vfs.SplitPath(fileName);
-
-            // Root directory
-            if(pieces.Length == 0)
+            fileInfo = new FileInfo
             {
-                fileInfo = new FileInfo
+                CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+            };
+
+            normalizedName = Path.GetFileName(fileName);
+
+            fileNode = new FileNode
+            {
+                FileName    = normalizedName,
+                IsDirectory = true,
+                Info        = fileInfo,
+                Path        = fileName,
+                RomSetId    = romSet.Id,
+                ParentInfo = new FileInfo
                 {
                     CreationTime   = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
                     FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
                     LastWriteTime  = (ulong)DateTime.UtcNow.ToFileTimeUtc()
-                };
+                }
+            };
 
-                normalizedName = "";
+            return STATUS_SUCCESS;
+        }
 
-                fileNode = new FileNode
-                {
-                    FileName    = normalizedName,
-                    IsDirectory = true,
-                    Info        = fileInfo,
-                    Path        = fileName
-                };
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-                return STATUS_SUCCESS;
-            }
+        if(machine == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
-
-            if(romSetId <= 0)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            RomSet romSet = _vfs.GetRomSet(romSetId);
-
-            if(romSet == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            // ROM Set
-            if(pieces.Length == 1)
+        // Machine
+        if(pieces.Length == 2)
+        {
+            fileInfo = new FileInfo
             {
-                fileInfo = new FileInfo
+                CreationTime   = (ulong)machine.CreationDate.ToUniversalTime().ToFileTimeUtc(),
+                FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                LastWriteTime  = (ulong)machine.ModificationDate.ToUniversalTime().ToFileTimeUtc()
+            };
+
+            normalizedName = Path.GetFileName(fileName);
+
+            fileNode = new FileNode
+            {
+                FileName    = normalizedName,
+                IsDirectory = true,
+                Info        = fileInfo,
+                Path        = fileName,
+                MachineId   = machine.Id,
+                ParentInfo = new FileInfo
                 {
                     CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
                     FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
                     LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
-                };
+                }
+            };
 
-                normalizedName = Path.GetFileName(fileName);
+            return STATUS_SUCCESS;
+        }
 
-                fileNode = new FileNode
-                {
-                    FileName    = normalizedName,
-                    IsDirectory = true,
-                    Info        = fileInfo,
-                    Path        = fileName,
-                    RomSetId    = romSet.Id,
-                    ParentInfo = new FileInfo
-                    {
-                        CreationTime   = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                        FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                        LastWriteTime  = (ulong)DateTime.UtcNow.ToFileTimeUtc()
-                    }
-                };
+        long       handle = 0;
+        CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
 
-                return STATUS_SUCCESS;
-            }
+        if(file != null)
+        {
+            if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
 
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+            if(file.Sha384 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            if(machine == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+            handle = _vfs.Open(file.Sha384, (long)file.Size);
 
-            // Machine
-            if(pieces.Length == 2)
-            {
-                fileInfo = new FileInfo
-                {
-                    CreationTime   = (ulong)machine.CreationDate.ToUniversalTime().ToFileTimeUtc(),
-                    FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                    LastWriteTime  = (ulong)machine.ModificationDate.ToUniversalTime().ToFileTimeUtc()
-                };
-
-                normalizedName = Path.GetFileName(fileName);
-
-                fileNode = new FileNode
-                {
-                    FileName    = normalizedName,
-                    IsDirectory = true,
-                    Info        = fileInfo,
-                    Path        = fileName,
-                    MachineId   = machine.Id,
-                    ParentInfo = new FileInfo
-                    {
-                        CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
-                        FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                        LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
-                    }
-                };
-
-                return STATUS_SUCCESS;
-            }
-
-            long       handle = 0;
-            CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
-
-            if(file != null)
-            {
-                if(pieces.Length > 3)
-                    return STATUS_INVALID_DEVICE_REQUEST;
-
-                if(file.Sha384 == null)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
-
-                handle = _vfs.Open(file.Sha384, (long)file.Size);
-
-                if(handle <= 0)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
-
-                normalizedName = Path.GetFileName(fileName);
-
-                // TODO: Real allocation size
-                fileInfo = new FileInfo
-                {
-                    ChangeTime     = (ulong)file.UpdatedOn.ToFileTimeUtc(),
-                    AllocationSize = (file.Size + 511) / 512,
-                    FileSize       = file.Size,
-                    CreationTime   = (ulong)file.CreatedOn.ToFileTimeUtc(),
-                    FileAttributes =
-                        (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                    IndexNumber    = file.Id,
-                    LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                    LastWriteTime  = (ulong)(file.FileLastModification?.ToFileTimeUtc() ?? file.UpdatedOn.ToFileTimeUtc())
-                };
-
-                fileNode = new FileNode
-                {
-                    FileName = normalizedName,
-                    Info     = fileInfo,
-                    Path     = fileName,
-                    Handle   = handle
-                };
-
-                return STATUS_SUCCESS;
-            }
-
-            CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
-
-            if(disk != null)
-            {
-                if(pieces.Length > 3)
-                    return STATUS_INVALID_DEVICE_REQUEST;
-
-                if(disk.Sha1 == null &&
-                   disk.Md5  == null)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
-
-                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
-
-                if(handle <= 0)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
-
-                normalizedName = Path.GetFileName(fileName);
-
-                // TODO: Real allocation size
-                fileInfo = new FileInfo
-                {
-                    ChangeTime     = (ulong)disk.UpdatedOn.ToFileTimeUtc(),
-                    AllocationSize = (disk.Size + 511) / 512,
-                    FileSize       = disk.Size,
-                    CreationTime   = (ulong)disk.CreatedOn.ToFileTimeUtc(),
-                    FileAttributes =
-                        (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                    IndexNumber    = disk.Id,
-                    LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                    LastWriteTime  = (ulong)disk.UpdatedOn.ToFileTimeUtc()
-                };
-
-                fileNode = new FileNode
-                {
-                    FileName = normalizedName,
-                    Info     = fileInfo,
-                    Path     = fileName,
-                    Handle   = handle
-                };
-
-                return STATUS_SUCCESS;
-            }
-
-            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
-
-            if(media == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            if(pieces.Length > 3)
-                return STATUS_INVALID_DEVICE_REQUEST;
-
-            if(media.Sha256 == null &&
-               media.Sha1   == null &&
-               media.Md5    == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
-
-            if(handle <= 0)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+            if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
             normalizedName = Path.GetFileName(fileName);
 
             // TODO: Real allocation size
             fileInfo = new FileInfo
             {
-                ChangeTime     = (ulong)media.UpdatedOn.ToFileTimeUtc(),
-                AllocationSize = (media.Size + 511) / 512,
-                FileSize       = media.Size,
-                CreationTime   = (ulong)media.CreatedOn.ToFileTimeUtc(),
+                ChangeTime     = (ulong)file.UpdatedOn.ToFileTimeUtc(),
+                AllocationSize = (file.Size + 511) / 512,
+                FileSize       = file.Size,
+                CreationTime   = (ulong)file.CreatedOn.ToFileTimeUtc(),
                 FileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                IndexNumber    = media.Id,
+                IndexNumber    = file.Id,
                 LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                LastWriteTime  = (ulong)media.UpdatedOn.ToFileTimeUtc()
+                LastWriteTime  = (ulong)(file.FileLastModification?.ToFileTimeUtc() ?? file.UpdatedOn.ToFileTimeUtc())
             };
 
             fileNode = new FileNode
@@ -379,365 +280,411 @@ namespace RomRepoMgr.Core.Filesystem
             return STATUS_SUCCESS;
         }
 
-        public override void Close(object fileNode, object fileDesc)
+        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+
+        if(disk != null)
         {
-            if(!(fileNode is FileNode node))
-                return;
+            if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
 
-            if(node.Handle <= 0)
-                return;
+            if(disk.Sha1 == null && disk.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            _vfs.Close(node.Handle);
-        }
+            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
 
-        public override int Read(object fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
-                                 out uint bytesTransferred)
-        {
-            bytesTransferred = 0;
+            if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            if(!(fileNode is FileNode node) ||
-               node.Handle <= 0)
-                return STATUS_INVALID_HANDLE;
+            normalizedName = Path.GetFileName(fileName);
 
-            byte[] buf = new byte[length];
-
-            int ret = _vfs.Read(node.Handle, buf, (long)offset);
-
-            if(ret < 0)
-                return STATUS_INVALID_HANDLE;
-
-            Marshal.Copy(buf, 0, buffer, ret);
-
-            bytesTransferred = (uint)ret;
-
-            return STATUS_SUCCESS;
-        }
-
-        public override int GetFileInfo(object fileNode, object fileDesc, out FileInfo fileInfo)
-        {
-            fileInfo = default;
-
-            if(!(fileNode is FileNode node))
-                return STATUS_INVALID_HANDLE;
-
-            fileInfo = node.Info;
-
-            return STATUS_SUCCESS;
-        }
-
-        public override bool ReadDirectoryEntry(object fileNode, object fileDesc, string pattern, string marker,
-                                                ref object context, out string fileName, out FileInfo fileInfo)
-        {
-            fileName = default;
-            fileInfo = default;
-
-            if(!(fileNode is FileNode node) ||
-               !node.IsDirectory)
-                return false;
-
-            if(!(context is IEnumerator<FileEntry> enumerator))
+            // TODO: Real allocation size
+            fileInfo = new FileInfo
             {
-                if(node.MachineId > 0)
+                ChangeTime     = (ulong)disk.UpdatedOn.ToFileTimeUtc(),
+                AllocationSize = (disk.Size + 511) / 512,
+                FileSize       = disk.Size,
+                CreationTime   = (ulong)disk.CreatedOn.ToFileTimeUtc(),
+                FileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                IndexNumber    = disk.Id,
+                LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                LastWriteTime  = (ulong)disk.UpdatedOn.ToFileTimeUtc()
+            };
+
+            fileNode = new FileNode
+            {
+                FileName = normalizedName,
+                Info     = fileInfo,
+                Path     = fileName,
+                Handle   = handle
+            };
+
+            return STATUS_SUCCESS;
+        }
+
+        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+        if(media == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
+
+        if(media.Sha256 == null && media.Sha1 == null && media.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
+
+        if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        normalizedName = Path.GetFileName(fileName);
+
+        // TODO: Real allocation size
+        fileInfo = new FileInfo
+        {
+            ChangeTime     = (ulong)media.UpdatedOn.ToFileTimeUtc(),
+            AllocationSize = (media.Size + 511) / 512,
+            FileSize       = media.Size,
+            CreationTime   = (ulong)media.CreatedOn.ToFileTimeUtc(),
+            FileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+            IndexNumber    = media.Id,
+            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+            LastWriteTime  = (ulong)media.UpdatedOn.ToFileTimeUtc()
+        };
+
+        fileNode = new FileNode
+        {
+            FileName = normalizedName,
+            Info     = fileInfo,
+            Path     = fileName,
+            Handle   = handle
+        };
+
+        return STATUS_SUCCESS;
+    }
+
+    public override void Close(object fileNode, object fileDesc)
+    {
+        if(!(fileNode is FileNode node)) return;
+
+        if(node.Handle <= 0) return;
+
+        _vfs.Close(node.Handle);
+    }
+
+    public override int Read(object   fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
+                             out uint bytesTransferred)
+    {
+        bytesTransferred = 0;
+
+        if(!(fileNode is FileNode node) || node.Handle <= 0) return STATUS_INVALID_HANDLE;
+
+        var buf = new byte[length];
+
+        int ret = _vfs.Read(node.Handle, buf, (long)offset);
+
+        if(ret < 0) return STATUS_INVALID_HANDLE;
+
+        Marshal.Copy(buf, 0, buffer, ret);
+
+        bytesTransferred = (uint)ret;
+
+        return STATUS_SUCCESS;
+    }
+
+    public override int GetFileInfo(object fileNode, object fileDesc, out FileInfo fileInfo)
+    {
+        fileInfo = default(FileInfo);
+
+        if(!(fileNode is FileNode node)) return STATUS_INVALID_HANDLE;
+
+        fileInfo = node.Info;
+
+        return STATUS_SUCCESS;
+    }
+
+    public override bool ReadDirectoryEntry(object     fileNode, object     fileDesc, string pattern, string marker,
+                                            ref object context,  out string fileName, out FileInfo fileInfo)
+    {
+        fileName = default(string);
+        fileInfo = default(FileInfo);
+
+        if(!(fileNode is FileNode node) || !node.IsDirectory) return false;
+
+        if(!(context is IEnumerator<FileEntry> enumerator))
+        {
+            if(node.MachineId > 0)
+            {
+                ConcurrentDictionary<string, CachedFile> cachedMachineFiles = _vfs.GetFilesFromMachine(node.MachineId);
+
+                ConcurrentDictionary<string, CachedDisk> cachedMachineDisks = _vfs.GetDisksFromMachine(node.MachineId);
+
+                ConcurrentDictionary<string, CachedMedia> cachedMachineMedias =
+                    _vfs.GetMediasFromMachine(node.MachineId);
+
+                node.Children = new List<FileEntry>
                 {
-                    ConcurrentDictionary<string, CachedFile> cachedMachineFiles =
-                        _vfs.GetFilesFromMachine(node.MachineId);
-
-                    ConcurrentDictionary<string, CachedDisk> cachedMachineDisks =
-                        _vfs.GetDisksFromMachine(node.MachineId);
-
-                    ConcurrentDictionary<string, CachedMedia> cachedMachineMedias =
-                        _vfs.GetMediasFromMachine(node.MachineId);
-
-                    node.Children = new List<FileEntry>
+                    new()
                     {
-                        new FileEntry
-                        {
-                            FileName = ".",
-                            Info     = node.Info
-                        },
-                        new FileEntry
-                        {
-                            FileName = "..",
-                            Info     = node.ParentInfo
-                        }
-                    };
-
-                    node.Children.AddRange(cachedMachineFiles.Select(file => new FileEntry
+                        FileName = ".",
+                        Info     = node.Info
+                    },
+                    new()
                     {
-                        FileName = file.Key,
-                        Info = new FileInfo
-                        {
-                            ChangeTime     = (ulong)file.Value.UpdatedOn.ToFileTimeUtc(),
-                            AllocationSize = (file.Value.Size + 511) / 512,
-                            FileSize       = file.Value.Size,
-                            CreationTime   = (ulong)file.Value.CreatedOn.ToFileTimeUtc(),
-                            FileAttributes =
-                                (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                            IndexNumber    = file.Value.Id,
-                            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                            LastWriteTime  = (ulong)(file.Value.FileLastModification?.ToFileTimeUtc() ?? file.Value.UpdatedOn.ToFileTimeUtc())
-                        }
-                    }));
+                        FileName = "..",
+                        Info     = node.ParentInfo
+                    }
+                };
 
-                    node.Children.AddRange(cachedMachineDisks.Select(disk => new FileEntry
-                    {
-                        FileName = disk.Key + ".chd",
-                        Info = new FileInfo
-                        {
-                            ChangeTime     = (ulong)disk.Value.UpdatedOn.ToFileTimeUtc(),
-                            AllocationSize = (disk.Value.Size + 511) / 512,
-                            FileSize       = disk.Value.Size,
-                            CreationTime   = (ulong)disk.Value.CreatedOn.ToFileTimeUtc(),
-                            FileAttributes =
-                                (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                            IndexNumber    = disk.Value.Id,
-                            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                            LastWriteTime  = (ulong)disk.Value.UpdatedOn.ToFileTimeUtc()
-                        }
-                    }));
-
-                    node.Children.AddRange(cachedMachineMedias.Select(media => new FileEntry
-                    {
-                        FileName = media.Key + ".aif",
-                        Info = new FileInfo
-                        {
-                            ChangeTime     = (ulong)media.Value.UpdatedOn.ToFileTimeUtc(),
-                            AllocationSize = (media.Value.Size + 511) / 512,
-                            FileSize       = media.Value.Size,
-                            CreationTime   = (ulong)media.Value.CreatedOn.ToFileTimeUtc(),
-                            FileAttributes =
-                                (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
-                            IndexNumber    = media.Value.Id,
-                            LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
-                            LastWriteTime  = (ulong)media.Value.UpdatedOn.ToFileTimeUtc()
-                        }
-                    }));
-                }
-                else if(node.RomSetId > 0)
+                node.Children.AddRange(cachedMachineFiles.Select(file => new FileEntry
                 {
-                    ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(node.RomSetId);
-
-                    node.Children = new List<FileEntry>
+                    FileName = file.Key,
+                    Info = new FileInfo
                     {
-                        new FileEntry
-                        {
-                            FileName = ".",
-                            Info     = node.Info
-                        },
-                        new FileEntry
-                        {
-                            FileName = "..",
-                            Info     = node.ParentInfo
-                        }
-                    };
+                        ChangeTime     = (ulong)file.Value.UpdatedOn.ToFileTimeUtc(),
+                        AllocationSize = (file.Value.Size + 511) / 512,
+                        FileSize       = file.Value.Size,
+                        CreationTime   = (ulong)file.Value.CreatedOn.ToFileTimeUtc(),
+                        FileAttributes =
+                            (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                        IndexNumber    = file.Value.Id,
+                        LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                        LastWriteTime = (ulong)(file.Value.FileLastModification?.ToFileTimeUtc() ??
+                                                file.Value.UpdatedOn.ToFileTimeUtc())
+                    }
+                }));
 
-                    node.Children.AddRange(machines.Select(machine => new FileEntry
-                    {
-                        FileName = machine.Key,
-                        Info = new FileInfo
-                        {
-                            CreationTime   = (ulong)machine.Value.CreationDate.ToUniversalTime().ToFileTimeUtc(),
-                            FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                            LastWriteTime  = (ulong)machine.Value.ModificationDate.ToUniversalTime().ToFileTimeUtc()
-                        }
-                    }));
-                }
-                else
+                node.Children.AddRange(cachedMachineDisks.Select(disk => new FileEntry
                 {
-                    node.Children = new List<FileEntry>();
-
-                    node.Children.AddRange(_vfs.GetRootEntries().Select(e => new FileEntry
+                    FileName = disk.Key + ".chd",
+                    Info = new FileInfo
                     {
-                        FileName = e,
-                        IsRomSet = true
-                    }));
-                }
+                        ChangeTime     = (ulong)disk.Value.UpdatedOn.ToFileTimeUtc(),
+                        AllocationSize = (disk.Value.Size + 511) / 512,
+                        FileSize       = disk.Value.Size,
+                        CreationTime   = (ulong)disk.Value.CreatedOn.ToFileTimeUtc(),
+                        FileAttributes =
+                            (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                        IndexNumber    = disk.Value.Id,
+                        LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                        LastWriteTime  = (ulong)disk.Value.UpdatedOn.ToFileTimeUtc()
+                    }
+                }));
 
-                if(marker != null)
+                node.Children.AddRange(cachedMachineMedias.Select(media => new FileEntry
                 {
-                    int idx = node.Children.FindIndex(f => f.FileName == marker);
-
-                    if(idx >= 0)
-                        node.Children.RemoveRange(0, idx + 1);
-                }
-
-                context = enumerator = node.Children.GetEnumerator();
+                    FileName = media.Key + ".aif",
+                    Info = new FileInfo
+                    {
+                        ChangeTime     = (ulong)media.Value.UpdatedOn.ToFileTimeUtc(),
+                        AllocationSize = (media.Value.Size + 511) / 512,
+                        FileSize       = media.Value.Size,
+                        CreationTime   = (ulong)media.Value.CreatedOn.ToFileTimeUtc(),
+                        FileAttributes =
+                            (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly),
+                        IndexNumber    = media.Value.Id,
+                        LastAccessTime = (ulong)DateTime.UtcNow.ToFileTimeUtc(),
+                        LastWriteTime  = (ulong)media.Value.UpdatedOn.ToFileTimeUtc()
+                    }
+                }));
             }
-
-            while(enumerator.MoveNext())
+            else if(node.RomSetId > 0)
             {
-                FileEntry entry = enumerator.Current;
+                ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(node.RomSetId);
 
-                if(entry is null)
-                    continue;
-
-                if(entry.IsRomSet)
+                node.Children = new List<FileEntry>
                 {
-                    long romSetId = _vfs.GetRomSetId(entry.FileName);
-
-                    if(romSetId <= 0)
-                        continue;
-
-                    RomSet romSet = _vfs.GetRomSet(romSetId);
-
-                    if(romSet is null)
-                        continue;
-
-                    entry.Info = new FileInfo
+                    new()
                     {
-                        CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                        FileName = ".",
+                        Info     = node.Info
+                    },
+                    new()
+                    {
+                        FileName = "..",
+                        Info     = node.ParentInfo
+                    }
+                };
+
+                node.Children.AddRange(machines.Select(machine => new FileEntry
+                {
+                    FileName = machine.Key,
+                    Info = new FileInfo
+                    {
+                        CreationTime   = (ulong)machine.Value.CreationDate.ToUniversalTime().ToFileTimeUtc(),
                         FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
-                        LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
-                    };
-                }
+                        LastWriteTime  = (ulong)machine.Value.ModificationDate.ToUniversalTime().ToFileTimeUtc()
+                    }
+                }));
+            }
+            else
+            {
+                node.Children = new List<FileEntry>();
 
-                fileName = entry.FileName;
-                fileInfo = entry.Info;
-
-                return true;
+                node.Children.AddRange(_vfs.GetRootEntries()
+                                           .Select(e => new FileEntry
+                                            {
+                                                FileName = e,
+                                                IsRomSet = true
+                                            }));
             }
 
-            return false;
+            if(marker != null)
+            {
+                int idx = node.Children.FindIndex(f => f.FileName == marker);
+
+                if(idx >= 0) node.Children.RemoveRange(0, idx + 1);
+            }
+
+            context = enumerator = node.Children.GetEnumerator();
         }
 
-        public override int GetSecurityByName(string fileName, out uint fileAttributes, ref byte[] securityDescriptor)
+        while(enumerator.MoveNext())
         {
-            fileAttributes = 0;
+            FileEntry entry = enumerator.Current;
 
-            string[] pieces = _vfs.SplitPath(fileName);
+            if(entry is null) continue;
 
-            // Root directory
-            if(pieces.Length == 0)
+            if(entry.IsRomSet)
             {
-                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+                long romSetId = _vfs.GetRomSetId(entry.FileName);
 
-                if(securityDescriptor == null)
-                    return STATUS_SUCCESS;
+                if(romSetId <= 0) continue;
 
-                string rootSddl = "O:BAG:BAD:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;WD)";
+                RomSet romSet = _vfs.GetRomSet(romSetId);
 
-                var    rootSecurityDescriptor = new RawSecurityDescriptor(rootSddl);
-                byte[] fileSecurity           = new byte[rootSecurityDescriptor.BinaryLength];
-                rootSecurityDescriptor.GetBinaryForm(fileSecurity, 0);
-                securityDescriptor = fileSecurity;
+                if(romSet is null) continue;
 
-                return STATUS_SUCCESS;
+                entry.Info = new FileInfo
+                {
+                    CreationTime   = (ulong)romSet.CreatedOn.ToUniversalTime().ToFileTimeUtc(),
+                    FileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed),
+                    LastWriteTime  = (ulong)romSet.UpdatedOn.ToUniversalTime().ToFileTimeUtc()
+                };
             }
 
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
+            fileName = entry.FileName;
+            fileInfo = entry.Info;
 
-            if(romSetId <= 0)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+            return true;
+        }
 
-            RomSet romSet = _vfs.GetRomSet(romSetId);
+        return false;
+    }
 
-            if(romSet == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+    public override int GetSecurityByName(string fileName, out uint fileAttributes, ref byte[] securityDescriptor)
+    {
+        fileAttributes = 0;
 
-            // ROM Set
-            if(pieces.Length == 1)
-            {
-                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+        string[] pieces = _vfs.SplitPath(fileName);
 
-                return STATUS_SUCCESS;
-            }
+        // Root directory
+        if(pieces.Length == 0)
+        {
+            fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
 
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+            if(securityDescriptor == null) return STATUS_SUCCESS;
 
-            if(machine == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+            var rootSddl = "O:BAG:BAD:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;WD)";
 
-            // Machine
-            if(pieces.Length == 2)
-            {
-                fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
+            var rootSecurityDescriptor = new RawSecurityDescriptor(rootSddl);
+            var fileSecurity           = new byte[rootSecurityDescriptor.BinaryLength];
+            rootSecurityDescriptor.GetBinaryForm(fileSecurity, 0);
+            securityDescriptor = fileSecurity;
 
-                return STATUS_SUCCESS;
-            }
+            return STATUS_SUCCESS;
+        }
 
-            long       handle = 0;
-            CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
 
-            if(file != null)
-            {
-                if(pieces.Length > 3)
-                    return STATUS_INVALID_DEVICE_REQUEST;
+        if(romSetId <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-                if(file.Sha384 == null)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
+        RomSet romSet = _vfs.GetRomSet(romSetId);
 
-                handle = _vfs.Open(file.Sha384, (long)file.Size);
+        if(romSet == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-                if(handle <= 0)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
+        // ROM Set
+        if(pieces.Length == 1)
+        {
+            fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
 
-                fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+            return STATUS_SUCCESS;
+        }
 
-                return STATUS_SUCCESS;
-            }
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+        if(machine == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            if(disk != null)
-            {
-                if(pieces.Length > 3)
-                    return STATUS_INVALID_DEVICE_REQUEST;
+        // Machine
+        if(pieces.Length == 2)
+        {
+            fileAttributes = (uint)(FileAttributes.Directory | FileAttributes.Compressed);
 
-                if(disk.Sha1 == null &&
-                   disk.Md5  == null)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
+            return STATUS_SUCCESS;
+        }
 
-                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+        long       handle = 0;
+        CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
 
-                if(handle <= 0)
-                    return STATUS_OBJECT_NAME_NOT_FOUND;
+        if(file != null)
+        {
+            if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
 
-                fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+            if(file.Sha384 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-                return STATUS_SUCCESS;
-            }
+            handle = _vfs.Open(file.Sha384, (long)file.Size);
 
-            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
-
-            if(media == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            if(pieces.Length > 3)
-                return STATUS_INVALID_DEVICE_REQUEST;
-
-            if(media.Sha256 == null &&
-               media.Sha1   == null &&
-               media.Md5    == null)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
-
-            handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
-
-            if(handle <= 0)
-                return STATUS_OBJECT_NAME_NOT_FOUND;
+            if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
             fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
 
             return STATUS_SUCCESS;
         }
 
-        sealed class FileEntry
+        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+
+        if(disk != null)
         {
-            public string   FileName { get; set; }
-            public FileInfo Info     { get; set; }
-            public bool     IsRomSet { get; set; }
+            if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
+
+            if(disk.Sha1 == null && disk.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+
+            if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+            fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+
+            return STATUS_SUCCESS;
         }
 
-        sealed class FileNode
-        {
-            public FileInfo        Info        { get; set; }
-            public FileInfo        ParentInfo  { get; set; }
-            public string          FileName    { get; set; }
-            public string          Path        { get; set; }
-            public long            Handle      { get; set; }
-            public List<FileEntry> Children    { get; set; }
-            public bool            IsDirectory { get; set; }
-            public long            RomSetId    { get; set; }
-            public ulong           MachineId   { get; set; }
-        }
+        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+        if(media == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        if(pieces.Length > 3) return STATUS_INVALID_DEVICE_REQUEST;
+
+        if(media.Sha256 == null && media.Sha1 == null && media.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
+
+        if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
+
+        fileAttributes = (uint)(FileAttributes.Normal | FileAttributes.Compressed | FileAttributes.ReadOnly);
+
+        return STATUS_SUCCESS;
+    }
+
+    sealed class FileEntry
+    {
+        public string   FileName { get; set; }
+        public FileInfo Info     { get; set; }
+        public bool     IsRomSet { get; set; }
+    }
+
+    sealed class FileNode
+    {
+        public FileInfo        Info        { get; set; }
+        public FileInfo        ParentInfo  { get; set; }
+        public string          FileName    { get; set; }
+        public string          Path        { get; set; }
+        public long            Handle      { get; set; }
+        public List<FileEntry> Children    { get; set; }
+        public bool            IsDirectory { get; set; }
+        public long            RomSetId    { get; set; }
+        public ulong           MachineId   { get; set; }
     }
 }

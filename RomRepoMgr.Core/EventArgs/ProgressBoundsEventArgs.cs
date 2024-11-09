@@ -23,11 +23,10 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
-namespace RomRepoMgr.Core.EventArgs
+namespace RomRepoMgr.Core.EventArgs;
+
+public sealed class ProgressBoundsEventArgs : System.EventArgs
 {
-    public sealed class ProgressBoundsEventArgs : System.EventArgs
-    {
-        public double Minimum { get; set; }
-        public double Maximum { get; set; }
-    }
+    public double Minimum { get; set; }
+    public double Maximum { get; set; }
 }

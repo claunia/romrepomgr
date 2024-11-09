@@ -1,371 +1,375 @@
 ﻿<root>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>1.3</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="AboutLabel" xml:space="preserve">
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="AboutLabel" xml:space="preserve">
     <value>Acerca de</value>
   </data>
-  <data name="AboutTitle" xml:space="preserve">
+    <data name="AboutTitle" xml:space="preserve">
     <value>Acerda de ROM Repository Manager</value>
   </data>
-  <data name="AllFilesDialogLabel" xml:space="preserve">
+    <data name="AllFilesDialogLabel" xml:space="preserve">
     <value>Todos los archivos</value>
   </data>
-  <data name="AllFilesLabel" xml:space="preserve">
+    <data name="AllFilesLabel" xml:space="preserve">
     <value>Comprobar todos los archivos.</value>
   </data>
-  <data name="AssembliesLibraryText" xml:space="preserve">
+    <data name="AssembliesLibraryText" xml:space="preserve">
     <value>Librería</value>
   </data>
-  <data name="AssembliesVersionText" xml:space="preserve">
+    <data name="AssembliesVersionText" xml:space="preserve">
     <value>Versión</value>
   </data>
-  <data name="AuthorsLabel" xml:space="preserve">
+    <data name="AuthorsLabel" xml:space="preserve">
     <value>Autores</value>
   </data>
-  <data name="AuthorsText" xml:space="preserve">
+    <data name="AuthorsText" xml:space="preserve">
     <value>Desarrolladores:
     Natalia Portillo</value>
   </data>
-  <data name="CancelLabel" xml:space="preserve">
+    <data name="CancelLabel" xml:space="preserve">
     <value>Cancelar</value>
   </data>
-  <data name="CheckingUnArText" xml:space="preserve">
+    <data name="CheckingUnArText" xml:space="preserve">
     <value>Comprobando The Unarchiver...</value>
   </data>
-  <data name="ChooseDatabaseFile" xml:space="preserve">
+    <data name="ChooseDatabaseFile" xml:space="preserve">
     <value>Elegir base de datos a abrir o crear</value>
   </data>
-  <data name="ChooseLabel" xml:space="preserve">
+    <data name="ChooseLabel" xml:space="preserve">
     <value>Elegir...</value>
   </data>
-  <data name="ChooseRepositoryFolder" xml:space="preserve">
+    <data name="ChooseRepositoryFolder" xml:space="preserve">
     <value>Elegir carpeta del repositorio</value>
   </data>
-  <data name="ChooseTemporaryFolder" xml:space="preserve">
+    <data name="ChooseTemporaryFolder" xml:space="preserve">
     <value>Elegir carpeta temporal</value>
   </data>
-  <data name="ChooseUnArExecutable" xml:space="preserve">
+    <data name="ChooseUnArExecutable" xml:space="preserve">
     <value>Elegir ejecutable de UnArchiver</value>
   </data>
-  <data name="CloseLabel" xml:space="preserve">
+    <data name="CloseLabel" xml:space="preserve">
     <value>Cerrar</value>
   </data>
-  <data name="CompleteMachinesLabel" xml:space="preserve">
+    <data name="CompleteMachinesLabel" xml:space="preserve">
     <value>Juegos completos</value>
   </data>
-  <data name="DatabaseFileCannotDeleteCaption" xml:space="preserve">
+    <data name="DatabaseFileCannotDeleteCaption" xml:space="preserve">
     <value>Ocurrió un error al eliminar el archivo elegido.</value>
   </data>
-  <data name="DatabaseFileCannotDeleteTitle" xml:space="preserve">
+    <data name="DatabaseFileCannotDeleteTitle" xml:space="preserve">
     <value>No se pudo eliminar el archivo.</value>
   </data>
-  <data name="DatabaseFileDeleteCaption" xml:space="preserve">
+    <data name="DatabaseFileDeleteCaption" xml:space="preserve">
     <value>¿Quieres eliminar el archivo?</value>
   </data>
-  <data name="DatabaseFileExistsMsgBoxTitle" xml:space="preserve">
+    <data name="DatabaseFileExistsMsgBoxTitle" xml:space="preserve">
     <value>El archivo existe</value>
   </data>
-  <data name="DatabaseFileLabel" xml:space="preserve">
+    <data name="DatabaseFileLabel" xml:space="preserve">
     <value>Archivo de base de datos</value>
   </data>
-  <data name="DatabaseFileMsgBoxTryOpen" xml:space="preserve">
+    <data name="DatabaseFileMsgBoxTryOpen" xml:space="preserve">
     <value>¿Quieres intentar abrir el archivo existente como una base de datos?</value>
   </data>
-  <data name="DatabaseFileTryOpenCaption" xml:space="preserve">
+    <data name="DatabaseFileTryOpenCaption" xml:space="preserve">
     <value>¿Quieres intentar abrir el archivo existente como una base de datos?</value>
   </data>
-  <data name="DatabaseFileUnusableDeleteMsgBoxCaption" xml:space="preserve">
+    <data name="DatabaseFileUnusableDeleteMsgBoxCaption" xml:space="preserve">
     <value>Ocurrió un error al tratar de usar el archivo seleccionado como una base de datos.
 ¿Quieres eliminarlo?</value>
   </data>
-  <data name="DatabaseFileUnusableMsgBoxCaption" xml:space="preserve">
+    <data name="DatabaseFileUnusableMsgBoxCaption" xml:space="preserve">
     <value>Ocurrió un error al tratar de usar el archivo seleccionado como una base de datos.</value>
   </data>
-  <data name="DatabaseFileUnusableMsgBoxTitle" xml:space="preserve">
+    <data name="DatabaseFileUnusableMsgBoxTitle" xml:space="preserve">
     <value>No se puede usar la base de datos.</value>
   </data>
-  <data name="DatFilesDialogLabel" xml:space="preserve">
+    <data name="DatFilesDialogLabel" xml:space="preserve">
     <value>Archivos DAT</value>
   </data>
-  <data name="DecompressingDat" xml:space="preserve">
+    <data name="DecompressingDat" xml:space="preserve">
     <value>Descomprimiendo archivo DAT...</value>
   </data>
-  <data name="DeleteRomSetMsgBoxCaption" xml:space="preserve">
+    <data name="DeleteRomSetMsgBoxCaption" xml:space="preserve">
     <value>¿Estás seguro de eliminar el set de ROMs {0}?</value>
   </data>
-  <data name="DeleteRomSetMsgBoxTitle" xml:space="preserve">
+    <data name="DeleteRomSetMsgBoxTitle" xml:space="preserve">
     <value>Eliminar set de ROMs</value>
   </data>
-  <data name="EditDatTitle" xml:space="preserve">
+    <data name="EditDatTitle" xml:space="preserve">
     <value>Editar DAT</value>
   </data>
-  <data name="Error" xml:space="preserve">
+    <data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="ExitButtonText" xml:space="preserve">
+    <data name="ExitButtonText" xml:space="preserve">
     <value>Salir</value>
   </data>
-  <data name="ExportDatTitle" xml:space="preserve">
+    <data name="ExportDatTitle" xml:space="preserve">
     <value>Exportando archivo DAT...</value>
   </data>
-  <data name="ExportRomsDialogTitle" xml:space="preserve">
+    <data name="ExportRomsDialogTitle" xml:space="preserve">
     <value>Exportar ROMs a carpeta...</value>
   </data>
-  <data name="ExportRomsTitle" xml:space="preserve">
+    <data name="ExportRomsTitle" xml:space="preserve">
     <value>Exportando ROMs a carpeta...</value>
   </data>
-  <data name="FileMenuExitText" xml:space="preserve">
+    <data name="FileMenuExitText" xml:space="preserve">
     <value>_Salir</value>
   </data>
-  <data name="FileMenuImportDatFileText" xml:space="preserve">
+    <data name="FileMenuImportDatFileText" xml:space="preserve">
     <value>Importar _archivo DAT</value>
   </data>
-  <data name="FileMenuImportDatFolderText" xml:space="preserve">
+    <data name="FileMenuImportDatFolderText" xml:space="preserve">
     <value>Importar _carpeta de DATs</value>
   </data>
-  <data name="FileMenuSettingsText" xml:space="preserve">
+    <data name="FileMenuSettingsText" xml:space="preserve">
     <value>_Preferencias</value>
   </data>
-  <data name="FileMenuText" xml:space="preserve">
+    <data name="FileMenuText" xml:space="preserve">
     <value>_Archivo</value>
   </data>
-  <data name="FilesystemMenuMountText" xml:space="preserve">
+    <data name="FilesystemMenuMountText" xml:space="preserve">
     <value>_Montar</value>
   </data>
-  <data name="FilesystemMenuText" xml:space="preserve">
+    <data name="FilesystemMenuText" xml:space="preserve">
     <value>_Sistema de ficheros</value>
   </data>
-  <data name="Finished" xml:space="preserve">
+    <data name="Finished" xml:space="preserve">
     <value>Terminado</value>
   </data>
-  <data name="FoundFiles" xml:space="preserve">
+    <data name="FoundFiles" xml:space="preserve">
     <value>Encontrados {0} archivos...</value>
   </data>
-  <data name="HaveRomsLabel" xml:space="preserve">
+    <data name="HaveRomsLabel" xml:space="preserve">
     <value>ROMs presentes</value>
   </data>
-  <data name="HelpMenuAboutText" xml:space="preserve">
+    <data name="HelpMenuAboutText" xml:space="preserve">
     <value>_Acerca de</value>
   </data>
-  <data name="HelpMenuText" xml:space="preserve">
+    <data name="HelpMenuText" xml:space="preserve">
     <value>_Ayuda</value>
   </data>
-  <data name="HomepageLabel" xml:space="preserve">
+    <data name="HomepageLabel" xml:space="preserve">
     <value>Página web</value>
   </data>
-  <data name="ImportDatFileDialogTitle" xml:space="preserve">
+    <data name="ImportDatFileDialogTitle" xml:space="preserve">
     <value>Importar archivo DAT...</value>
   </data>
-  <data name="ImportDatFolderDialogTitle" xml:space="preserve">
+    <data name="ImportDatFolderDialogTitle" xml:space="preserve">
     <value>Importar DATs en carpeta...</value>
   </data>
-  <data name="ImportDatFolderTitle" xml:space="preserve">
+    <data name="ImportDatFolderTitle" xml:space="preserve">
     <value>Importar archivos DAT de carpeta...</value>
   </data>
-  <data name="ImportDatTitle" xml:space="preserve">
+    <data name="ImportDatTitle" xml:space="preserve">
     <value>Importando archivo DAT...</value>
   </data>
-  <data name="ImportingItem" xml:space="preserve">
+    <data name="ImportingItem" xml:space="preserve">
     <value>Importando {0}...</value>
   </data>
-  <data name="ImportRomFolderTitle" xml:space="preserve">
+    <data name="ImportRomFolderTitle" xml:space="preserve">
     <value>Importar ROMs de carpeta...</value>
   </data>
-  <data name="ImportRomsFolderDialogTitle" xml:space="preserve">
+    <data name="ImportRomsFolderDialogTitle" xml:space="preserve">
     <value>IImportar ROMs de carpeta...</value>
   </data>
-  <data name="IncompleteMachinesLabel" xml:space="preserve">
+    <data name="IncompleteMachinesLabel" xml:space="preserve">
     <value>Juegos incompletos</value>
   </data>
-  <data name="KnownOnlyLabel" xml:space="preserve">
+    <data name="KnownOnlyLabel" xml:space="preserve">
     <value>Importar solo archivos conocidos.</value>
   </data>
-  <data name="LibrariesLabel" xml:space="preserve">
+    <data name="LibrariesLabel" xml:space="preserve">
     <value>Librerías</value>
   </data>
-  <data name="LicenseLabel" xml:space="preserve">
+    <data name="LicenseLabel" xml:space="preserve">
     <value>Licencia: Licencia Pública General GNU Versión 3</value>
   </data>
-  <data name="LoadingDatabaseText" xml:space="preserve">
+    <data name="LoadingDatabaseText" xml:space="preserve">
     <value>Cargando base de datos...</value>
   </data>
-  <data name="LoadingRomSetsText" xml:space="preserve">
+    <data name="LoadingRomSetsText" xml:space="preserve">
     <value>Cargando sets de ROMs...</value>
   </data>
-  <data name="LoadingSettingsText" xml:space="preserve">
+    <data name="LoadingSettingsText" xml:space="preserve">
     <value>Cargando preferencias...</value>
   </data>
-  <data name="MigratingDatabaseText" xml:space="preserve">
+    <data name="MigratingDatabaseText" xml:space="preserve">
     <value>Migrando base de datos...</value>
   </data>
-  <data name="MissRomsLabel" xml:space="preserve">
+    <data name="MissRomsLabel" xml:space="preserve">
     <value>ROMs faltantes</value>
   </data>
-  <data name="OK" xml:space="preserve">
+    <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="PathLabel" xml:space="preserve">
+    <data name="PathLabel" xml:space="preserve">
     <value>Ruta:</value>
   </data>
-  <data name="RecurseArchivesLabel" xml:space="preserve">
+    <data name="RecurseArchivesLabel" xml:space="preserve">
     <value>Intentar detectar archivos comprimiedos e importar su contenido.</value>
   </data>
-  <data name="RecursiveLabel" xml:space="preserve">
+    <data name="RecursiveLabel" xml:space="preserve">
     <value>Recorrer subcarpetas.</value>
   </data>
-  <data name="RemoveDatTitle" xml:space="preserve">
+    <data name="RemoveDatTitle" xml:space="preserve">
     <value>Eliminando set de ROM...</value>
   </data>
-  <data name="RemoveFilesLabel" xml:space="preserve">
+    <data name="RemoveFilesLabel" xml:space="preserve">
     <value>Eliminar archivos después de importar satisfactoriamente.</value>
   </data>
-  <data name="RemovingDatFileFromRepo" xml:space="preserve">
+    <data name="RemovingDatFileFromRepo" xml:space="preserve">
     <value>Eliminando archivo DAT del repositorio...</value>
   </data>
-  <data name="RemovingRomSetFromDatabase" xml:space="preserve">
+    <data name="RemovingRomSetFromDatabase" xml:space="preserve">
     <value>Elimiando set de ROMs de la base de datos...</value>
   </data>
-  <data name="RepositoryFolderLabel" xml:space="preserve">
+    <data name="RepositoryFolderLabel" xml:space="preserve">
     <value>Carpeta del repositorio</value>
   </data>
-  <data name="ResultFilenameLabel" xml:space="preserve">
+    <data name="ResultFilenameLabel" xml:space="preserve">
     <value>Nombre de archivo</value>
   </data>
-  <data name="ResultStatusLabel" xml:space="preserve">
+    <data name="ResultStatusLabel" xml:space="preserve">
     <value>Estado</value>
   </data>
-  <data name="RetrievingRomSetFromDatabase" xml:space="preserve">
+    <data name="RetrievingRomSetFromDatabase" xml:space="preserve">
     <value>Recuperando set de ROMs de la base de datos...</value>
   </data>
-  <data name="RomSetAuthorLabel" xml:space="preserve">
+    <data name="RomSetAuthorLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
-  <data name="RomSetCommentLabel" xml:space="preserve">
+    <data name="RomSetCommentLabel" xml:space="preserve">
     <value>Comentario</value>
   </data>
-  <data name="RomSetCompleteMachinesLabel" xml:space="preserve">
+    <data name="RomSetCompleteMachinesLabel" xml:space="preserve">
     <value>Completos</value>
   </data>
-  <data name="RomSetDateLabel" xml:space="preserve">
+    <data name="RomSetDateLabel" xml:space="preserve">
     <value>Fecha</value>
   </data>
-  <data name="RomSetDescriptionLabel" xml:space="preserve">
+    <data name="RomSetDescriptionLabel" xml:space="preserve">
     <value>Descripción</value>
   </data>
-  <data name="RomSetHaveRomsLabel" xml:space="preserve">
+    <data name="RomSetHaveRomsLabel" xml:space="preserve">
     <value>Presentes</value>
   </data>
-  <data name="RomSetIncompleteMachinesLabel" xml:space="preserve">
+    <data name="RomSetIncompleteMachinesLabel" xml:space="preserve">
     <value>Incompletos</value>
   </data>
-  <data name="RomSetMissRomsLabel" xml:space="preserve">
+    <data name="RomSetMissRomsLabel" xml:space="preserve">
     <value>Faltantes</value>
   </data>
-  <data name="RomSetNameLabel" xml:space="preserve">
+    <data name="RomSetNameLabel" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="RomSets" xml:space="preserve">
+    <data name="RomSets" xml:space="preserve">
     <value>Sets de ROMs</value>
   </data>
-  <data name="RomSetsMenuDeleteText" xml:space="preserve">
+    <data name="RomSetsMenuDeleteText" xml:space="preserve">
     <value>Elimina_r</value>
   </data>
-  <data name="RomSetsMenuEditText" xml:space="preserve">
+    <data name="RomSetsMenuEditText" xml:space="preserve">
     <value>_Editar</value>
   </data>
-  <data name="RomSetsMenuSaveDatText" xml:space="preserve">
+    <data name="RomSetsMenuSaveDatText" xml:space="preserve">
     <value>_Guardar archivo DAT</value>
   </data>
-  <data name="RomSetsMenuSaveRomsText" xml:space="preserve">
+    <data name="RomSetsMenuSaveRomsText" xml:space="preserve">
     <value>Guardar ROMs en _carpeta</value>
   </data>
-  <data name="RomSetsMenuText" xml:space="preserve">
+    <data name="RomSetsMenuText" xml:space="preserve">
     <value>Sets de _ROMs</value>
   </data>
-  <data name="RomSetTotalMachinesLabel" xml:space="preserve">
+    <data name="RomSetTotalMachinesLabel" xml:space="preserve">
     <value>Juegos</value>
   </data>
-  <data name="RomSetTotalRomsLabel" xml:space="preserve">
+    <data name="RomSetTotalRomsLabel" xml:space="preserve">
     <value>ROMs</value>
   </data>
-  <data name="RomSetVersionLabel" xml:space="preserve">
+    <data name="RomSetVersionLabel" xml:space="preserve">
     <value>Versión</value>
   </data>
-  <data name="RomsMenuImportText" xml:space="preserve">
+    <data name="RomsMenuImportText" xml:space="preserve">
     <value>Importar _carpeta</value>
   </data>
-  <data name="RomsMenuText" xml:space="preserve">
+    <data name="RomsMenuText" xml:space="preserve">
     <value>_ROMs</value>
   </data>
-  <data name="SaveLabel" xml:space="preserve">
+    <data name="SaveLabel" xml:space="preserve">
     <value>Guardar</value>
   </data>
-  <data name="SavingChangesToDatabase" xml:space="preserve">
+    <data name="SavingChangesToDatabase" xml:space="preserve">
     <value>Guardando cambios en la base de datos...</value>
   </data>
-  <data name="SearchingForFiles" xml:space="preserve">
+    <data name="SearchingForFiles" xml:space="preserve">
     <value>Buscando archivos...</value>
   </data>
-  <data name="SelectMountPointDialogTitle" xml:space="preserve">
+    <data name="SelectMountPointDialogTitle" xml:space="preserve">
     <value>Elegir punto de montaje...</value>
   </data>
-  <data name="SettingsTitle" xml:space="preserve">
+    <data name="SettingsTitle" xml:space="preserve">
     <value>Preferencias</value>
   </data>
-  <data name="StartLabel" xml:space="preserve">
+    <data name="StartLabel" xml:space="preserve">
     <value>Comenzar</value>
   </data>
-  <data name="TemporaryFolderLabel" xml:space="preserve">
+    <data name="TemporaryFolderLabel" xml:space="preserve">
     <value>Carpeta temporal</value>
   </data>
-  <data name="TheUnarchiverVersionLabel" xml:space="preserve">
+    <data name="TheUnarchiverVersionLabel" xml:space="preserve">
     <value>The Unarchiver versión {0}</value>
   </data>
-  <data name="TotalMachinesLabel" xml:space="preserve">
+    <data name="TotalMachinesLabel" xml:space="preserve">
     <value>Total de juegos</value>
   </data>
-  <data name="TotalRomsLabel" xml:space="preserve">
+    <data name="TotalRomsLabel" xml:space="preserve">
     <value>Total de ROMs</value>
   </data>
-  <data name="UnArPathLabel" xml:space="preserve">
+    <data name="UnArPathLabel" xml:space="preserve">
     <value>Ruta a UnAr</value>
   </data>
-  <data name="FilesystemMenuUmountText" xml:space="preserve">
+    <data name="FilesystemMenuUmountText" xml:space="preserve">
     <value>_Desmontar</value>
   </data>
-  <data name="RomSetCategoryLabel" xml:space="preserve">
+    <data name="RomSetCategoryLabel" xml:space="preserve">
     <value>Categoría</value>
   </data>
-  <data name="RetrievingRomSetsFromDatabase" xml:space="preserve">
+    <data name="RetrievingRomSetsFromDatabase" xml:space="preserve">
     <value>Recuperando sets de ROMs de la base de datos...</value>
   </data>
-  <data name="RemovingOldStatistics" xml:space="preserve">
+    <data name="RemovingOldStatistics" xml:space="preserve">
     <value>Eliminando estadísticas antiguas</value>
   </data>
-  <data name="CalculatingStatisticsForRomSet" xml:space="preserve">
+    <data name="CalculatingStatisticsForRomSet" xml:space="preserve">
     <value>Calculando estadísticas para {0} - {1} ({2})</value>
   </data>
-  <data name="DatabaseMenuText" xml:space="preserve">
+    <data name="DatabaseMenuText" xml:space="preserve">
     <value>Base de datos</value>
   </data>
-  <data name="DatabaseMenuUpdateStatsText" xml:space="preserve">
+    <data name="DatabaseMenuUpdateStatsText" xml:space="preserve">
     <value>Actualizar estadísticas</value>
   </data>
-  <data name="UpdateStatsConfirmationDialogText" xml:space="preserve">
+    <data name="UpdateStatsConfirmationDialogText" xml:space="preserve">
     <value>¿Quieres actualizar las estadísticas de los sets de ROMs en la base de datos?
 Tardará mucho tiempo...</value>
   </data>
-  <data name="UpdateStatsTitle" xml:space="preserve">
+    <data name="UpdateStatsTitle" xml:space="preserve">
     <value>Actualizando estadísticas de sets de ROMs</value>
   </data>
 </root>

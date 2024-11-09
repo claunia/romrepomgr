@@ -36,23 +36,22 @@
 // Copyright © 2011-2024 Natalia Portillo
 // ****************************************************************************/
 
-namespace Aaru.CommonTypes.Interfaces
+namespace Aaru.CommonTypes.Interfaces;
+
+public interface IChecksum
 {
-    public interface IChecksum
-    {
-        /// <summary>Updates the hash with data.</summary>
-        /// <param name="data">Data buffer.</param>
-        /// <param name="len">Length of buffer to hash.</param>
-        void Update(byte[] data, uint len);
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    /// <param name="len">Length of buffer to hash.</param>
+    void Update(byte[] data, uint len);
 
-        /// <summary>Updates the hash with data.</summary>
-        /// <param name="data">Data buffer.</param>
-        void Update(byte[] data);
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    void Update(byte[] data);
 
-        /// <summary>Returns a byte array of the hash value.</summary>
-        byte[] Final();
+    /// <summary>Returns a byte array of the hash value.</summary>
+    byte[] Final();
 
-        /// <summary>Returns a hexadecimal representation of the hash value.</summary>
-        string End();
-    }
+    /// <summary>Returns a hexadecimal representation of the hash value.</summary>
+    string End();
 }

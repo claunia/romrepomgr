@@ -24,12 +24,21 @@
 // Copyright © 2020-2024 Natalia Portillo
 // ****************************************************************************/
 -->
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" Width="720" Height="480" x:Class="RomRepoMgr.Views.EditDat"
-        Icon="/Assets/avalonia-logo.ico" CanResize="False" Title="{Binding Title}" WindowStartupLocation="CenterScreen">
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        Width="720"
+        Height="480"
+        x:Class="RomRepoMgr.Views.EditDat"
+        Icon="/Assets/avalonia-logo.ico"
+        CanResize="False"
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterScreen">
     <Design.DataContext>
         <vm:EditDatViewModel />
     </Design.DataContext>
@@ -46,138 +55,244 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding NameLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Name}"
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding NameLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Name}"
                          Padding="5" />
             </Grid>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding VersionLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Version}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding VersionLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Version}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding AuthorLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Author}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding AuthorLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Author}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding CategoryLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Category}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding CategoryLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Category}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding CommentLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Comment}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding CommentLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Comment}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding DateLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Date}"
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding DateLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Date}"
                          Padding="5" />
             </Grid>
             <Grid Grid.Row="6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding DescriptionLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Description}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding DescriptionLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Description}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="7">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding HomepageLabel}" FontWeight="Bold" Padding="5" />
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                         Text="{Binding Homepage}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding HomepageLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBox Grid.Column="1"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Text="{Binding Homepage}"
+                         Padding="5" />
             </Grid>
             <Grid Grid.Row="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding TotalMachinesLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding TotalMachines}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding TotalMachinesLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding TotalMachines}"
+                           Padding="5" />
             </Grid>
             <Grid Grid.Row="9">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding CompleteMachinesLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding CompleteMachines}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding CompleteMachinesLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding CompleteMachines}"
+                           Padding="5" />
             </Grid>
             <Grid Grid.Row="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding IncompleteMachinesLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding IncompleteMachines}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding IncompleteMachinesLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding IncompleteMachines}"
+                           Padding="5" />
             </Grid>
             <Grid Grid.Row="11">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding TotalRomsLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding TotalRoms}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding TotalRomsLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding TotalRoms}"
+                           Padding="5" />
             </Grid>
             <Grid Grid.Row="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding HaveRomsLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding HaveRoms}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding HaveRomsLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding HaveRoms}"
+                           Padding="5" />
             </Grid>
             <Grid Grid.Row="13">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" /> <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="{Binding MissRomsLabel}" FontWeight="Bold" Padding="5" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Text="{Binding MissRoms}" Padding="5" />
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding MissRomsLabel}"
+                           FontWeight="Bold"
+                           Padding="5" />
+                <TextBlock Grid.Column="1"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding MissRoms}"
+                           Padding="5" />
             </Grid>
-            <StackPanel Grid.Row="14" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding SaveCommand}"
+            <StackPanel Grid.Row="14"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding SaveCommand}"
                         IsVisible="{Binding Modified}">
                     <TextBlock Text="{Binding SaveLabel}" />
                 </Button>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding CancelCommand}"
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding CancelCommand}"
                         IsVisible="{Binding Modified}">
                     <TextBlock Text="{Binding CancelLabel}" />
                 </Button>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding CloseCommand}"
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding CloseCommand}"
                         IsVisible="{Binding !Modified}">
                     <TextBlock Text="{Binding CloseLabel}" />
                 </Button>

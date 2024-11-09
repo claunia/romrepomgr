@@ -40,44 +40,40 @@ using System;
 using System.Reflection;
 using System.Runtime;
 
-namespace Aaru.CommonTypes.Interop
+namespace Aaru.CommonTypes.Interop;
+
+public static class Version
 {
-    public static class Version
+    /// <summary>Gets version string</summary>
+    /// <returns>Version</returns>
+    public static string GetVersion() => typeof(Version).Assembly.GetName().Version?.ToString();
+
+    public static string GetNetCoreVersion()
     {
-        /// <summary>Gets version string</summary>
-        /// <returns>Version</returns>
-        public static string GetVersion() => typeof(Version).Assembly.GetName().Version?.ToString();
+        Assembly assembly = typeof(GCSettings).Assembly;
 
-        public static string GetNetCoreVersion()
-        {
-            Assembly assembly = typeof(GCSettings).Assembly;
+        string[] assemblyPath = assembly.Location.Split(new[]
+                                                        {
+                                                            '/', '\\'
+                                                        },
+                                                        StringSplitOptions.RemoveEmptyEntries);
 
-            string[] assemblyPath = assembly.Location.Split(new[]
-            {
-                '/', '\\'
-            }, StringSplitOptions.RemoveEmptyEntries);
+        int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
 
-            int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
+        if(netCoreAppIndex > 0 && netCoreAppIndex < assemblyPath.Length - 2) return assemblyPath[netCoreAppIndex + 1];
 
-            if(netCoreAppIndex > 0 &&
-               netCoreAppIndex < assemblyPath.Length - 2)
-                return assemblyPath[netCoreAppIndex + 1];
+        return null;
+    }
 
-            return null;
-        }
+    public static string GetMonoVersion()
+    {
+        if(!DetectOS.IsMono) return null;
 
-        public static string GetMonoVersion()
-        {
-            if(!DetectOS.IsMono)
-                return null;
+        MethodInfo monoDisplayName = Type.GetType("Mono.Runtime")
+                                        ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
 
-            MethodInfo monoDisplayName = Type.GetType("Mono.Runtime")?.
-                                              GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+        if(monoDisplayName != null) return (string)monoDisplayName.Invoke(null, null);
 
-            if(monoDisplayName != null)
-                return (string)monoDisplayName.Invoke(null, null);
-
-            return null;
-        }
+        return null;
     }
 }

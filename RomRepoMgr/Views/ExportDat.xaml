@@ -24,12 +24,21 @@
 // Copyright © 2020-2024 Natalia Portillo
 // ****************************************************************************/
 -->
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" Width="480" Height="90" x:Class="RomRepoMgr.Views.ExportDat"
-        Icon="/Assets/avalonia-logo.ico" CanResize="False" Title="{Binding Title}" WindowStartupLocation="CenterOwner">
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        Width="480"
+        Height="90"
+        x:Class="RomRepoMgr.Views.ExportDat"
+        Icon="/Assets/avalonia-logo.ico"
+        CanResize="False"
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:ExportDatViewModel />
     </Design.DataContext>
@@ -39,12 +48,22 @@
                 <RowDefinition Height="Auto" /> <RowDefinition Height="auto" /> <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="{Binding StatusMessage}" HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="1" IsIndeterminate="True" HorizontalAlignment="Stretch"
+            <TextBlock Grid.Row="0"
+                       Text="{Binding StatusMessage}"
+                       HorizontalAlignment="Center" />
+            <ProgressBar Grid.Row="1"
+                         IsIndeterminate="True"
+                         HorizontalAlignment="Stretch"
                          IsVisible="{Binding ProgressVisible}" />
-            <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" HorizontalAlignment="Center" Foreground="Red"
+            <TextBlock Grid.Row="2"
+                       Text="{Binding ErrorMessage}"
+                       HorizontalAlignment="Center"
+                       Foreground="Red"
                        IsVisible="{Binding ErrorVisible}" />
-            <Button Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanClose}"
+            <Button Grid.Row="3"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding CanClose}"
                     Command="{Binding CloseCommand}">
                 <TextBlock Text="{Binding CloseLabel}" />
             </Button>

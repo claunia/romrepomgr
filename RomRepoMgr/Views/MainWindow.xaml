@@ -1,130 +1,183 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" x:Class="RomRepoMgr.Views.MainWindow" Icon="/Assets/avalonia-logo.ico" Title="RomRepoMgr">
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="RomRepoMgr.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="RomRepoMgr">
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{Binding FileMenuText}">
-                <MenuItem Header="{Binding FileMenuImportDatFileText}" Command="{Binding ImportDatCommand}" />
+                <MenuItem Header="{Binding FileMenuImportDatFileText}"
+                          Command="{Binding ImportDatCommand}" />
                 <Separator />
-                <MenuItem Header="{Binding FileMenuImportDatFolderText}" Command="{Binding ImportDatFolderCommand}" />
+                <MenuItem Header="{Binding FileMenuImportDatFolderText}"
+                          Command="{Binding ImportDatFolderCommand}" />
                 <Separator />
-                <MenuItem Header="{Binding FileMenuSettingsText}" IsVisible="{Binding !NativeMenuSupported}"
+                <MenuItem Header="{Binding FileMenuSettingsText}"
+                          IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding SettingsCommand}" />
                 <Separator />
-                <MenuItem Header="{Binding FileMenuExitText}" IsVisible="{Binding !NativeMenuSupported}"
+                <MenuItem Header="{Binding FileMenuExitText}"
+                          IsVisible="{Binding !NativeMenuSupported}"
                           Command="{Binding ExitCommand}" />
             </MenuItem>
-            <MenuItem Header="{Binding FilesystemMenuText}" IsEnabled="{Binding IsVfsAvailable}">
-                <MenuItem Header="{Binding FilesystemMenuMountText}" Command="{Binding MountCommand}"
+            <MenuItem Header="{Binding FilesystemMenuText}"
+                      IsEnabled="{Binding IsVfsAvailable}">
+                <MenuItem Header="{Binding FilesystemMenuMountText}"
+                          Command="{Binding MountCommand}"
                           IsEnabled="{Binding Vfs, Converter={x:Static ObjectConverters.IsNull}}" />
                 <Separator />
-                <MenuItem Header="{Binding FilesystemMenuUmountText}" Command="{Binding UmountCommand}"
+                <MenuItem Header="{Binding FilesystemMenuUmountText}"
+                          Command="{Binding UmountCommand}"
                           IsEnabled="{Binding Vfs, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <Separator />
             </MenuItem>
             <MenuItem Header="{Binding RomsMenuText}">
-                <MenuItem Header="{Binding RomsMenuImportText}" Command="{Binding ImportRomFolderCommand}" />
+                <MenuItem Header="{Binding RomsMenuImportText}"
+                          Command="{Binding ImportRomFolderCommand}" />
                 <Separator />
             </MenuItem>
             <MenuItem Header="{Binding RomSetsMenuText}"
                       IsEnabled="{Binding SelectedRomSet, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <MenuItem Header="{Binding RomSetsMenuSaveRomsText}" Command="{Binding ExportRomsCommand}" />
+                <MenuItem Header="{Binding RomSetsMenuSaveRomsText}"
+                          Command="{Binding ExportRomsCommand}" />
                 <Separator />
-                <MenuItem Header="{Binding RomSetsMenuSaveDatText}" Command="{Binding ExportDatCommand}" />
-                <Separator /> <MenuItem Header="{Binding RomSetsMenuEditText}" Command="{Binding EditRomSetCommand}" />
+                <MenuItem Header="{Binding RomSetsMenuSaveDatText}"
+                          Command="{Binding ExportDatCommand}" />
                 <Separator />
-                <MenuItem Header="{Binding RomSetsMenuDeleteText}" Command="{Binding DeleteRomSetCommand}" />
+                <MenuItem Header="{Binding RomSetsMenuEditText}"
+                          Command="{Binding EditRomSetCommand}" />
+                <Separator />
+                <MenuItem Header="{Binding RomSetsMenuDeleteText}"
+                          Command="{Binding DeleteRomSetCommand}" />
                 <Separator />
             </MenuItem>
             <MenuItem Header="{Binding DatabaseMenuText}">
-                <MenuItem Header="{Binding DatabaseMenuUpdateStatsText}" Command="{Binding UpdateStatsCommand}" />
+                <MenuItem Header="{Binding DatabaseMenuUpdateStatsText}"
+                          Command="{Binding UpdateStatsCommand}" />
                 <Separator />
             </MenuItem>
             <MenuItem Header="{Binding HelpMenuText}">
-                <MenuItem Header="{Binding HelpMenuAboutText}" Name="AboutMenuItem"
-                          IsVisible="{Binding !NativeMenuSupported}" Command="{Binding AboutCommand}" />
+                <MenuItem Header="{Binding HelpMenuAboutText}"
+                          Name="AboutMenuItem"
+                          IsVisible="{Binding !NativeMenuSupported}"
+                          Command="{Binding AboutCommand}" />
             </MenuItem>
         </Menu>
-        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TabControl HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
             <TabItem>
                 <TabItem.Header>
                     <TextBlock Text="{Binding RomSetLabel}" />
                 </TabItem.Header>
-                <DataGrid Items="{Binding RomSets}" HorizontalScrollBarVisibility="Visible"
-                          SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}" CanUserSortColumns="True"
+                <DataGrid Items="{Binding RomSets}"
+                          HorizontalScrollBarVisibility="Visible"
+                          SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}"
+                          CanUserSortColumns="True"
                           CanUserResizeColumns="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding Name}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Name}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetNameLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Version}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Version}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetVersionLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Author}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Author}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetAuthorLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Category}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Category}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetCategoryLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Date}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Date}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetDateLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Description}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Description}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetDescriptionLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Comment}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Comment}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetCommentLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Homepage}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding Homepage}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetHomepageLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding TotalMachines}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding TotalMachines}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetTotalMachinesLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding CompleteMachines}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding CompleteMachines}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetCompleteMachinesLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding IncompleteMachines}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding IncompleteMachines}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetIncompleteMachinesLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding TotalRoms}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding TotalRoms}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetTotalRomsLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding HaveRoms}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding HaveRoms}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetHaveRomsLabel}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding MissRoms}" Width="Auto" IsReadOnly="True">
+                        <DataGridTextColumn Binding="{Binding MissRoms}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{Binding RomSetMissRomsLabel}" />
                             </DataGridTextColumn.Header>

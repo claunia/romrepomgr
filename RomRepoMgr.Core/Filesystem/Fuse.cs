@@ -10,166 +10,298 @@ using Mono.Fuse.NETStandard;
 using Mono.Unix.Native;
 using RomRepoMgr.Database.Models;
 
-namespace RomRepoMgr.Core.Filesystem
+namespace RomRepoMgr.Core.Filesystem;
+
+// TODO: Last handle goes negative
+[SupportedOSPlatform("Linux")]
+[SupportedOSPlatform("macOS")]
+public sealed class Fuse : FileSystem
 {
-    // TODO: Last handle goes negative
-    [SupportedOSPlatform("Linux")]
-    [SupportedOSPlatform("macOS")]
-    public sealed class Fuse : FileSystem
+    readonly ConcurrentDictionary<long, List<DirectoryEntry>> _directoryCache;
+    readonly ConcurrentDictionary<long, Stat>                 _fileStatHandleCache;
+    readonly Vfs                                              _vfs;
+    long                                                      _lastHandle;
+    string                                                    _umountToken;
+
+    public Fuse(Vfs vfs)
     {
-        readonly ConcurrentDictionary<long, List<DirectoryEntry>> _directoryCache;
-        readonly ConcurrentDictionary<long, Stat>                 _fileStatHandleCache;
-        readonly Vfs                                              _vfs;
-        long                                                      _lastHandle;
-        string                                                    _umountToken;
+        _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
+        _lastHandle          = 0;
+        _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
+        Name                 = "romrepombgrfs";
+        _vfs                 = vfs;
+    }
 
-        public Fuse(Vfs vfs)
+    public static bool IsAvailable
+    {
+        get
         {
-            _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
-            _lastHandle          = 0;
-            _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
-            Name                 = "romrepombgrfs";
-            _vfs                 = vfs;
-        }
-
-        public static bool IsAvailable
-        {
-            get
+            try
             {
-                try
+                IntPtr fuse = dlopen("libfuse.so.2", 2);
+
+                if(fuse == IntPtr.Zero) return false;
+
+                dlclose(fuse);
+
+                IntPtr helper = dlopen("libMonoFuseHelper.so", 2);
+
+                if(helper == IntPtr.Zero)
                 {
-                    IntPtr fuse = dlopen("libfuse.so.2", 2);
+                    helper = dlopen("./libMonoFuseHelper.so", 2);
 
-                    if(fuse == IntPtr.Zero)
-                        return false;
-
-                    dlclose(fuse);
-
-                    IntPtr helper = dlopen("libMonoFuseHelper.so", 2);
-
-                    if(helper == IntPtr.Zero)
-                    {
-                        helper = dlopen("./libMonoFuseHelper.so", 2);
-
-                        if(helper == IntPtr.Zero)
-                            return false;
-                    }
-
-                    dlclose(helper);
-
-                    return true;
+                    if(helper == IntPtr.Zero) return false;
                 }
-                catch(Exception e)
-                {
-                    return false;
-                }
+
+                dlclose(helper);
+
+                return true;
+            }
+            catch(Exception e)
+            {
+                return false;
             }
         }
+    }
 
-        [DllImport("libdl")]
-        static extern IntPtr dlopen(string filename, int flags);
+    [DllImport("libdl")]
+    static extern IntPtr dlopen(string filename, int flags);
 
-        [DllImport("libdl")]
-        static extern int dlclose(IntPtr handle);
+    [DllImport("libdl")]
+    static extern int dlclose(IntPtr handle);
 
-        protected override Errno OnGetPathStatus(string path, out Stat stat)
+    protected override Errno OnGetPathStatus(string path, out Stat stat)
+    {
+        stat = new Stat();
+
+        string[] pieces = _vfs.SplitPath(path);
+
+        if(pieces.Length == 0)
         {
-            stat = new Stat();
+            stat.st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555");
+            stat.st_nlink = 2;
 
-            string[] pieces = _vfs.SplitPath(path);
+            return 0;
+        }
 
-            if(pieces.Length == 0)
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0)
+        {
+            if(pieces[0] != ".fuse_umount" || _umountToken == null) return Errno.ENOENT;
+
+            stat = new Stat
             {
-                stat.st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555");
-                stat.st_nlink = 2;
+                st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                st_nlink   = 1,
+                st_ctime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                st_mtime   = NativeConvert.ToTimeT(DateTime.UtcNow),
+                st_blksize = 0,
+                st_blocks  = 0,
+                st_ino     = 0,
+                st_size    = 0
+            };
 
-                return 0;
-            }
+            return 0;
+        }
 
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
+        RomSet romSet = _vfs.GetRomSet(romSetId);
 
-            if(romSetId <= 0)
+        if(romSet == null) return Errno.ENOENT;
+
+        if(pieces.Length == 1)
+        {
+            stat.st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555");
+            stat.st_nlink = 2;
+            stat.st_ctime = NativeConvert.ToTimeT(romSet.CreatedOn.ToUniversalTime());
+            stat.st_mtime = NativeConvert.ToTimeT(romSet.UpdatedOn.ToUniversalTime());
+
+            return 0;
+        }
+
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+        if(machine == null) return Errno.ENOENT;
+
+        if(pieces.Length == 2)
+        {
+            stat = new Stat
             {
-                if(pieces[0]    != ".fuse_umount" ||
-                   _umountToken == null)
-                    return Errno.ENOENT;
+                st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
+                st_nlink = 2,
+                st_ctime = NativeConvert.ToTimeT(machine.CreationDate.ToUniversalTime()),
+                st_mtime = NativeConvert.ToTimeT(machine.ModificationDate.ToUniversalTime())
+            };
 
-                stat = new Stat
-                {
-                    st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                    st_nlink   = 1,
-                    st_ctime   = NativeConvert.ToTimeT(DateTime.UtcNow),
-                    st_mtime   = NativeConvert.ToTimeT(DateTime.UtcNow),
-                    st_blksize = 0,
-                    st_blocks  = 0,
-                    st_ino     = 0,
-                    st_size    = 0
-                };
+            return 0;
+        }
 
-                return 0;
-            }
+        CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
 
-            RomSet romSet = _vfs.GetRomSet(romSetId);
+        if(file != null)
+        {
+            if(pieces.Length != 3) return Errno.ENOSYS;
 
-            if(romSet == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 1)
+            stat = new Stat
             {
-                stat.st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555");
-                stat.st_nlink = 2;
-                stat.st_ctime = NativeConvert.ToTimeT(romSet.CreatedOn.ToUniversalTime());
-                stat.st_mtime = NativeConvert.ToTimeT(romSet.UpdatedOn.ToUniversalTime());
+                st_mode  = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                st_nlink = 1,
+                st_ctime = NativeConvert.ToTimeT(file.CreatedOn.ToUniversalTime()),
+                st_mtime =
+                    NativeConvert.ToTimeT(file.FileLastModification?.ToUniversalTime() ??
+                                          file.UpdatedOn.ToUniversalTime()),
+                st_blksize = 512,
+                st_blocks  = (long)(file.Size / 512),
+                st_ino     = file.Id,
+                st_size    = (long)file.Size
+            };
 
-                return 0;
-            }
+            return 0;
+        }
 
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-            if(machine == null)
-                return Errno.ENOENT;
+        if(disk != null)
+        {
+            if(pieces.Length != 3) return Errno.ENOSYS;
 
-            if(pieces.Length == 2)
+            stat = new Stat
             {
-                stat = new Stat
-                {
-                    st_mode  = FilePermissions.S_IFDIR | NativeConvert.FromOctalPermissionString("0555"),
-                    st_nlink = 2,
-                    st_ctime = NativeConvert.ToTimeT(machine.CreationDate.ToUniversalTime()),
-                    st_mtime = NativeConvert.ToTimeT(machine.ModificationDate.ToUniversalTime())
-                };
+                st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                st_nlink   = 1,
+                st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
+                st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
+                st_blksize = 512,
+                st_blocks  = (long)(disk.Size / 512),
+                st_ino     = disk.Id,
+                st_size    = (long)disk.Size
+            };
 
-                return 0;
-            }
+            return 0;
+        }
 
-            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
 
-            if(file != null)
+        if(media == null) return Errno.ENOENT;
+
+        if(pieces.Length != 3) return Errno.ENOSYS;
+
+        stat = new Stat
+        {
+            st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+            st_nlink   = 1,
+            st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
+            st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
+            st_blksize = 512,
+            st_blocks  = (long)(media.Size / 512),
+            st_ino     = media.Id,
+            st_size    = (long)media.Size
+        };
+
+        return 0;
+    }
+
+    protected override Errno OnReadSymbolicLink(string link, out string target)
+    {
+        target = null;
+
+        return Errno.EOPNOTSUPP;
+    }
+
+    protected override Errno OnCreateSpecialFile(string file, FilePermissions perms, ulong dev) => Errno.EROFS;
+
+    protected override Errno OnCreateDirectory(string directory, FilePermissions mode) => Errno.EROFS;
+
+    protected override Errno OnRemoveFile(string file) => Errno.EROFS;
+
+    protected override Errno OnRemoveDirectory(string directory) => Errno.EROFS;
+
+    protected override Errno OnCreateSymbolicLink(string target, string link) => Errno.EROFS;
+
+    protected override Errno OnRenamePath(string oldPath, string newPath) => Errno.EROFS;
+
+    protected override Errno OnCreateHardLink(string oldPath, string link) => Errno.EROFS;
+
+    protected override Errno OnChangePathPermissions(string path, FilePermissions mode) => Errno.EROFS;
+
+    protected override Errno OnChangePathOwner(string path, long owner, long group) => Errno.EROFS;
+
+    protected override Errno OnTruncateFile(string file, long length) => Errno.EROFS;
+
+    protected override Errno OnChangePathTimes(string path, ref Utimbuf buf) => Errno.EROFS;
+
+    protected override Errno OnOpenHandle(string path, OpenedPathInfo info)
+    {
+        string[] pieces = _vfs.SplitPath(path);
+
+        if(pieces.Length == 0) return Errno.EISDIR;
+
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0) return Errno.ENOENT;
+
+        RomSet romSet = _vfs.GetRomSet(romSetId);
+
+        if(romSet == null) return Errno.ENOENT;
+
+        if(pieces.Length == 1) return Errno.EISDIR;
+
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+        if(machine == null) return Errno.ENOENT;
+
+        if(pieces.Length == 2) return Errno.EISDIR;
+
+        long handle = 0;
+        Stat stat;
+
+        CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+        if(file != null)
+        {
+            if(pieces.Length > 3) return Errno.ENOSYS;
+
+            if(file.Sha384 == null) return Errno.ENOENT;
+
+            if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
+               info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
+               info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
+               info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
+                return Errno.EROFS;
+
+            handle = _vfs.Open(file.Sha384, (long)file.Size);
+
+            stat = new Stat
             {
-                if(pieces.Length != 3)
-                    return Errno.ENOSYS;
-
-                stat = new Stat
-                {
-                    st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                    st_nlink   = 1,
-                    st_ctime   = NativeConvert.ToTimeT(file.CreatedOn.ToUniversalTime()),
-                    st_mtime   = NativeConvert.ToTimeT(file.FileLastModification?.ToUniversalTime() ?? file.UpdatedOn.ToUniversalTime()),
-                    st_blksize = 512,
-                    st_blocks  = (long)(file.Size / 512),
-                    st_ino     = file.Id,
-                    st_size    = (long)file.Size
-                };
-
-                return 0;
-            }
-
+                st_mode  = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
+                st_nlink = 1,
+                st_ctime = NativeConvert.ToTimeT(file.CreatedOn.ToUniversalTime()),
+                st_mtime =
+                    NativeConvert.ToTimeT(file.FileLastModification?.ToUniversalTime() ??
+                                          file.UpdatedOn.ToUniversalTime()),
+                st_blksize = 512,
+                st_blocks  = (long)(file.Size / 512),
+                st_ino     = file.Id,
+                st_size    = (long)file.Size
+            };
+        }
+        else
+        {
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
             if(disk != null)
             {
-                if(pieces.Length != 3)
-                    return Errno.ENOSYS;
+                if(pieces.Length > 3) return Errno.ENOSYS;
+
+                if(disk.Sha1 == null && disk.Md5 == null) return Errno.ENOENT;
+
+                if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
+                   info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
+                   info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
+                   info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
+                    return Errno.EROFS;
+
+                handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
 
                 stat = new Stat
                 {
@@ -182,102 +314,16 @@ namespace RomRepoMgr.Core.Filesystem
                     st_ino     = disk.Id,
                     st_size    = (long)disk.Size
                 };
-
-                return 0;
             }
-
-            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
-
-            if(media == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length != 3)
-                return Errno.ENOSYS;
-
-            stat = new Stat
+            else
             {
-                st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                st_nlink   = 1,
-                st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
-                st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
-                st_blksize = 512,
-                st_blocks  = (long)(media.Size / 512),
-                st_ino     = media.Id,
-                st_size    = (long)media.Size
-            };
+                CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
 
-            return 0;
-        }
+                if(media == null) return Errno.ENOENT;
 
-        protected override Errno OnReadSymbolicLink(string link, out string target)
-        {
-            target = null;
+                if(pieces.Length > 3) return Errno.ENOSYS;
 
-            return Errno.EOPNOTSUPP;
-        }
-
-        protected override Errno OnCreateSpecialFile(string file, FilePermissions perms, ulong dev) => Errno.EROFS;
-
-        protected override Errno OnCreateDirectory(string directory, FilePermissions mode) => Errno.EROFS;
-
-        protected override Errno OnRemoveFile(string file) => Errno.EROFS;
-
-        protected override Errno OnRemoveDirectory(string directory) => Errno.EROFS;
-
-        protected override Errno OnCreateSymbolicLink(string target, string link) => Errno.EROFS;
-
-        protected override Errno OnRenamePath(string oldPath, string newPath) => Errno.EROFS;
-
-        protected override Errno OnCreateHardLink(string oldPath, string link) => Errno.EROFS;
-
-        protected override Errno OnChangePathPermissions(string path, FilePermissions mode) => Errno.EROFS;
-
-        protected override Errno OnChangePathOwner(string path, long owner, long group) => Errno.EROFS;
-
-        protected override Errno OnTruncateFile(string file, long length) => Errno.EROFS;
-
-        protected override Errno OnChangePathTimes(string path, ref Utimbuf buf) => Errno.EROFS;
-
-        protected override Errno OnOpenHandle(string path, OpenedPathInfo info)
-        {
-            string[] pieces = _vfs.SplitPath(path);
-
-            if(pieces.Length == 0)
-                return Errno.EISDIR;
-
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
-
-            if(romSetId <= 0)
-                return Errno.ENOENT;
-
-            RomSet romSet = _vfs.GetRomSet(romSetId);
-
-            if(romSet == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 1)
-                return Errno.EISDIR;
-
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
-
-            if(machine == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 2)
-                return Errno.EISDIR;
-
-            long handle = 0;
-            Stat stat;
-
-            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
-
-            if(file != null)
-            {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
-
-                if(file.Sha384 == null)
-                    return Errno.ENOENT;
+                if(media.Sha256 == null && media.Sha1 == null && media.Md5 == null) return Errno.ENOENT;
 
                 if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
                    info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
@@ -285,672 +331,535 @@ namespace RomRepoMgr.Core.Filesystem
                    info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
                     return Errno.EROFS;
 
-                handle = _vfs.Open(file.Sha384, (long)file.Size);
+                handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
 
                 stat = new Stat
                 {
                     st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
                     st_nlink   = 1,
-                    st_ctime   = NativeConvert.ToTimeT(file.CreatedOn.ToUniversalTime()),
-                    st_mtime   = NativeConvert.ToTimeT(file.FileLastModification?.ToUniversalTime() ?? file.UpdatedOn.ToUniversalTime()),
+                    st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
+                    st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
                     st_blksize = 512,
-                    st_blocks  = (long)(file.Size / 512),
-                    st_ino     = file.Id,
-                    st_size    = (long)file.Size
+                    st_blocks  = (long)(media.Size / 512),
+                    st_ino     = media.Id,
+                    st_size    = (long)media.Size
                 };
             }
-            else
-            {
-                CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
-
-                if(disk != null)
-                {
-                    if(pieces.Length > 3)
-                        return Errno.ENOSYS;
-
-                    if(disk.Sha1 == null &&
-                       disk.Md5  == null)
-                        return Errno.ENOENT;
-
-                    if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
-                        return Errno.EROFS;
-
-                    handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
-
-                    stat = new Stat
-                    {
-                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                        st_nlink   = 1,
-                        st_ctime   = NativeConvert.ToTimeT(disk.CreatedOn.ToUniversalTime()),
-                        st_mtime   = NativeConvert.ToTimeT(disk.UpdatedOn.ToUniversalTime()),
-                        st_blksize = 512,
-                        st_blocks  = (long)(disk.Size / 512),
-                        st_ino     = disk.Id,
-                        st_size    = (long)disk.Size
-                    };
-                }
-                else
-                {
-                    CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
-
-                    if(media == null)
-                        return Errno.ENOENT;
-
-                    if(pieces.Length > 3)
-                        return Errno.ENOSYS;
-
-                    if(media.Sha256 == null &&
-                       media.Sha1   == null &&
-                       media.Md5    == null)
-                        return Errno.ENOENT;
-
-                    if(info.OpenAccess.HasFlag(OpenFlags.O_APPEND) ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_CREAT)  ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_EXCL)   ||
-                       info.OpenAccess.HasFlag(OpenFlags.O_TRUNC))
-                        return Errno.EROFS;
-
-                    handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
-
-                    stat = new Stat
-                    {
-                        st_mode    = FilePermissions.S_IFREG | NativeConvert.FromOctalPermissionString("0444"),
-                        st_nlink   = 1,
-                        st_ctime   = NativeConvert.ToTimeT(media.CreatedOn.ToUniversalTime()),
-                        st_mtime   = NativeConvert.ToTimeT(media.UpdatedOn.ToUniversalTime()),
-                        st_blksize = 512,
-                        st_blocks  = (long)(media.Size / 512),
-                        st_ino     = media.Id,
-                        st_size    = (long)media.Size
-                    };
-                }
-            }
-
-            if(handle <= 0)
-                return Errno.ENOENT;
-
-            info.Handle = new IntPtr(handle);
-
-            _fileStatHandleCache[handle] = stat;
-
-            return 0;
         }
 
-        protected override Errno OnReadHandle(string file, OpenedPathInfo info, byte[] buf, long offset,
-                                              out int bytesWritten)
+        if(handle <= 0) return Errno.ENOENT;
+
+        info.Handle = new IntPtr(handle);
+
+        _fileStatHandleCache[handle] = stat;
+
+        return 0;
+    }
+
+    protected override Errno OnReadHandle(string  file, OpenedPathInfo info, byte[] buf, long offset,
+                                          out int bytesWritten)
+    {
+        bytesWritten = _vfs.Read(info.Handle.ToInt64(), buf, offset);
+
+        if(bytesWritten >= 0) return 0;
+
+        bytesWritten = 0;
+
+        return Errno.EBADF;
+    }
+
+    protected override Errno OnWriteHandle(string file, OpenedPathInfo info, byte[] buf, long offset, out int bytesRead)
+    {
+        bytesRead = 0;
+
+        return Errno.EROFS;
+    }
+
+    protected override Errno OnGetFileSystemStatus(string path, out Statvfs buf)
+    {
+        _vfs.GetInfo(out ulong files, out ulong totalSize);
+
+        buf = new Statvfs
         {
-            bytesWritten = _vfs.Read(info.Handle.ToInt64(), buf, offset);
+            f_bsize   = 512,
+            f_frsize  = 512,
+            f_blocks  = totalSize / 512,
+            f_bavail  = 0,
+            f_files   = files,
+            f_ffree   = 0,
+            f_favail  = 0,
+            f_fsid    = 0xFFFFFFFF,
+            f_flag    = 0,
+            f_namemax = 255
+        };
 
-            if(bytesWritten >= 0)
-                return 0;
+        return 0;
+    }
 
-            bytesWritten = 0;
+    protected override Errno OnFlushHandle(string file, OpenedPathInfo info) => Errno.ENOSYS;
 
-            return Errno.EBADF;
-        }
+    protected override Errno OnReleaseHandle(string file, OpenedPathInfo info)
+    {
+        if(!_vfs.Close(info.Handle.ToInt64())) return Errno.EBADF;
 
-        protected override Errno OnWriteHandle(string file, OpenedPathInfo info, byte[] buf, long offset,
-                                               out int bytesRead)
+        _fileStatHandleCache.TryRemove(info.Handle.ToInt64(), out _);
+
+        return 0;
+    }
+
+    protected override Errno OnSynchronizeHandle(string file, OpenedPathInfo info, bool onlyUserData) =>
+        Errno.EOPNOTSUPP;
+
+    protected override Errno OnSetPathExtendedAttribute(string path, string name, byte[] value, XattrFlags flags)
+    {
+        if(_umountToken == null) return Errno.EROFS;
+
+        if(path != "/.fuse_umount") return Errno.EROFS;
+
+        if(name != _umountToken) return Errno.EROFS;
+
+        if(value?.Length != 0) return Errno.EROFS;
+
+        _umountToken = null;
+        Stop();
+
+        return 0;
+    }
+
+    protected override Errno OnGetPathExtendedAttribute(string path, string name, byte[] value, out int bytesWritten)
+    {
+        bytesWritten = 0;
+
+        string[] pieces = _vfs.SplitPath(path);
+
+        if(pieces.Length == 0) return Errno.ENODATA;
+
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0) return Errno.ENOENT;
+
+        RomSet romSet = _vfs.GetRomSet(romSetId);
+
+        if(romSet == null) return Errno.ENOENT;
+
+        if(pieces.Length == 1) return Errno.ENODATA;
+
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+        if(machine == null) return Errno.ENOENT;
+
+        if(pieces.Length == 2) return Errno.ENODATA;
+
+        CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+        string hash = null;
+
+        if(file != null)
         {
-            bytesRead = 0;
+            if(pieces.Length > 3) return Errno.ENOSYS;
 
-            return Errno.EROFS;
-        }
-
-        protected override Errno OnGetFileSystemStatus(string path, out Statvfs buf)
-        {
-            _vfs.GetInfo(out ulong files, out ulong totalSize);
-
-            buf = new Statvfs
+            switch(name)
             {
-                f_bsize   = 512,
-                f_frsize  = 512,
-                f_blocks  = totalSize / 512,
-                f_bavail  = 0,
-                f_files   = files,
-                f_ffree   = 0,
-                f_favail  = 0,
-                f_fsid    = 0xFFFFFFFF,
-                f_flag    = 0,
-                f_namemax = 255
-            };
+                case "user.crc32":
+                    hash = file.Crc32;
 
-            return 0;
-        }
+                    break;
+                case "user.md5":
+                    hash = file.Md5;
 
-        protected override Errno OnFlushHandle(string file, OpenedPathInfo info) => Errno.ENOSYS;
+                    break;
+                case "user.sha1":
+                    hash = file.Sha1;
 
-        protected override Errno OnReleaseHandle(string file, OpenedPathInfo info)
-        {
-            if(!_vfs.Close(info.Handle.ToInt64()))
-                return Errno.EBADF;
+                    break;
+                case "user.sha256":
+                    hash = file.Sha256;
 
-            _fileStatHandleCache.TryRemove(info.Handle.ToInt64(), out _);
+                    break;
+                case "user.sha384":
+                    hash = file.Sha384;
 
-            return 0;
-        }
+                    break;
+                case "user.sha512":
+                    hash = file.Sha512;
 
-        protected override Errno OnSynchronizeHandle(string file, OpenedPathInfo info, bool onlyUserData) =>
-            Errno.EOPNOTSUPP;
-
-        protected override Errno OnSetPathExtendedAttribute(string path, string name, byte[] value, XattrFlags flags)
-        {
-            if(_umountToken == null)
-                return Errno.EROFS;
-
-            if(path != "/.fuse_umount")
-                return Errno.EROFS;
-
-            if(name != _umountToken)
-                return Errno.EROFS;
-
-            if(value?.Length != 0)
-                return Errno.EROFS;
-
-            _umountToken = null;
-            Stop();
-
-            return 0;
-        }
-
-        protected override Errno OnGetPathExtendedAttribute(string path, string name, byte[] value,
-                                                            out int bytesWritten)
-        {
-            bytesWritten = 0;
-
-            string[] pieces = _vfs.SplitPath(path);
-
-            if(pieces.Length == 0)
-                return Errno.ENODATA;
-
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
-
-            if(romSetId <= 0)
-                return Errno.ENOENT;
-
-            RomSet romSet = _vfs.GetRomSet(romSetId);
-
-            if(romSet == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 1)
-                return Errno.ENODATA;
-
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
-
-            if(machine == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 2)
-                return Errno.ENODATA;
-
-            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
-
-            string hash = null;
-
-            if(file != null)
-            {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
-
-                switch(name)
-                {
-                    case "user.crc32":
-                        hash = file.Crc32;
-
-                        break;
-                    case "user.md5":
-                        hash = file.Md5;
-
-                        break;
-                    case "user.sha1":
-                        hash = file.Sha1;
-
-                        break;
-                    case "user.sha256":
-                        hash = file.Sha256;
-
-                        break;
-                    case "user.sha384":
-                        hash = file.Sha384;
-
-                        break;
-                    case "user.sha512":
-                        hash = file.Sha512;
-
-                        break;
-                }
+                    break;
             }
-            else
-            {
-                CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
-
-                if(disk != null)
-                {
-                    switch(name)
-                    {
-                        case "user.md5":
-                            hash = disk.Md5;
-
-                            break;
-                        case "user.sha1":
-                            hash = disk.Sha1;
-
-                            break;
-                    }
-                }
-                else
-                {
-                    CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
-
-                    if(media == null)
-                        return Errno.ENOENT;
-
-                    switch(name)
-                    {
-                        case "user.md5":
-                            hash = media.Md5;
-
-                            break;
-                        case "user.sha1":
-                            hash = media.Sha1;
-
-                            break;
-                        case "user.sha256":
-                            hash = media.Sha256;
-
-                            break;
-                        case "user.spamsum":
-                            hash = media.SpamSum;
-
-                            break;
-                    }
-                }
-            }
-
-            if(hash == null)
-                return Errno.ENODATA;
-
-            byte[] xattr = null;
-
-            if(name == "user.spamsum")
-            {
-                xattr = Encoding.ASCII.GetBytes(hash);
-            }
-            else
-            {
-                xattr = new byte[hash.Length / 2];
-
-                for(int i = 0; i < xattr.Length; i++)
-                {
-                    if(hash[i * 2] >= 0x30 &&
-                       hash[i * 2] <= 0x39)
-                        xattr[i] = (byte)((hash[i * 2] - 0x30) * 0x10);
-                    else if(hash[i * 2] >= 0x41 &&
-                            hash[i * 2] <= 0x46)
-                        xattr[i] = (byte)((hash[i * 2] - 0x37) * 0x10);
-                    else if(hash[i * 2] >= 0x61 &&
-                            hash[i * 2] <= 0x66)
-                        xattr[i] = (byte)((hash[i * 2] - 0x57) * 0x10);
-
-                    if(hash[(i * 2) + 1] >= 0x30 &&
-                       hash[(i * 2) + 1] <= 0x39)
-                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x30);
-                    else if(hash[(i * 2) + 1] >= 0x41 &&
-                            hash[(i * 2) + 1] <= 0x46)
-                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x37);
-                    else if(hash[(i * 2) + 1] >= 0x61 &&
-                            hash[(i * 2) + 1] <= 0x66)
-                        xattr[i] += (byte)(hash[(i * 2) + 1] - 0x57);
-                }
-            }
-
-            if(value == null)
-            {
-                bytesWritten = xattr.Length;
-
-                return 0;
-            }
-
-            int maxSize = value.Length > xattr.Length ? xattr.Length : value.Length;
-
-            Array.Copy(xattr, 0, value, 0, maxSize);
-            bytesWritten = maxSize;
-
-            return 0;
         }
-
-        protected override Errno OnListPathExtendedAttributes(string path, out string[] names)
+        else
         {
-            names = null;
-
-            string[] pieces = _vfs.SplitPath(path);
-
-            if(pieces.Length == 0)
-                return 0;
-
-            long romSetId = _vfs.GetRomSetId(pieces[0]);
-
-            if(romSetId <= 0)
-                return Errno.ENOENT;
-
-            RomSet romSet = _vfs.GetRomSet(romSetId);
-
-            if(romSet == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 1)
-                return 0;
-
-            CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
-
-            if(machine == null)
-                return Errno.ENOENT;
-
-            if(pieces.Length == 2)
-                return 0;
-
-            List<string> xattrs = new List<string>();
-
-            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
-
-            if(file != null)
-            {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
-
-                if(file.Crc32 != null)
-                    xattrs.Add("user.crc32");
-
-                if(file.Md5 != null)
-                    xattrs.Add("user.md5");
-
-                if(file.Sha1 != null)
-                    xattrs.Add("user.sha1");
-
-                if(file.Sha256 != null)
-                    xattrs.Add("user.sha256");
-
-                if(file.Sha384 != null)
-                    xattrs.Add("user.sha384");
-
-                if(file.Sha512 != null)
-                    xattrs.Add("user.sha512");
-
-                names = xattrs.ToArray();
-
-                return 0;
-            }
-
             CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
             if(disk != null)
             {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
+                switch(name)
+                {
+                    case "user.md5":
+                        hash = disk.Md5;
 
-                if(disk.Md5 != null)
-                    xattrs.Add("user.md5");
+                        break;
+                    case "user.sha1":
+                        hash = disk.Sha1;
 
-                if(disk.Sha1 != null)
-                    xattrs.Add("user.sha1");
-
-                names = xattrs.ToArray();
-
-                return 0;
+                        break;
+                }
             }
+            else
+            {
+                CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
 
-            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+                if(media == null) return Errno.ENOENT;
 
-            if(media == null)
-                return Errno.ENOENT;
+                switch(name)
+                {
+                    case "user.md5":
+                        hash = media.Md5;
 
-            if(pieces.Length > 3)
-                return Errno.ENOSYS;
+                        break;
+                    case "user.sha1":
+                        hash = media.Sha1;
 
-            if(media.Md5 != null)
-                xattrs.Add("user.md5");
+                        break;
+                    case "user.sha256":
+                        hash = media.Sha256;
 
-            if(media.Sha1 != null)
-                xattrs.Add("user.sha1");
+                        break;
+                    case "user.spamsum":
+                        hash = media.SpamSum;
 
-            if(media.Sha256 != null)
-                xattrs.Add("user.sha256");
+                        break;
+                }
+            }
+        }
 
-            if(media.SpamSum != null)
-                xattrs.Add("user.spamsum");
+        if(hash == null) return Errno.ENODATA;
+
+        byte[] xattr = null;
+
+        if(name == "user.spamsum")
+            xattr = Encoding.ASCII.GetBytes(hash);
+        else
+        {
+            xattr = new byte[hash.Length / 2];
+
+            for(var i = 0; i < xattr.Length; i++)
+            {
+                if(hash[i * 2] >= 0x30 && hash[i * 2] <= 0x39)
+                    xattr[i] = (byte)((hash[i * 2] - 0x30) * 0x10);
+                else if(hash[i * 2] >= 0x41 && hash[i * 2] <= 0x46)
+                    xattr[i]                                                 = (byte)((hash[i * 2] - 0x37) * 0x10);
+                else if(hash[i * 2] >= 0x61 && hash[i * 2] <= 0x66) xattr[i] = (byte)((hash[i * 2] - 0x57) * 0x10);
+
+                if(hash[i * 2 + 1] >= 0x30 && hash[i * 2 + 1] <= 0x39)
+                    xattr[i] += (byte)(hash[i * 2 + 1] - 0x30);
+                else if(hash[i * 2 + 1] >= 0x41 && hash[i * 2 + 1] <= 0x46)
+                    xattr[i]                                                         += (byte)(hash[i * 2 + 1] - 0x37);
+                else if(hash[i * 2 + 1] >= 0x61 && hash[i * 2 + 1] <= 0x66) xattr[i] += (byte)(hash[i * 2 + 1] - 0x57);
+            }
+        }
+
+        if(value == null)
+        {
+            bytesWritten = xattr.Length;
+
+            return 0;
+        }
+
+        int maxSize = value.Length > xattr.Length ? xattr.Length : value.Length;
+
+        Array.Copy(xattr, 0, value, 0, maxSize);
+        bytesWritten = maxSize;
+
+        return 0;
+    }
+
+    protected override Errno OnListPathExtendedAttributes(string path, out string[] names)
+    {
+        names = null;
+
+        string[] pieces = _vfs.SplitPath(path);
+
+        if(pieces.Length == 0) return 0;
+
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0) return Errno.ENOENT;
+
+        RomSet romSet = _vfs.GetRomSet(romSetId);
+
+        if(romSet == null) return Errno.ENOENT;
+
+        if(pieces.Length == 1) return 0;
+
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+        if(machine == null) return Errno.ENOENT;
+
+        if(pieces.Length == 2) return 0;
+
+        var xattrs = new List<string>();
+
+        CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+        if(file != null)
+        {
+            if(pieces.Length > 3) return Errno.ENOSYS;
+
+            if(file.Crc32 != null) xattrs.Add("user.crc32");
+
+            if(file.Md5 != null) xattrs.Add("user.md5");
+
+            if(file.Sha1 != null) xattrs.Add("user.sha1");
+
+            if(file.Sha256 != null) xattrs.Add("user.sha256");
+
+            if(file.Sha384 != null) xattrs.Add("user.sha384");
+
+            if(file.Sha512 != null) xattrs.Add("user.sha512");
 
             names = xattrs.ToArray();
 
             return 0;
         }
 
-        protected override Errno OnRemovePathExtendedAttribute(string path, string name) => Errno.EROFS;
+        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-        protected override Errno OnOpenDirectory(string directory, OpenedPathInfo info)
+        if(disk != null)
         {
-            try
-            {
-                if(directory == "/")
-                {
-                    List<DirectoryEntry> entries = new List<DirectoryEntry>
-                    {
-                        new DirectoryEntry("."),
-                        new DirectoryEntry("..")
-                    };
+            if(pieces.Length > 3) return Errno.ENOSYS;
 
-                    entries.AddRange(_vfs.GetRootEntries().Select(e => new DirectoryEntry(e)));
+            if(disk.Md5 != null) xattrs.Add("user.md5");
 
-                    _lastHandle++;
-                    info.Handle = new IntPtr(_lastHandle);
+            if(disk.Sha1 != null) xattrs.Add("user.sha1");
 
-                    _directoryCache[_lastHandle] = entries;
-
-                    return 0;
-                }
-
-                string[] pieces = directory.Split("/", StringSplitOptions.RemoveEmptyEntries);
-
-                if(pieces.Length == 0)
-                    return Errno.ENOENT;
-
-                long romSetId = _vfs.GetRomSetId(pieces[0]);
-
-                if(romSetId <= 0)
-                    return Errno.ENOENT;
-
-                RomSet romSet = _vfs.GetRomSet(romSetId);
-
-                if(romSet == null)
-                    return Errno.ENOENT;
-
-                ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(romSetId);
-
-                if(pieces.Length == 1)
-                {
-                    List<DirectoryEntry> entries = new List<DirectoryEntry>
-                    {
-                        new DirectoryEntry("."),
-                        new DirectoryEntry("..")
-                    };
-
-                    entries.AddRange(machines.Select(mach => new DirectoryEntry(mach.Key)));
-
-                    _lastHandle++;
-                    info.Handle = new IntPtr(_lastHandle);
-
-                    _directoryCache[_lastHandle] = entries;
-
-                    return 0;
-                }
-
-                CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
-
-                if(machine == null)
-                    return Errno.ENOENT;
-
-                ConcurrentDictionary<string, CachedFile>  cachedMachineFiles  = _vfs.GetFilesFromMachine(machine.Id);
-                ConcurrentDictionary<string, CachedDisk>  cachedMachineDisks  = _vfs.GetDisksFromMachine(machine.Id);
-                ConcurrentDictionary<string, CachedMedia> cachedMachineMedias = _vfs.GetMediasFromMachine(machine.Id);
-
-                if(pieces.Length == 2)
-                {
-                    List<DirectoryEntry> entries = new List<DirectoryEntry>
-                    {
-                        new DirectoryEntry("."),
-                        new DirectoryEntry("..")
-                    };
-
-                    entries.AddRange(cachedMachineFiles.Select(file => new DirectoryEntry(file.Key)));
-                    entries.AddRange(cachedMachineDisks.Select(disk => new DirectoryEntry(disk.Key    + ".chd")));
-                    entries.AddRange(cachedMachineMedias.Select(media => new DirectoryEntry(media.Key + ".aif")));
-
-                    _lastHandle++;
-                    info.Handle = new IntPtr(_lastHandle);
-
-                    _directoryCache[_lastHandle] = entries;
-
-                    return 0;
-                }
-
-                // TODO: DATs with subfolders as game name
-                if(pieces.Length >= 3)
-                    return Errno.EISDIR;
-
-                return Errno.ENOENT;
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-
-                throw;
-            }
-        }
-
-        protected override Errno OnReadDirectory(string directory, OpenedPathInfo info,
-                                                 out IEnumerable<DirectoryEntry> paths)
-        {
-            paths = null;
-
-            if(!_directoryCache.TryGetValue(info.Handle.ToInt64(), out List<DirectoryEntry> cache))
-                return Errno.EBADF;
-
-            paths = cache;
+            names = xattrs.ToArray();
 
             return 0;
         }
 
-        protected override Errno OnReleaseDirectory(string directory, OpenedPathInfo info)
+        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+
+        if(media == null) return Errno.ENOENT;
+
+        if(pieces.Length > 3) return Errno.ENOSYS;
+
+        if(media.Md5 != null) xattrs.Add("user.md5");
+
+        if(media.Sha1 != null) xattrs.Add("user.sha1");
+
+        if(media.Sha256 != null) xattrs.Add("user.sha256");
+
+        if(media.SpamSum != null) xattrs.Add("user.spamsum");
+
+        names = xattrs.ToArray();
+
+        return 0;
+    }
+
+    protected override Errno OnRemovePathExtendedAttribute(string path, string name) => Errno.EROFS;
+
+    protected override Errno OnOpenDirectory(string directory, OpenedPathInfo info)
+    {
+        try
         {
-            if(!_directoryCache.TryGetValue(info.Handle.ToInt64(), out _))
-                return Errno.EBADF;
+            if(directory == "/")
+            {
+                var entries = new List<DirectoryEntry>
+                {
+                    new("."),
+                    new("..")
+                };
 
-            _directoryCache.Remove(info.Handle.ToInt64(), out _);
+                entries.AddRange(_vfs.GetRootEntries().Select(e => new DirectoryEntry(e)));
 
-            return 0;
-        }
+                _lastHandle++;
+                info.Handle = new IntPtr(_lastHandle);
 
-        protected override Errno OnSynchronizeDirectory(string directory, OpenedPathInfo info, bool onlyUserData) =>
-            Errno.ENOSYS;
+                _directoryCache[_lastHandle] = entries;
 
-        protected override Errno OnAccessPath(string path, AccessModes mode)
-        {
-            string[] pieces = _vfs.SplitPath(path);
+                return 0;
+            }
 
-            if(pieces.Length == 0)
-                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+            string[] pieces = directory.Split("/", StringSplitOptions.RemoveEmptyEntries);
+
+            if(pieces.Length == 0) return Errno.ENOENT;
 
             long romSetId = _vfs.GetRomSetId(pieces[0]);
 
-            if(romSetId <= 0)
-                return Errno.ENOENT;
+            if(romSetId <= 0) return Errno.ENOENT;
 
             RomSet romSet = _vfs.GetRomSet(romSetId);
 
-            if(romSet == null)
-                return Errno.ENOENT;
+            if(romSet == null) return Errno.ENOENT;
+
+            ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(romSetId);
 
             if(pieces.Length == 1)
-                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+            {
+                var entries = new List<DirectoryEntry>
+                {
+                    new("."),
+                    new("..")
+                };
+
+                entries.AddRange(machines.Select(mach => new DirectoryEntry(mach.Key)));
+
+                _lastHandle++;
+                info.Handle = new IntPtr(_lastHandle);
+
+                _directoryCache[_lastHandle] = entries;
+
+                return 0;
+            }
 
             CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
 
-            if(machine == null)
-                return Errno.ENOENT;
+            if(machine == null) return Errno.ENOENT;
+
+            ConcurrentDictionary<string, CachedFile>  cachedMachineFiles  = _vfs.GetFilesFromMachine(machine.Id);
+            ConcurrentDictionary<string, CachedDisk>  cachedMachineDisks  = _vfs.GetDisksFromMachine(machine.Id);
+            ConcurrentDictionary<string, CachedMedia> cachedMachineMedias = _vfs.GetMediasFromMachine(machine.Id);
 
             if(pieces.Length == 2)
-                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
-
-            CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
-
-            if(file != null)
             {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
+                var entries = new List<DirectoryEntry>
+                {
+                    new("."),
+                    new("..")
+                };
 
-                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+                entries.AddRange(cachedMachineFiles.Select(file => new DirectoryEntry(file.Key)));
+                entries.AddRange(cachedMachineDisks.Select(disk => new DirectoryEntry(disk.Key    + ".chd")));
+                entries.AddRange(cachedMachineMedias.Select(media => new DirectoryEntry(media.Key + ".aif")));
+
+                _lastHandle++;
+                info.Handle = new IntPtr(_lastHandle);
+
+                _directoryCache[_lastHandle] = entries;
+
+                return 0;
             }
 
-            CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+            // TODO: DATs with subfolders as game name
+            if(pieces.Length >= 3) return Errno.EISDIR;
 
-            if(disk != null)
-            {
-                if(pieces.Length > 3)
-                    return Errno.ENOSYS;
+            return Errno.ENOENT;
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
 
-                return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
-            }
+            throw;
+        }
+    }
 
-            CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+    protected override Errno OnReadDirectory(string                          directory, OpenedPathInfo info,
+                                             out IEnumerable<DirectoryEntry> paths)
+    {
+        paths = null;
 
-            if(media == null)
-                return Errno.ENOENT;
+        if(!_directoryCache.TryGetValue(info.Handle.ToInt64(), out List<DirectoryEntry> cache)) return Errno.EBADF;
 
-            if(pieces.Length > 3)
-                return Errno.ENOSYS;
+        paths = cache;
+
+        return 0;
+    }
+
+    protected override Errno OnReleaseDirectory(string directory, OpenedPathInfo info)
+    {
+        if(!_directoryCache.TryGetValue(info.Handle.ToInt64(), out _)) return Errno.EBADF;
+
+        _directoryCache.Remove(info.Handle.ToInt64(), out _);
+
+        return 0;
+    }
+
+    protected override Errno OnSynchronizeDirectory(string directory, OpenedPathInfo info, bool onlyUserData) =>
+        Errno.ENOSYS;
+
+    protected override Errno OnAccessPath(string path, AccessModes mode)
+    {
+        string[] pieces = _vfs.SplitPath(path);
+
+        if(pieces.Length == 0) return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+
+        long romSetId = _vfs.GetRomSetId(pieces[0]);
+
+        if(romSetId <= 0) return Errno.ENOENT;
+
+        RomSet romSet = _vfs.GetRomSet(romSetId);
+
+        if(romSet == null) return Errno.ENOENT;
+
+        if(pieces.Length == 1) return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+
+        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+
+        if(machine == null) return Errno.ENOENT;
+
+        if(pieces.Length == 2) return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+
+        CachedFile file = _vfs.GetFile(machine.Id, pieces[2]);
+
+        if(file != null)
+        {
+            if(pieces.Length > 3) return Errno.ENOSYS;
 
             return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
         }
 
-        protected override Errno OnCreateHandle(string file, OpenedPathInfo info, FilePermissions mode) => Errno.EROFS;
+        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
 
-        protected override Errno OnTruncateHandle(string file, OpenedPathInfo info, long length) => Errno.EROFS;
-
-        protected override Errno OnGetHandleStatus(string file, OpenedPathInfo info, out Stat buf)
+        if(disk != null)
         {
-            buf = new Stat();
+            if(pieces.Length > 3) return Errno.ENOSYS;
 
-            if(!_fileStatHandleCache.TryGetValue(info.Handle.ToInt64(), out Stat fileStat))
-                return Errno.EBADF;
-
-            buf = fileStat;
-
-            return 0;
+            return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
         }
 
-        protected override Errno OnLockHandle(string file, OpenedPathInfo info, FcntlCommand cmd, ref Flock @lock) =>
-            Errno.EOPNOTSUPP;
+        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
 
-        protected override Errno OnMapPathLogicalToPhysicalIndex(string path, ulong logical, out ulong physical)
-        {
-            physical = ulong.MaxValue;
+        if(media == null) return Errno.ENOENT;
 
-            return Errno.EOPNOTSUPP;
-        }
+        if(pieces.Length > 3) return Errno.ENOSYS;
 
-        [DllImport("libc", SetLastError = true)]
-        static extern int setxattr(string path, string name, IntPtr value, long size, int flags);
+        return mode.HasFlag(AccessModes.W_OK) ? Errno.EROFS : 0;
+    }
 
-        public void Umount()
-        {
-            var    rnd   = new Random();
-            byte[] token = new byte[64];
-            rnd.NextBytes(token);
-            _umountToken = Base32.ToBase32String(token);
-            setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);
-        }
+    protected override Errno OnCreateHandle(string file, OpenedPathInfo info, FilePermissions mode) => Errno.EROFS;
+
+    protected override Errno OnTruncateHandle(string file, OpenedPathInfo info, long length) => Errno.EROFS;
+
+    protected override Errno OnGetHandleStatus(string file, OpenedPathInfo info, out Stat buf)
+    {
+        buf = new Stat();
+
+        if(!_fileStatHandleCache.TryGetValue(info.Handle.ToInt64(), out Stat fileStat)) return Errno.EBADF;
+
+        buf = fileStat;
+
+        return 0;
+    }
+
+    protected override Errno OnLockHandle(string file, OpenedPathInfo info, FcntlCommand cmd, ref Flock @lock) =>
+        Errno.EOPNOTSUPP;
+
+    protected override Errno OnMapPathLogicalToPhysicalIndex(string path, ulong logical, out ulong physical)
+    {
+        physical = ulong.MaxValue;
+
+        return Errno.EOPNOTSUPP;
+    }
+
+    [DllImport("libc", SetLastError = true)]
+    static extern int setxattr(string path, string name, IntPtr value, long size, int flags);
+
+    public void Umount()
+    {
+        var rnd   = new Random();
+        var token = new byte[64];
+        rnd.NextBytes(token);
+        _umountToken = Base32.ToBase32String(token);
+        setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);
     }
 }

@@ -31,136 +31,130 @@ using System.Reactive;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Avalonia.Platform;
 using JetBrains.Annotations;
-using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.PlatformAbstractions;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
-namespace RomRepoMgr.ViewModels
+namespace RomRepoMgr.ViewModels;
+
+public sealed class AboutViewModel : ViewModelBase
 {
-    public sealed class AboutViewModel : ViewModelBase
+    readonly About _view;
+    string         _versionText;
+
+    public AboutViewModel(About view)
     {
-        readonly About _view;
-        string         _versionText;
+        _view = view;
 
-        public AboutViewModel(About view)
+        VersionText =
+            (Attribute.GetCustomAttribute(typeof(App).Assembly, typeof(AssemblyInformationalVersionAttribute)) as
+                 AssemblyInformationalVersionAttribute)?.InformationalVersion;
+
+        WebsiteCommand = ReactiveCommand.Create(ExecuteWebsiteCommand);
+        LicenseCommand = ReactiveCommand.Create(ExecuteLicenseCommand);
+        CloseCommand   = ReactiveCommand.Create(ExecuteCloseCommand);
+
+        Assemblies = new ObservableCollection<AssemblyModel>();
+
+        // TODO: They do not load in time
+        Task.Run(() =>
         {
-            _view = view;
-
-            VersionText =
-                (Attribute.GetCustomAttribute(typeof(App).Assembly, typeof(AssemblyInformationalVersionAttribute)) as
-                     AssemblyInformationalVersionAttribute)?.InformationalVersion;
-
-            WebsiteCommand = ReactiveCommand.Create(ExecuteWebsiteCommand);
-            LicenseCommand = ReactiveCommand.Create(ExecuteLicenseCommand);
-            CloseCommand   = ReactiveCommand.Create(ExecuteCloseCommand);
-
-            Assemblies = new ObservableCollection<AssemblyModel>();
-
-            // TODO: They do not load in time
-            Task.Run(() =>
+            foreach(Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(a => a.FullName))
             {
-                foreach(Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(a => a.FullName))
+                string name = assembly.GetName().Name;
+
+                string version =
+                    (Attribute.GetCustomAttribute(assembly, typeof(AssemblyInformationalVersionAttribute)) as
+                         AssemblyInformationalVersionAttribute)?.InformationalVersion;
+
+                if(name is null || version is null) continue;
+
+                Assemblies.Add(new AssemblyModel
                 {
-                    string name = assembly.GetName().Name;
-
-                    string version =
-                        (Attribute.GetCustomAttribute(assembly, typeof(AssemblyInformationalVersionAttribute)) as
-                             AssemblyInformationalVersionAttribute)?.InformationalVersion;
-
-                    if(name is null ||
-                       version is null)
-                        continue;
-
-                    Assemblies.Add(new AssemblyModel
-                    {
-                        Name    = name,
-                        Version = version
-                    });
-                }
-            });
-        }
-
-        [NotNull]
-        public string AboutLabel => Localization.AboutLabel;
-        [NotNull]
-        public string LibrariesLabel => Localization.LibrariesLabel;
-        [NotNull]
-        public string AuthorsLabel => Localization.AuthorsLabel;
-        [NotNull]
-        public string Title => Localization.AboutTitle;
-        [NotNull]
-        public string SoftwareName => "RomRepoMgr";
-        [NotNull]
-        public string SuiteName => "ROM Repository Manager";
-        [NotNull]
-        public string Copyright => "© 2020-2024 Natalia Portillo";
-        [NotNull]
-        public string Website => "https://www.claunia.com";
-        [NotNull]
-        public string License => Localization.LicenseLabel;
-        [NotNull]
-        public string CloseLabel => Localization.CloseLabel;
-        [NotNull]
-        public string AssembliesLibraryText => Localization.AssembliesLibraryText;
-        [NotNull]
-        public string AssembliesVersionText => Localization.AssembliesVersionText;
-        [NotNull]
-        public string Authors => Localization.AuthorsText;
-        public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
-        public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
-        public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }
-        public ObservableCollection<AssemblyModel> Assemblies     { get; }
-
-        public string VersionText
-        {
-            get => _versionText;
-            set => this.RaiseAndSetIfChanged(ref _versionText, value);
-        }
-
-        void ExecuteWebsiteCommand()
-        {
-            var process = new Process
-            {
-                StartInfo =
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow  = true,
-                    Arguments       = "https://www.claunia.com"
-                }
-            };
-
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                process.StartInfo.FileName  = "cmd";
-                process.StartInfo.Arguments = $"/c start {process.StartInfo.Arguments.Replace("&", "^&")}";
+                    Name    = name,
+                    Version = version
+                });
             }
-            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
-                    RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-                process.StartInfo.FileName = "xdg-open";
-            else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                process.StartInfo.FileName = "open";
-            else
-            {
-                if(Debugger.IsAttached) throw new ArgumentOutOfRangeException();
-
-                return;
-            }
-
-            process.Start();
-        }
-
-        void ExecuteLicenseCommand()
-        {
-            /*            var dialog = new LicenseDialog();
-                        dialog.DataContext = new LicenseViewModel(dialog);
-                        dialog.ShowDialog(_view);*/
-        }
-
-        void ExecuteCloseCommand() => _view.Close();
+        });
     }
+
+    [NotNull]
+    public string AboutLabel => Localization.AboutLabel;
+    [NotNull]
+    public string LibrariesLabel => Localization.LibrariesLabel;
+    [NotNull]
+    public string AuthorsLabel => Localization.AuthorsLabel;
+    [NotNull]
+    public string Title => Localization.AboutTitle;
+    [NotNull]
+    public string SoftwareName => "RomRepoMgr";
+    [NotNull]
+    public string SuiteName => "ROM Repository Manager";
+    [NotNull]
+    public string Copyright => "© 2020-2024 Natalia Portillo";
+    [NotNull]
+    public string Website => "https://www.claunia.com";
+    [NotNull]
+    public string License => Localization.LicenseLabel;
+    [NotNull]
+    public string CloseLabel => Localization.CloseLabel;
+    [NotNull]
+    public string AssembliesLibraryText => Localization.AssembliesLibraryText;
+    [NotNull]
+    public string AssembliesVersionText => Localization.AssembliesVersionText;
+    [NotNull]
+    public string Authors => Localization.AuthorsText;
+    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
+    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }
+    public ObservableCollection<AssemblyModel> Assemblies     { get; }
+
+    public string VersionText
+    {
+        get => _versionText;
+        set => this.RaiseAndSetIfChanged(ref _versionText, value);
+    }
+
+    void ExecuteWebsiteCommand()
+    {
+        var process = new Process
+        {
+            StartInfo =
+            {
+                UseShellExecute = false,
+                CreateNoWindow  = true,
+                Arguments       = "https://www.claunia.com"
+            }
+        };
+
+        if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            process.StartInfo.FileName  = "cmd";
+            process.StartInfo.Arguments = $"/c start {process.StartInfo.Arguments.Replace("&", "^&")}";
+        }
+        else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+            process.StartInfo.FileName = "xdg-open";
+        else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            process.StartInfo.FileName = "open";
+        else
+        {
+            if(Debugger.IsAttached) throw new ArgumentOutOfRangeException();
+
+            return;
+        }
+
+        process.Start();
+    }
+
+    void ExecuteLicenseCommand()
+    {
+        /*            var dialog = new LicenseDialog();
+                    dialog.DataContext = new LicenseViewModel(dialog);
+                    dialog.ShowDialog(_view);*/
+    }
+
+    void ExecuteCloseCommand() => _view.Close();
 }

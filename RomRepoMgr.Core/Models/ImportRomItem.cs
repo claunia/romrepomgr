@@ -23,11 +23,10 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
-namespace RomRepoMgr.Core.Models
+namespace RomRepoMgr.Core.Models;
+
+public sealed class ImportRomItem
 {
-    public sealed class ImportRomItem
-    {
-        public string Filename { get; set; }
-        public string Status   { get; set; }
-    }
+    public string Filename { get; set; }
+    public string Status   { get; set; }
 }

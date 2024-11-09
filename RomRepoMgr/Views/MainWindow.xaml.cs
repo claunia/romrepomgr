@@ -27,18 +27,17 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace RomRepoMgr.Views
-{
-    public class MainWindow : Window
-    {
-        public MainWindow()
-        {
-            InitializeComponent();
-        #if DEBUG
-            this.AttachDevTools();
-        #endif
-        }
+namespace RomRepoMgr.Views;
 
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+public class MainWindow : Window
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+#if DEBUG
+        this.AttachDevTools();
+#endif
     }
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

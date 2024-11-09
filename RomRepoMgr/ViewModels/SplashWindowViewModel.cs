@@ -39,335 +39,339 @@ using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
 using RomRepoMgr.Resources;
 
-namespace RomRepoMgr.ViewModels
+namespace RomRepoMgr.ViewModels;
+
+public sealed class SplashWindowViewModel : ViewModelBase
 {
-    public sealed class SplashWindowViewModel : ViewModelBase
+    bool _checkingUnArError;
+    bool _checkingUnArOk;
+    bool _checkingUnArUnknown;
+    bool _exitVisible;
+    bool _loadingDatabaseError;
+    bool _loadingDatabaseOk;
+    bool _loadingDatabaseUnknown;
+    bool _loadingRomSetsError;
+    bool _loadingRomSetsOk;
+    bool _loadingRomSetsUnknown;
+    bool _loadingSettingsError;
+    bool _loadingSettingsOk;
+    bool _loadingSettingsUnknown;
+    bool _migratingDatabaseError;
+    bool _migratingDatabaseOk;
+    bool _migratingDatabaseUnknown;
+
+    public SplashWindowViewModel()
     {
-        bool _checkingUnArError;
-        bool _checkingUnArOk;
-        bool _checkingUnArUnknown;
-        bool _exitVisible;
-        bool _loadingDatabaseError;
-        bool _loadingDatabaseOk;
-        bool _loadingDatabaseUnknown;
-        bool _loadingRomSetsError;
-        bool _loadingRomSetsOk;
-        bool _loadingRomSetsUnknown;
-        bool _loadingSettingsError;
-        bool _loadingSettingsOk;
-        bool _loadingSettingsUnknown;
-        bool _migratingDatabaseError;
-        bool _migratingDatabaseOk;
-        bool _migratingDatabaseUnknown;
+        ExitCommand = ReactiveCommand.Create(ExecuteExitCommand);
 
-        public SplashWindowViewModel()
-        {
-            ExitCommand = ReactiveCommand.Create(ExecuteExitCommand);
-
-            LoadingSettingsOk        = false;
-            LoadingSettingsError     = false;
-            LoadingSettingsUnknown   = true;
-            CheckingUnArOk           = false;
-            CheckingUnArError        = false;
-            CheckingUnArUnknown      = true;
-            LoadingDatabaseOk        = false;
-            LoadingDatabaseError     = false;
-            LoadingDatabaseUnknown   = true;
-            MigratingDatabaseOk      = false;
-            MigratingDatabaseError   = false;
-            MigratingDatabaseUnknown = true;
-            LoadingRomSetsOk         = false;
-            LoadingRomSetsError      = false;
-            LoadingRomSetsUnknown    = true;
-            ExitVisible              = false;
-        }
-
-        public ReactiveCommand<Unit, Unit> ExitCommand { get; }
-
-        public bool LoadingSettingsOk
-        {
-            get => _loadingSettingsOk;
-            set => this.RaiseAndSetIfChanged(ref _loadingSettingsOk, value);
-        }
-
-        public bool LoadingSettingsError
-        {
-            get => _loadingSettingsError;
-            set => this.RaiseAndSetIfChanged(ref _loadingSettingsError, value);
-        }
-
-        public bool LoadingSettingsUnknown
-        {
-            get => _loadingSettingsUnknown;
-            set => this.RaiseAndSetIfChanged(ref _loadingSettingsUnknown, value);
-        }
-
-        public bool CheckingUnArOk
-        {
-            get => _checkingUnArOk;
-            set => this.RaiseAndSetIfChanged(ref _checkingUnArOk, value);
-        }
-
-        public bool CheckingUnArError
-        {
-            get => _checkingUnArError;
-            set => this.RaiseAndSetIfChanged(ref _checkingUnArError, value);
-        }
-
-        public bool CheckingUnArUnknown
-        {
-            get => _checkingUnArUnknown;
-            set => this.RaiseAndSetIfChanged(ref _checkingUnArUnknown, value);
-        }
-
-        public bool LoadingDatabaseOk
-        {
-            get => _loadingDatabaseOk;
-            set => this.RaiseAndSetIfChanged(ref _loadingDatabaseOk, value);
-        }
-
-        public bool LoadingDatabaseError
-        {
-            get => _loadingDatabaseError;
-            set => this.RaiseAndSetIfChanged(ref _loadingDatabaseError, value);
-        }
-
-        public bool LoadingDatabaseUnknown
-        {
-            get => _loadingDatabaseUnknown;
-            set => this.RaiseAndSetIfChanged(ref _loadingDatabaseUnknown, value);
-        }
-
-        public bool MigratingDatabaseOk
-        {
-            get => _migratingDatabaseOk;
-            set => this.RaiseAndSetIfChanged(ref _migratingDatabaseOk, value);
-        }
-
-        public bool MigratingDatabaseError
-        {
-            get => _migratingDatabaseError;
-            set => this.RaiseAndSetIfChanged(ref _migratingDatabaseError, value);
-        }
-
-        public bool MigratingDatabaseUnknown
-        {
-            get => _migratingDatabaseUnknown;
-            set => this.RaiseAndSetIfChanged(ref _migratingDatabaseUnknown, value);
-        }
-
-        public bool ExitVisible
-        {
-            get => _exitVisible;
-            set => this.RaiseAndSetIfChanged(ref _exitVisible, value);
-        }
-
-        public bool LoadingRomSetsOk
-        {
-            get => _loadingRomSetsOk;
-            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsOk, value);
-        }
-
-        public bool LoadingRomSetsError
-        {
-            get => _loadingRomSetsError;
-            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsError, value);
-        }
-
-        public bool LoadingRomSetsUnknown
-        {
-            get => _loadingRomSetsUnknown;
-            set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
-        }
-
-        public string LoadingText           => "ROM Repository Manager";
-        public string LoadingSettingsText   => Localization.LoadingSettingsText;
-        public string CheckingUnArText      => Localization.CheckingUnArText;
-        public string LoadingDatabaseText   => Localization.LoadingDatabaseText;
-        public string MigratingDatabaseText => Localization.MigratingDatabaseText;
-        public string LoadingRomSetsText    => Localization.LoadingRomSetsText;
-        public string ExitButtonText        => Localization.ExitButtonText;
-
-        void ExecuteExitCommand() =>
-            (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();
-
-        internal void OnOpened() => Dispatcher.UIThread.Post(LoadSettings);
-
-        void LoadSettings() => Task.Run(() =>
-        {
-            try
-            {
-                Settings.Settings.LoadSettings();
-
-                Dispatcher.UIThread.Post(CheckUnAr);
-            }
-            catch(Exception e)
-            {
-                // TODO: Log error
-                Dispatcher.UIThread.Post(FailedLoadingSettings);
-            }
-        });
-
-        void FailedLoadingSettings()
-        {
-            LoadingSettingsUnknown = false;
-            LoadingSettingsError   = true;
-            ExitVisible            = true;
-        }
-
-        void CheckUnAr() => Task.Run(() =>
-        {
-            LoadingSettingsUnknown = false;
-            LoadingSettingsOk      = true;
-
-            try
-            {
-                var worker = new Compression();
-                Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
-
-                Dispatcher.UIThread.Post(LoadDatabase);
-            }
-            catch(Exception e)
-            {
-                // TODO: Log error
-                Dispatcher.UIThread.Post(FailedCheckUnAr);
-            }
-        });
-
-        void FailedCheckUnAr()
-        {
-            CheckingUnArUnknown = false;
-            CheckingUnArError   = true;
-            ExitVisible         = true;
-        }
-
-        void LoadDatabase()
-        {
-            CheckingUnArUnknown = false;
-            CheckingUnArOk      = true;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    string dbPathFolder = Path.GetDirectoryName(Settings.Settings.Current.DatabasePath);
-
-                    if(!Directory.Exists(dbPathFolder))
-                        Directory.CreateDirectory(dbPathFolder);
-
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    Dispatcher.UIThread.Post(MigrateDatabase);
-                }
-                catch(Exception e)
-                {
-                    // TODO: Log error
-                    Dispatcher.UIThread.Post(FailedLoadingDatabase);
-                }
-            });
-        }
-
-        void FailedLoadingDatabase()
-        {
-            LoadingDatabaseUnknown = false;
-            LoadingDatabaseError   = true;
-            ExitVisible            = true;
-        }
-
-        void MigrateDatabase()
-        {
-            LoadingDatabaseUnknown = false;
-            LoadingDatabaseOk      = true;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    ctx.Database.Migrate();
-
-                    Dispatcher.UIThread.Post(LoadRomSets);
-                }
-                catch(Exception e)
-                {
-                    // TODO: Log error
-                    Dispatcher.UIThread.Post(FailedMigratingDatabase);
-                }
-            });
-        }
-
-        void FailedMigratingDatabase()
-        {
-            MigratingDatabaseUnknown = false;
-            MigratingDatabaseError   = true;
-            ExitVisible              = true;
-        }
-
-        void LoadRomSets()
-        {
-            MigratingDatabaseUnknown = false;
-            MigratingDatabaseOk      = true;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-                    GotRomSets?.Invoke(this, new RomSetsEventArgs
-                    {
-                        RomSets = ctx.RomSets.OrderBy(r => r.Name).ThenBy(r => r.Version).ThenBy(r => r.Date).
-                                      ThenBy(r => r.Description).ThenBy(r => r.Comment).ThenBy(r => r.Filename).
-                                      Select(r => new RomSetModel
-                                      {
-                                          Id                 = r.Id,
-                                          Author             = r.Author,
-                                          Comment            = r.Comment,
-                                          Date               = r.Date,
-                                          Description        = r.Description,
-                                          Filename           = r.Filename,
-                                          Homepage           = r.Homepage,
-                                          Name               = r.Name,
-                                          Sha384             = r.Sha384,
-                                          Version            = r.Version,
-                                          TotalMachines      = r.Statistics.TotalMachines,
-                                          CompleteMachines   = r.Statistics.CompleteMachines,
-                                          IncompleteMachines = r.Statistics.IncompleteMachines,
-                                          TotalRoms          = r.Statistics.TotalRoms,
-                                          HaveRoms           = r.Statistics.HaveRoms,
-                                          MissRoms           = r.Statistics.MissRoms,
-                                          Category           = r.Category
-                                      }).ToList()
-                    });
-
-                    Dispatcher.UIThread.Post(LoadMainWindow);
-                }
-                catch(Exception e)
-                {
-                    // TODO: Log error
-                    Dispatcher.UIThread.Post(FailedLoadingRomSets);
-                }
-            });
-        }
-
-        void FailedLoadingRomSets()
-        {
-            LoadingRomSetsUnknown = false;
-            LoadingRomSetsError   = true;
-            ExitVisible           = true;
-        }
-
-        void LoadMainWindow()
-        {
-            LoadingRomSetsUnknown = false;
-            LoadingRomSetsOk      = true;
-
-            WorkFinished?.Invoke(this, EventArgs.Empty);
-        }
-
-        internal event EventHandler WorkFinished;
-
-        internal event EventHandler<RomSetsEventArgs> GotRomSets;
+        LoadingSettingsOk        = false;
+        LoadingSettingsError     = false;
+        LoadingSettingsUnknown   = true;
+        CheckingUnArOk           = false;
+        CheckingUnArError        = false;
+        CheckingUnArUnknown      = true;
+        LoadingDatabaseOk        = false;
+        LoadingDatabaseError     = false;
+        LoadingDatabaseUnknown   = true;
+        MigratingDatabaseOk      = false;
+        MigratingDatabaseError   = false;
+        MigratingDatabaseUnknown = true;
+        LoadingRomSetsOk         = false;
+        LoadingRomSetsError      = false;
+        LoadingRomSetsUnknown    = true;
+        ExitVisible              = false;
     }
+
+    public ReactiveCommand<Unit, Unit> ExitCommand { get; }
+
+    public bool LoadingSettingsOk
+    {
+        get => _loadingSettingsOk;
+        set => this.RaiseAndSetIfChanged(ref _loadingSettingsOk, value);
+    }
+
+    public bool LoadingSettingsError
+    {
+        get => _loadingSettingsError;
+        set => this.RaiseAndSetIfChanged(ref _loadingSettingsError, value);
+    }
+
+    public bool LoadingSettingsUnknown
+    {
+        get => _loadingSettingsUnknown;
+        set => this.RaiseAndSetIfChanged(ref _loadingSettingsUnknown, value);
+    }
+
+    public bool CheckingUnArOk
+    {
+        get => _checkingUnArOk;
+        set => this.RaiseAndSetIfChanged(ref _checkingUnArOk, value);
+    }
+
+    public bool CheckingUnArError
+    {
+        get => _checkingUnArError;
+        set => this.RaiseAndSetIfChanged(ref _checkingUnArError, value);
+    }
+
+    public bool CheckingUnArUnknown
+    {
+        get => _checkingUnArUnknown;
+        set => this.RaiseAndSetIfChanged(ref _checkingUnArUnknown, value);
+    }
+
+    public bool LoadingDatabaseOk
+    {
+        get => _loadingDatabaseOk;
+        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseOk, value);
+    }
+
+    public bool LoadingDatabaseError
+    {
+        get => _loadingDatabaseError;
+        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseError, value);
+    }
+
+    public bool LoadingDatabaseUnknown
+    {
+        get => _loadingDatabaseUnknown;
+        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseUnknown, value);
+    }
+
+    public bool MigratingDatabaseOk
+    {
+        get => _migratingDatabaseOk;
+        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseOk, value);
+    }
+
+    public bool MigratingDatabaseError
+    {
+        get => _migratingDatabaseError;
+        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseError, value);
+    }
+
+    public bool MigratingDatabaseUnknown
+    {
+        get => _migratingDatabaseUnknown;
+        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseUnknown, value);
+    }
+
+    public bool ExitVisible
+    {
+        get => _exitVisible;
+        set => this.RaiseAndSetIfChanged(ref _exitVisible, value);
+    }
+
+    public bool LoadingRomSetsOk
+    {
+        get => _loadingRomSetsOk;
+        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsOk, value);
+    }
+
+    public bool LoadingRomSetsError
+    {
+        get => _loadingRomSetsError;
+        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsError, value);
+    }
+
+    public bool LoadingRomSetsUnknown
+    {
+        get => _loadingRomSetsUnknown;
+        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
+    }
+
+    public string LoadingText           => "ROM Repository Manager";
+    public string LoadingSettingsText   => Localization.LoadingSettingsText;
+    public string CheckingUnArText      => Localization.CheckingUnArText;
+    public string LoadingDatabaseText   => Localization.LoadingDatabaseText;
+    public string MigratingDatabaseText => Localization.MigratingDatabaseText;
+    public string LoadingRomSetsText    => Localization.LoadingRomSetsText;
+    public string ExitButtonText        => Localization.ExitButtonText;
+
+    void ExecuteExitCommand() =>
+        (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();
+
+    internal void OnOpened() => Dispatcher.UIThread.Post(LoadSettings);
+
+    void LoadSettings() => Task.Run(() =>
+    {
+        try
+        {
+            Settings.Settings.LoadSettings();
+
+            Dispatcher.UIThread.Post(CheckUnAr);
+        }
+        catch(Exception e)
+        {
+            // TODO: Log error
+            Dispatcher.UIThread.Post(FailedLoadingSettings);
+        }
+    });
+
+    void FailedLoadingSettings()
+    {
+        LoadingSettingsUnknown = false;
+        LoadingSettingsError   = true;
+        ExitVisible            = true;
+    }
+
+    void CheckUnAr() => Task.Run(() =>
+    {
+        LoadingSettingsUnknown = false;
+        LoadingSettingsOk      = true;
+
+        try
+        {
+            var worker = new Compression();
+            Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
+
+            Dispatcher.UIThread.Post(LoadDatabase);
+        }
+        catch(Exception e)
+        {
+            // TODO: Log error
+            Dispatcher.UIThread.Post(FailedCheckUnAr);
+        }
+    });
+
+    void FailedCheckUnAr()
+    {
+        CheckingUnArUnknown = false;
+        CheckingUnArError   = true;
+        ExitVisible         = true;
+    }
+
+    void LoadDatabase()
+    {
+        CheckingUnArUnknown = false;
+        CheckingUnArOk      = true;
+
+        Task.Run(() =>
+        {
+            try
+            {
+                string dbPathFolder = Path.GetDirectoryName(Settings.Settings.Current.DatabasePath);
+
+                if(!Directory.Exists(dbPathFolder)) Directory.CreateDirectory(dbPathFolder);
+
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+                Dispatcher.UIThread.Post(MigrateDatabase);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedLoadingDatabase);
+            }
+        });
+    }
+
+    void FailedLoadingDatabase()
+    {
+        LoadingDatabaseUnknown = false;
+        LoadingDatabaseError   = true;
+        ExitVisible            = true;
+    }
+
+    void MigrateDatabase()
+    {
+        LoadingDatabaseUnknown = false;
+        LoadingDatabaseOk      = true;
+
+        Task.Run(() =>
+        {
+            try
+            {
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+                ctx.Database.Migrate();
+
+                Dispatcher.UIThread.Post(LoadRomSets);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedMigratingDatabase);
+            }
+        });
+    }
+
+    void FailedMigratingDatabase()
+    {
+        MigratingDatabaseUnknown = false;
+        MigratingDatabaseError   = true;
+        ExitVisible              = true;
+    }
+
+    void LoadRomSets()
+    {
+        MigratingDatabaseUnknown = false;
+        MigratingDatabaseOk      = true;
+
+        Task.Run(() =>
+        {
+            try
+            {
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+
+                GotRomSets?.Invoke(this,
+                                   new RomSetsEventArgs
+                                   {
+                                       RomSets = ctx.RomSets.OrderBy(r => r.Name)
+                                                    .ThenBy(r => r.Version)
+                                                    .ThenBy(r => r.Date)
+                                                    .ThenBy(r => r.Description)
+                                                    .ThenBy(r => r.Comment)
+                                                    .ThenBy(r => r.Filename)
+                                                    .Select(r => new RomSetModel
+                                                     {
+                                                         Id                 = r.Id,
+                                                         Author             = r.Author,
+                                                         Comment            = r.Comment,
+                                                         Date               = r.Date,
+                                                         Description        = r.Description,
+                                                         Filename           = r.Filename,
+                                                         Homepage           = r.Homepage,
+                                                         Name               = r.Name,
+                                                         Sha384             = r.Sha384,
+                                                         Version            = r.Version,
+                                                         TotalMachines      = r.Statistics.TotalMachines,
+                                                         CompleteMachines   = r.Statistics.CompleteMachines,
+                                                         IncompleteMachines = r.Statistics.IncompleteMachines,
+                                                         TotalRoms          = r.Statistics.TotalRoms,
+                                                         HaveRoms           = r.Statistics.HaveRoms,
+                                                         MissRoms           = r.Statistics.MissRoms,
+                                                         Category           = r.Category
+                                                     })
+                                                    .ToList()
+                                   });
+
+                Dispatcher.UIThread.Post(LoadMainWindow);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedLoadingRomSets);
+            }
+        });
+    }
+
+    void FailedLoadingRomSets()
+    {
+        LoadingRomSetsUnknown = false;
+        LoadingRomSetsError   = true;
+        ExitVisible           = true;
+    }
+
+    void LoadMainWindow()
+    {
+        LoadingRomSetsUnknown = false;
+        LoadingRomSetsOk      = true;
+
+        WorkFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    internal event EventHandler WorkFinished;
+
+    internal event EventHandler<RomSetsEventArgs> GotRomSets;
 }

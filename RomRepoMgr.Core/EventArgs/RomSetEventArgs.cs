@@ -25,10 +25,9 @@
 
 using RomRepoMgr.Core.Models;
 
-namespace RomRepoMgr.Core.EventArgs
+namespace RomRepoMgr.Core.EventArgs;
+
+public sealed class RomSetEventArgs : System.EventArgs
 {
-    public sealed class RomSetEventArgs : System.EventArgs
-    {
-        public RomSetModel RomSet { get; set; }
-    }
+    public RomSetModel RomSet { get; set; }
 }

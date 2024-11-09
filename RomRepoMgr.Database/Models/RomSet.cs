@@ -26,24 +26,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
-{
-    public class RomSet : BaseModel<long>
-    {
-        public string Author      { get; set; }
-        public string Comment     { get; set; }
-        public string Date        { get; set; }
-        public string Description { get; set; }
-        public string Homepage    { get; set; }
-        public string Name        { get; set; }
-        public string Version     { get; set; }
-        [Required]
-        public string Filename { get; set; }
-        [Required, StringLength(96, MinimumLength = 96)]
-        public string Sha384 { get;                 set; }
-        public         string     Category   { get; set; }
-        public virtual RomSetStat Statistics { get; set; }
+namespace RomRepoMgr.Database.Models;
 
-        public virtual ICollection<Machine> Machines { get; set; }
-    }
+public class RomSet : BaseModel<long>
+{
+    public string Author      { get; set; }
+    public string Comment     { get; set; }
+    public string Date        { get; set; }
+    public string Description { get; set; }
+    public string Homepage    { get; set; }
+    public string Name        { get; set; }
+    public string Version     { get; set; }
+    [Required]
+    public string Filename { get; set; }
+    [Required]
+    [StringLength(96, MinimumLength = 96)]
+    public string Sha384 { get;                 set; }
+    public         string     Category   { get; set; }
+    public virtual RomSetStat Statistics { get; set; }
+
+    public virtual ICollection<Machine> Machines { get; set; }
 }

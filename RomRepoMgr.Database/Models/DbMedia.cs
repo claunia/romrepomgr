@@ -27,21 +27,20 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Models;
+
+public class DbMedia : BaseModel<ulong>
 {
-    public class DbMedia : BaseModel<ulong>
-    {
-        public ulong? Size { get; set; }
-        [StringLength(32, MinimumLength = 32)]
-        public string Md5 { get; set; }
-        [StringLength(40, MinimumLength = 40)]
-        public string Sha1 { get; set; }
-        [StringLength(64, MinimumLength = 64)]
-        public string Sha256 { get;  set; }
-        public string SpamSum { get; set; }
-        [DefaultValue(false)]
-        public bool IsInRepo { get;                                        set; }
-        public         string                      OriginalFileName { get; set; }
-        public virtual IEnumerable<MediaByMachine> Machines         { get; set; }
-    }
+    public ulong? Size { get; set; }
+    [StringLength(32, MinimumLength = 32)]
+    public string Md5 { get; set; }
+    [StringLength(40, MinimumLength = 40)]
+    public string Sha1 { get; set; }
+    [StringLength(64, MinimumLength = 64)]
+    public string Sha256 { get;  set; }
+    public string SpamSum { get; set; }
+    [DefaultValue(false)]
+    public bool IsInRepo { get;                                        set; }
+    public         string                      OriginalFileName { get; set; }
+    public virtual IEnumerable<MediaByMachine> Machines         { get; set; }
 }

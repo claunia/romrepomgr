@@ -23,10 +23,9 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
-namespace RomRepoMgr.Core.EventArgs
+namespace RomRepoMgr.Core.EventArgs;
+
+public sealed class ProgressEventArgs : System.EventArgs
 {
-    public sealed class ProgressEventArgs : System.EventArgs
-    {
-        public double Value { get; set; }
-    }
+    public double Value { get; set; }
 }

@@ -28,18 +28,17 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using RomRepoMgr.ViewModels;
 
-namespace RomRepoMgr.Views
+namespace RomRepoMgr.Views;
+
+public sealed class UpdateStats : Window
 {
-    public sealed class UpdateStats : Window
+    public UpdateStats() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    protected override void OnOpened(EventArgs e)
     {
-        public UpdateStats() => InitializeComponent();
-
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-        protected override void OnOpened(EventArgs e)
-        {
-            base.OnOpened(e);
-            (DataContext as UpdateStatsViewModel)?.OnOpened();
-        }
+        base.OnOpened(e);
+        (DataContext as UpdateStatsViewModel)?.OnOpened();
     }
 }

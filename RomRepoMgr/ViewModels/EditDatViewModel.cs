@@ -33,220 +33,211 @@ using RomRepoMgr.Database.Models;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
-namespace RomRepoMgr.ViewModels
+namespace RomRepoMgr.ViewModels;
+
+public class EditDatViewModel : ViewModelBase
 {
-    public class EditDatViewModel : ViewModelBase
+    readonly RomSetModel _romSet;
+    readonly EditDat     _view;
+    string               _author;
+    string               _category;
+    string               _comment;
+    string               _date;
+    string               _description;
+    string               _homepage;
+    bool                 _modified;
+    string               _name;
+    string               _version;
+
+    public EditDatViewModel(EditDat view, RomSetModel romSet)
     {
-        readonly RomSetModel _romSet;
-        readonly EditDat     _view;
-        string               _author;
-        string               _category;
-        string               _comment;
-        string               _date;
-        string               _description;
-        string               _homepage;
-        bool                 _modified;
-        string               _name;
-        string               _version;
+        _view         = view;
+        _romSet       = romSet;
+        _name         = romSet.Name;
+        _version      = romSet.Version;
+        _author       = romSet.Author;
+        _comment      = romSet.Comment;
+        _category     = romSet.Category;
+        _date         = romSet.Date;
+        _description  = romSet.Description;
+        _homepage     = romSet.Homepage;
+        SaveCommand   = ReactiveCommand.Create(ExecuteSaveCommand);
+        CancelCommand = ReactiveCommand.Create(ExecuteCloseCommand);
+        CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
+    }
 
-        public EditDatViewModel(EditDat view, RomSetModel romSet)
+    public string NameLabel               => Localization.RomSetNameLabel;
+    public string VersionLabel            => Localization.RomSetVersionLabel;
+    public string AuthorLabel             => Localization.RomSetAuthorLabel;
+    public string CategoryLabel           => Localization.RomSetCategoryLabel;
+    public string CommentLabel            => Localization.RomSetCommentLabel;
+    public string DateLabel               => Localization.RomSetDateLabel;
+    public string DescriptionLabel        => Localization.RomSetDescriptionLabel;
+    public string HomepageLabel           => Localization.HomepageLabel;
+    public string TotalMachinesLabel      => Localization.TotalMachinesLabel;
+    public string CompleteMachinesLabel   => Localization.CompleteMachinesLabel;
+    public string IncompleteMachinesLabel => Localization.IncompleteMachinesLabel;
+    public string TotalRomsLabel          => Localization.TotalRomsLabel;
+    public string HaveRomsLabel           => Localization.HaveRomsLabel;
+    public string MissRomsLabel           => Localization.MissRomsLabel;
+    public string Title                   => Localization.EditDatTitle;
+    public string SaveLabel               => Localization.SaveLabel;
+    public string CancelLabel             => Localization.CancelLabel;
+    public string CloseLabel              => Localization.CloseLabel;
+
+    public ReactiveCommand<Unit, Unit> SaveCommand        { get; }
+    public ReactiveCommand<Unit, Unit> CancelCommand      { get; }
+    public ReactiveCommand<Unit, Unit> CloseCommand       { get; }
+    public long                        TotalMachines      => _romSet.TotalMachines;
+    public long                        CompleteMachines   => _romSet.CompleteMachines;
+    public long                        IncompleteMachines => _romSet.IncompleteMachines;
+    public long                        TotalRoms          => _romSet.TotalRoms;
+    public long                        HaveRoms           => _romSet.HaveRoms;
+    public long                        MissRoms           => _romSet.MissRoms;
+
+    public bool Modified
+    {
+        get => _modified;
+        set => this.RaiseAndSetIfChanged(ref _modified, value);
+    }
+
+    public string Name
+    {
+        get => _name;
+        set
         {
-            _view         = view;
-            _romSet       = romSet;
-            _name         = romSet.Name;
-            _version      = romSet.Version;
-            _author       = romSet.Author;
-            _comment      = romSet.Comment;
-            _category     = romSet.Category;
-            _date         = romSet.Date;
-            _description  = romSet.Description;
-            _homepage     = romSet.Homepage;
-            SaveCommand   = ReactiveCommand.Create(ExecuteSaveCommand);
-            CancelCommand = ReactiveCommand.Create(ExecuteCloseCommand);
-            CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
+            if(value != _name) Modified = true;
+
+            this.RaiseAndSetIfChanged(ref _name, value);
         }
+    }
 
-        public string NameLabel               => Localization.RomSetNameLabel;
-        public string VersionLabel            => Localization.RomSetVersionLabel;
-        public string AuthorLabel             => Localization.RomSetAuthorLabel;
-        public string CategoryLabel           => Localization.RomSetCategoryLabel;
-        public string CommentLabel            => Localization.RomSetCommentLabel;
-        public string DateLabel               => Localization.RomSetDateLabel;
-        public string DescriptionLabel        => Localization.RomSetDescriptionLabel;
-        public string HomepageLabel           => Localization.HomepageLabel;
-        public string TotalMachinesLabel      => Localization.TotalMachinesLabel;
-        public string CompleteMachinesLabel   => Localization.CompleteMachinesLabel;
-        public string IncompleteMachinesLabel => Localization.IncompleteMachinesLabel;
-        public string TotalRomsLabel          => Localization.TotalRomsLabel;
-        public string HaveRomsLabel           => Localization.HaveRomsLabel;
-        public string MissRomsLabel           => Localization.MissRomsLabel;
-        public string Title                   => Localization.EditDatTitle;
-        public string SaveLabel               => Localization.SaveLabel;
-        public string CancelLabel             => Localization.CancelLabel;
-        public string CloseLabel              => Localization.CloseLabel;
-
-        public ReactiveCommand<Unit, Unit> SaveCommand        { get; }
-        public ReactiveCommand<Unit, Unit> CancelCommand      { get; }
-        public ReactiveCommand<Unit, Unit> CloseCommand       { get; }
-        public long                        TotalMachines      => _romSet.TotalMachines;
-        public long                        CompleteMachines   => _romSet.CompleteMachines;
-        public long                        IncompleteMachines => _romSet.IncompleteMachines;
-        public long                        TotalRoms          => _romSet.TotalRoms;
-        public long                        HaveRoms           => _romSet.HaveRoms;
-        public long                        MissRoms           => _romSet.MissRoms;
-
-        public bool Modified
+    public string Version
+    {
+        get => _version;
+        set
         {
-            get => _modified;
-            set => this.RaiseAndSetIfChanged(ref _modified, value);
-        }
+            if(value != _version) Modified = true;
 
-        public string Name
+            this.RaiseAndSetIfChanged(ref _version, value);
+        }
+    }
+
+    public string Author
+    {
+        get => _author;
+        set
         {
-            get => _name;
-            set
-            {
-                if(value != _name)
-                    Modified = true;
+            if(value != _author) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _name, value);
-            }
+            this.RaiseAndSetIfChanged(ref _author, value);
         }
+    }
 
-        public string Version
+    public string Comment
+    {
+        get => _comment;
+        set
         {
-            get => _version;
-            set
-            {
-                if(value != _version)
-                    Modified = true;
+            if(value != _comment) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _version, value);
-            }
+            this.RaiseAndSetIfChanged(ref _comment, value);
         }
+    }
 
-        public string Author
+    public string Category
+    {
+        get => _category;
+        set
         {
-            get => _author;
-            set
-            {
-                if(value != _author)
-                    Modified = true;
+            if(value != _category) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _author, value);
-            }
+            this.RaiseAndSetIfChanged(ref _category, value);
         }
+    }
 
-        public string Comment
+    public string Date
+    {
+        get => _date;
+        set
         {
-            get => _comment;
-            set
-            {
-                if(value != _comment)
-                    Modified = true;
+            if(value != _date) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _comment, value);
-            }
+            this.RaiseAndSetIfChanged(ref _date, value);
         }
+    }
 
-        public string Category
+    public string Description
+    {
+        get => _description;
+        set
         {
-            get => _category;
-            set
-            {
-                if(value != _category)
-                    Modified = true;
+            if(value != _description) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _category, value);
-            }
+            this.RaiseAndSetIfChanged(ref _description, value);
         }
+    }
 
-        public string Date
+    public string Homepage
+    {
+        get => _homepage;
+        set
         {
-            get => _date;
-            set
-            {
-                if(value != _date)
-                    Modified = true;
+            if(value != _homepage) Modified = true;
 
-                this.RaiseAndSetIfChanged(ref _date, value);
-            }
+            this.RaiseAndSetIfChanged(ref _homepage, value);
         }
+    }
 
-        public string Description
-        {
-            get => _description;
-            set
-            {
-                if(value != _description)
-                    Modified = true;
+    public EventHandler<RomSetEventArgs> RomSetModified { get; set; }
 
-                this.RaiseAndSetIfChanged(ref _description, value);
-            }
-        }
+    void ExecuteCloseCommand() => _view.Close();
 
-        public string Homepage
-        {
-            get => _homepage;
-            set
-            {
-                if(value != _homepage)
-                    Modified = true;
+    async void ExecuteSaveCommand()
+    {
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-                this.RaiseAndSetIfChanged(ref _homepage, value);
-            }
-        }
+        RomSet romSetDb = await ctx.RomSets.FindAsync(_romSet.Id);
 
-        public EventHandler<RomSetEventArgs> RomSetModified { get; set; }
+        if(romSetDb == null) return;
 
-        void ExecuteCloseCommand() => _view.Close();
+        romSetDb.Author      = Author;
+        romSetDb.Comment     = Comment;
+        romSetDb.Category    = Category;
+        romSetDb.Date        = Date;
+        romSetDb.Description = Description;
+        romSetDb.Homepage    = Homepage;
+        romSetDb.Name        = Name;
+        romSetDb.Version     = Version;
+        romSetDb.UpdatedOn   = DateTime.UtcNow;
 
-        async void ExecuteSaveCommand()
-        {
-            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        await ctx.SaveChangesAsync();
 
-            RomSet romSetDb = await ctx.RomSets.FindAsync(_romSet.Id);
+        RomSetModified?.Invoke(this,
+                               new RomSetEventArgs
+                               {
+                                   RomSet = new RomSetModel
+                                   {
+                                       Author             = Author,
+                                       Comment            = Comment,
+                                       Category           = Category,
+                                       Date               = Date,
+                                       Description        = Description,
+                                       Homepage           = Homepage,
+                                       Name               = Name,
+                                       Version            = Version,
+                                       Filename           = _romSet.Filename,
+                                       Sha384             = _romSet.Sha384,
+                                       TotalMachines      = _romSet.TotalMachines,
+                                       CompleteMachines   = _romSet.CompleteMachines,
+                                       IncompleteMachines = _romSet.IncompleteMachines,
+                                       TotalRoms          = _romSet.TotalRoms,
+                                       HaveRoms           = _romSet.HaveRoms,
+                                       MissRoms           = _romSet.MissRoms,
+                                       Id                 = _romSet.Id
+                                   }
+                               });
 
-            if(romSetDb == null)
-                return;
-
-            romSetDb.Author      = Author;
-            romSetDb.Comment     = Comment;
-            romSetDb.Category    = Category;
-            romSetDb.Date        = Date;
-            romSetDb.Description = Description;
-            romSetDb.Homepage    = Homepage;
-            romSetDb.Name        = Name;
-            romSetDb.Version     = Version;
-            romSetDb.UpdatedOn   = DateTime.UtcNow;
-
-            await ctx.SaveChangesAsync();
-
-            RomSetModified?.Invoke(this, new RomSetEventArgs
-            {
-                RomSet = new RomSetModel
-                {
-                    Author             = Author,
-                    Comment            = Comment,
-                    Category           = Category,
-                    Date               = Date,
-                    Description        = Description,
-                    Homepage           = Homepage,
-                    Name               = Name,
-                    Version            = Version,
-                    Filename           = _romSet.Filename,
-                    Sha384             = _romSet.Sha384,
-                    TotalMachines      = _romSet.TotalMachines,
-                    CompleteMachines   = _romSet.CompleteMachines,
-                    IncompleteMachines = _romSet.IncompleteMachines,
-                    TotalRoms          = _romSet.TotalRoms,
-                    HaveRoms           = _romSet.HaveRoms,
-                    MissRoms           = _romSet.MissRoms,
-                    Id                 = _romSet.Id
-                }
-            });
-
-            Modified = false;
-        }
+        Modified = false;
     }
 }

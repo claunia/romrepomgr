@@ -24,12 +24,21 @@
 // Copyright © 2020-2024 Natalia Portillo
 // ****************************************************************************/
 -->
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" Width="480" Height="360" x:Class="RomRepoMgr.Views.ImportRomFolder"
-        Icon="/Assets/avalonia-logo.ico" CanResize="False" Title="{Binding Title}" WindowStartupLocation="CenterOwner">
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        Width="480"
+        Height="360"
+        x:Class="RomRepoMgr.Views.ImportRomFolder"
+        Icon="/Assets/avalonia-logo.ico"
+        CanResize="False"
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:ImportRomFolderViewModel />
     </Design.DataContext>
@@ -40,56 +49,87 @@
                 <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" /> <RowDefinition Height="*" /> <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <TextBlock Text="{Binding PathLabel}" FontWeight="Bold" /> <TextBlock Text="{Binding FolderPath}" />
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Stretch">
+                <TextBlock Text="{Binding PathLabel}"
+                           FontWeight="Bold" />
+                <TextBlock Text="{Binding FolderPath}" />
             </StackPanel>
-            <CheckBox Grid.Row="1" IsChecked="{Binding RemoveFilesChecked}" IsEnabled="{Binding RemoveFilesEnabled}"
+            <CheckBox Grid.Row="1"
+                      IsChecked="{Binding RemoveFilesChecked}"
+                      IsEnabled="{Binding RemoveFilesEnabled}"
                       IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding RemoveFilesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
-            <CheckBox Grid.Row="2" IsChecked="{Binding KnownOnlyChecked}" IsVisible="{Binding IsReady}">
+            <CheckBox Grid.Row="2"
+                      IsChecked="{Binding KnownOnlyChecked}"
+                      IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding KnownOnlyLabel}" />
                 </CheckBox.Content>
             </CheckBox>
-            <CheckBox Grid.Row="3" IsChecked="{Binding RecurseArchivesChecked}"
-                      IsEnabled="{Binding RecurseArchivesEnabled}" IsVisible="{Binding IsReady}">
+            <CheckBox Grid.Row="3"
+                      IsChecked="{Binding RecurseArchivesChecked}"
+                      IsEnabled="{Binding RecurseArchivesEnabled}"
+                      IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
                     <TextBlock Text="{Binding RecurseArchivesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
-            <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" FontWeight="Bold" HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="5" Minimum="{Binding ProgressMinimum}" Maximum="{Binding ProgressMaximum}"
-                         Value="{Binding ProgressValue}" IsIndeterminate="{Binding ProgressIsIndeterminate}"
+            <TextBlock Grid.Row="4"
+                       Text="{Binding StatusMessage}"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center" />
+            <ProgressBar Grid.Row="5"
+                         Minimum="{Binding ProgressMinimum}"
+                         Maximum="{Binding ProgressMaximum}"
+                         Value="{Binding ProgressValue}"
+                         IsIndeterminate="{Binding ProgressIsIndeterminate}"
                          IsVisible="{Binding ProgressVisible}" />
-            <StackPanel Grid.Row="6" IsVisible="{Binding Progress2Visible}">
+            <StackPanel Grid.Row="6"
+                        IsVisible="{Binding Progress2Visible}">
                 <TextBlock Text="{Binding Status2Message}" />
-                <ProgressBar Minimum="{Binding Progress2Minimum}" Maximum="{Binding Progress2Maximum}"
-                             Value="{Binding Progress2Value}" IsIndeterminate="{Binding Progress2IsIndeterminate}" />
+                <ProgressBar Minimum="{Binding Progress2Minimum}"
+                             Maximum="{Binding Progress2Maximum}"
+                             Value="{Binding Progress2Value}"
+                             IsIndeterminate="{Binding Progress2IsIndeterminate}" />
             </StackPanel>
-            <DataGrid Grid.Row="7" Items="{Binding ImportResults}" HorizontalScrollBarVisibility="Visible"
+            <DataGrid Grid.Row="7"
+                      Items="{Binding ImportResults}"
+                      HorizontalScrollBarVisibility="Visible"
                       IsVisible="{Binding IsImporting}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Filename}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Filename}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding ResultFilenameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Status}" Width="Auto" IsReadOnly="True">
+                    <DataGridTextColumn Binding="{Binding Status}"
+                                        Width="Auto"
+                                        IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding ResultStatusLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanClose}"
+            <StackPanel Grid.Row="8"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding CanClose}"
                         Command="{Binding CloseCommand}">
                     <TextBlock Text="{Binding CloseLabel}" />
                 </Button>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="{Binding CanStart}"
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding CanStart}"
                         Command="{Binding StartCommand}">
                     <TextBlock Text="{Binding StartLabel}" />
                 </Button>

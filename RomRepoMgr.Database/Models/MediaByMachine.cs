@@ -25,19 +25,18 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace RomRepoMgr.Database.Models
+namespace RomRepoMgr.Database.Models;
+
+public class MediaByMachine
 {
-    public class MediaByMachine
-    {
-        [Key]
-        public ulong Id { get; set; }
-        [Required]
-        public virtual DbMedia Media { get; set; }
-        [Required]
-        public virtual Machine Machine { get; set; }
-        [Required]
-        public string Name { get;     set; }
-        public ulong MediaId   { get; set; }
-        public ulong MachineId { get; set; }
-    }
+    [Key]
+    public ulong Id { get; set; }
+    [Required]
+    public virtual DbMedia Media { get; set; }
+    [Required]
+    public virtual Machine Machine { get; set; }
+    [Required]
+    public string Name { get;     set; }
+    public ulong MediaId   { get; set; }
+    public ulong MachineId { get; set; }
 }

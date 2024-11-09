@@ -25,13 +25,12 @@
 
 using System;
 
-namespace RomRepoMgr.Database.Models
-{
-    public abstract class BaseModel<TKey>
-    {
-        public TKey Id { get; set; }
+namespace RomRepoMgr.Database.Models;
 
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
-    }
+public abstract class BaseModel<TKey>
+{
+    public TKey Id { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+    public DateTime UpdatedOn { get; set; }
 }

@@ -1,39 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <NeutralLanguage>en</NeutralLanguage>
-        <LangVersion>default</LangVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <NeutralLanguage>en</NeutralLanguage>
+    <LangVersion>default</LangVersion>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="DotNetZip" Version="1.15.0" />
-      <PackageReference Include="EFCore.BulkExtensions" Version="3.2.7" />
-      <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0" />
-      <PackageReference Include="SharpCompress" Version="0.26.0" />
-      <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DotNetZip" Version="1.15.0"/>
+    <PackageReference Include="EFCore.BulkExtensions" Version="3.2.7"/>
+    <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
+    <PackageReference Include="SharpCompress" Version="0.26.0"/>
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj" />
-      <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj" />
-      <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
-      <ProjectReference Include="..\winfsp-netcore\winfsp-netcore.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
+    <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
+    <ProjectReference Include="..\winfsp-netcore\winfsp-netcore.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <EmbeddedResource Update="Resources\Localization.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Localization.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Localization.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="Resources\Localization.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Language.resx</DependentUpon>
-      </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\Localization.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Language.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
 </Project>

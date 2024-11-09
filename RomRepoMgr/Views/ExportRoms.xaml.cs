@@ -28,18 +28,17 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using RomRepoMgr.ViewModels;
 
-namespace RomRepoMgr.Views
+namespace RomRepoMgr.Views;
+
+public sealed class ExportRoms : Window
 {
-    public sealed class ExportRoms : Window
+    public ExportRoms() => InitializeComponent();
+
+    void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    protected override void OnOpened(EventArgs e)
     {
-        public ExportRoms() => InitializeComponent();
-
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-        protected override void OnOpened(EventArgs e)
-        {
-            base.OnOpened(e);
-            (DataContext as ExportRomsViewModel)?.OnOpened();
-        }
+        base.OnOpened(e);
+        (DataContext as ExportRomsViewModel)?.OnOpened();
     }
 }
