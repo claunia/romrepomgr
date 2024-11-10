@@ -14,13 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.Core", "SabreToo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.DatItems", "SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj", "{459BDA50-3AF3-4E8F-92F3-CA5A9D02A3B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.IO", "SabreTools\SabreTools.IO\SabreTools.IO.csproj", "{5536BA8A-F413-478B-94AC-4830A4D3DAC7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.Logging", "SabreTools\SabreTools.Logging\SabreTools.Logging.csproj", "{4E9020F1-F390-4328-B110-692C97A88DF2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.FileTypes", "SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj", "{5FA7C8BF-BCB4-439C-B326-90DDD43B53A5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreTools.Skippers", "SabreTools\SabreTools.Skippers\SabreTools.Skippers.csproj", "{20C71A36-7AD1-4BB9-91DD-146EBF39BCAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,21 +50,9 @@ Global
 		{459BDA50-3AF3-4E8F-92F3-CA5A9D02A3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{459BDA50-3AF3-4E8F-92F3-CA5A9D02A3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{459BDA50-3AF3-4E8F-92F3-CA5A9D02A3B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5536BA8A-F413-478B-94AC-4830A4D3DAC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5536BA8A-F413-478B-94AC-4830A4D3DAC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5536BA8A-F413-478B-94AC-4830A4D3DAC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5536BA8A-F413-478B-94AC-4830A4D3DAC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E9020F1-F390-4328-B110-692C97A88DF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E9020F1-F390-4328-B110-692C97A88DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E9020F1-F390-4328-B110-692C97A88DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E9020F1-F390-4328-B110-692C97A88DF2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5FA7C8BF-BCB4-439C-B326-90DDD43B53A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5FA7C8BF-BCB4-439C-B326-90DDD43B53A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FA7C8BF-BCB4-439C-B326-90DDD43B53A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FA7C8BF-BCB4-439C-B326-90DDD43B53A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20C71A36-7AD1-4BB9-91DD-146EBF39BCAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20C71A36-7AD1-4BB9-91DD-146EBF39BCAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20C71A36-7AD1-4BB9-91DD-146EBF39BCAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20C71A36-7AD1-4BB9-91DD-146EBF39BCAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
