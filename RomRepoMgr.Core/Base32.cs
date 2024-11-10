@@ -11,7 +11,7 @@ using RomRepoMgr.Core.Resources;
 namespace RomRepoMgr.Core;
 
 /// <summary>Class used for conversion between byte array and Base32 notation</summary>
-public sealed class Base32
+public static class Base32
 {
     /// <summary>Size of the regular byte in bits</summary>
     const int _inByteSize = 8;

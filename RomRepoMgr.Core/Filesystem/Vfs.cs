@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
@@ -418,11 +419,19 @@ public class Vfs : IDisposable
     {
         if(!_streamsCache.TryGetValue(handle, out Stream stream)) return -1;
 
-        lock(stream)
+        using var rwLock = new ReaderWriterLockSlim();
+
+        try
         {
+            rwLock.EnterReadLock();
+
             stream.Position = offset;
 
             return stream.Read(buf, 0, buf.Length);
+        }
+        finally
+        {
+            rwLock.ExitReadLock();
         }
     }
 
