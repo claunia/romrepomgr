@@ -10,6 +10,7 @@
     <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="EFCore.BulkExtensions" Version="8.1.1" />
     <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
+    <PackageReference Include="SabreTools.Models" Version="1.4.10" />
     <PackageReference Include="SharpCompress" Version="0.38.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
     <PackageReference Include="winfsp.net" Version="2.1.24255" />
@@ -55,7 +56,9 @@
   <ItemGroup>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
-    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
+    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
+    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj" />
+    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -69,8 +69,6 @@
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj"/>
-    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
-    <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj"/>
     <ProjectReference Include="..\SabreTools\SabreTools.IO\SabreTools.IO.csproj"/>
   </ItemGroup>
   <ItemGroup>

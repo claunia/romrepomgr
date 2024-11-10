@@ -39,9 +39,14 @@ using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.DatFiles;
-using SabreTools.DatItems;
+using SabreTools.Models.Metadata;
+using DatItem = SabreTools.DatItems.DatItem;
+using Disk = SabreTools.DatItems.Formats.Disk;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
+using File = System.IO.File;
 using Machine = RomRepoMgr.Database.Models.Machine;
+using Media = SabreTools.DatItems.Formats.Media;
+using Rom = SabreTools.DatItems.Formats.Rom;
 
 namespace RomRepoMgr.Core.Workers;
 
@@ -112,15 +117,15 @@ public sealed class DatImporter
 
             var romSet = new RomSet
             {
-                Author      = datFile.Header.Author,
-                Comment     = datFile.Header.Comment,
-                Date        = datFile.Header.Date,
-                Description = datFile.Header.Description,
+                Author      = datFile.Header.GetStringFieldValue(Header.AuthorKey),
+                Comment     = datFile.Header.GetStringFieldValue(Header.CommentKey),
+                Date        = datFile.Header.GetStringFieldValue(Header.DateKey),
+                Description = datFile.Header.GetStringFieldValue(Header.DescriptionKey),
                 Filename    = Path.GetFileName(_datPath),
-                Homepage    = datFile.Header.Homepage,
-                Name        = datFile.Header.Name,
+                Homepage    = datFile.Header.GetStringFieldValue(Header.HomepageKey),
+                Name        = datFile.Header.GetStringFieldValue(Header.NameKey),
                 Sha384      = datHash,
-                Version     = datFile.Header.Version,
+                Version     = datFile.Header.GetStringFieldValue(Header.VersionKey),
                 CreatedOn   = DateTime.UtcNow,
                 UpdatedOn   = DateTime.UtcNow,
                 Category    = _category
@@ -146,9 +151,14 @@ public sealed class DatImporter
                                    Message = Localization.GettingMachineNames
                                });
 
-            var machineNames = (from value in datFile.Items.Values from item in value select item.Machine.Name)
-                              .Distinct()
-                              .ToList();
+            var machineNames = (from value in datFile.Items.Values
+                                from item in value
+                                select item.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
+                                          ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey)
+                                into m
+                                where m is not null
+                                select m).Distinct()
+                                         .ToList();
 
             SetMessage?.Invoke(this,
                                new MessageEventArgs
@@ -311,72 +321,72 @@ public sealed class DatImporter
                         switch(item)
                         {
                             case Rom rom:
-                                if(rom.CRC != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomCrc32Table}\" (\"Size\", \"Crc32\") VALUES (\"{(ulong)rom.Size}\", \"{rom.CRC}\");";
+                                        $"INSERT INTO \"{tmpRomCrc32Table}\" (\"Size\", \"Crc32\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     romsHaveCrc = true;
                                 }
 
-                                if(rom.MD5 != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomMd5Table}\" (\"Size\", \"Md5\") VALUES (\"{(ulong)rom.Size}\", \"{rom.MD5}\");";
+                                        $"INSERT INTO \"{tmpRomMd5Table}\" (\"Size\", \"Md5\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     romsHaveMd5 = true;
                                 }
 
-                                if(rom.SHA1 != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomSha1Table}\" (\"Size\", \"Sha1\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA1}\");";
+                                        $"INSERT INTO \"{tmpRomSha1Table}\" (\"Size\", \"Sha1\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     romsHaveSha1 = true;
                                 }
 
-                                if(rom.SHA256 != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomSha256Table}\" (\"Size\", \"Sha256\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA256}\");";
+                                        $"INSERT INTO \"{tmpRomSha256Table}\" (\"Size\", \"Sha256\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     romsHaveSha256 = true;
                                 }
 
-                                if(rom.SHA384 != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomSha384Table}\" (\"Size\", \"Sha384\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA384}\");";
+                                        $"INSERT INTO \"{tmpRomSha384Table}\" (\"Size\", \"Sha384\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     romsHaveSha384 = true;
                                 }
 
-                                if(rom.SHA512 != null)
+                                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpRomSha512Table}\" (\"Size\", \"Sha512\") VALUES (\"{(ulong)rom.Size}\", \"{rom.SHA512}\");";
+                                        $"INSERT INTO \"{tmpRomSha512Table}\" (\"Size\", \"Sha512\") VALUES (\"{(ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey)}\", \"{rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
@@ -387,24 +397,24 @@ public sealed class DatImporter
 
                                 continue;
                             case Disk disk:
-                                if(disk.MD5 != null)
+                                if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpDiskMd5Table}\" (\"Md5\") VALUES (\"{disk.MD5}\");";
+                                        $"INSERT INTO \"{tmpDiskMd5Table}\" (\"Md5\") VALUES (\"{disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     disksHaveMd5 = true;
                                 }
 
-                                if(disk.SHA1 != null)
+                                if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpDiskSha1Table}\" (\"Sha1\") VALUES (\"{disk.SHA1}\");";
+                                        $"INSERT INTO \"{tmpDiskSha1Table}\" (\"Sha1\") VALUES (\"{disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
@@ -415,36 +425,36 @@ public sealed class DatImporter
 
                                 continue;
                             case Media media:
-                                if(media.MD5 != null)
+                                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpMediaMd5Table}\" (\"Md5\") VALUES (\"{media.MD5}\");";
+                                        $"INSERT INTO \"{tmpMediaMd5Table}\" (\"Md5\") VALUES (\"{media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     mediasHaveMd5 = true;
                                 }
 
-                                if(media.SHA1 != null)
+                                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpMediaSha1Table}\" (\"Sha1\") VALUES (\"{media.SHA1}\");";
+                                        $"INSERT INTO \"{tmpMediaSha1Table}\" (\"Sha1\") VALUES (\"{media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
                                     mediasHaveSha1 = true;
                                 }
 
-                                if(media.SHA256 != null)
+                                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key) != null)
                                 {
                                     dbcc = dbConnection.CreateCommand();
 
                                     dbcc.CommandText =
-                                        $"INSERT INTO \"{tmpMediaSha256Table}\" (\"Sha256\") VALUES (\"{media.SHA256}\");";
+                                        $"INSERT INTO \"{tmpMediaSha256Table}\" (\"Sha256\") VALUES (\"{media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key)}\");";
 
                                     dbcc.ExecuteNonQuery();
 
@@ -645,7 +655,9 @@ public sealed class DatImporter
                                         Value = position
                                     });
 
-                if(!machines.TryGetValue(rom.Machine.Name, out Machine machine))
+                if(!machines.TryGetValue(rom.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
+                                           ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                         out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
                                           new ErrorEventArgs
@@ -656,13 +668,15 @@ public sealed class DatImporter
                     return;
                 }
 
-                var uSize = (ulong)rom.Size;
+                var uSize = (ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey);
 
                 DbFile file = null;
 
-                if(rom.SHA512 != null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key) != null)
                 {
-                    if(pendingFilesBySha512.TryGetValue(rom.SHA512, out file))
+                    if(pendingFilesBySha512.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                   .SHA512Key),
+                                                        out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -672,9 +686,11 @@ public sealed class DatImporter
                     }
                 }
 
-                if(rom.SHA384 != null && file == null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key) != null && file == null)
                 {
-                    if(pendingFilesBySha384.TryGetValue(rom.SHA384, out file))
+                    if(pendingFilesBySha384.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                   .SHA384Key),
+                                                        out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -684,9 +700,11 @@ public sealed class DatImporter
                     }
                 }
 
-                if(rom.SHA256 != null && file == null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key) != null && file == null)
                 {
-                    if(pendingFilesBySha256.TryGetValue(rom.SHA256, out file))
+                    if(pendingFilesBySha256.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                   .SHA256Key),
+                                                        out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -696,9 +714,10 @@ public sealed class DatImporter
                     }
                 }
 
-                if(rom.SHA1 != null && file == null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) != null && file == null)
                 {
-                    if(pendingFilesBySha1.TryGetValue(rom.SHA1, out file))
+                    if(pendingFilesBySha1.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key),
+                                                      out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -708,9 +727,10 @@ public sealed class DatImporter
                     }
                 }
 
-                if(rom.MD5 != null && file == null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) != null && file == null)
                 {
-                    if(pendingFilesByMd5.TryGetValue(rom.MD5, out file))
+                    if(pendingFilesByMd5.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key),
+                                                     out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -720,9 +740,10 @@ public sealed class DatImporter
                     }
                 }
 
-                if(rom.CRC != null && file == null)
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) != null && file == null)
                 {
-                    if(pendingFilesByCrc.TryGetValue(rom.CRC, out file))
+                    if(pendingFilesByCrc.TryGetValue(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey),
+                                                     out file))
                     {
                         if(file.Size != uSize)
                         {
@@ -734,36 +755,54 @@ public sealed class DatImporter
 
                 if(file == null && hashCollision)
                 {
-                    if(rom.SHA512 != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Sha512 == rom.SHA512 && f.Size == uSize);
+                    if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Sha512 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .SHA512Key) &&
+                                                                f.Size == uSize);
 
-                    if(file == null && rom.SHA384 != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Sha384 == rom.SHA384 && f.Size == uSize);
+                    if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Sha384 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .SHA384Key) &&
+                                                                f.Size == uSize);
 
-                    if(file == null && rom.SHA256 != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Sha256 == rom.SHA256 && f.Size == uSize);
+                    if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Sha256 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .SHA256Key) &&
+                                                                f.Size == uSize);
 
-                    if(file == null && rom.SHA1 != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Sha1 == rom.SHA1 && f.Size == uSize);
+                    if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Sha1 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .SHA1Key) &&
+                                                                f.Size == uSize);
 
-                    if(file == null && rom.MD5 != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Md5 == rom.MD5 && f.Size == uSize);
+                    if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Md5 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .MD5Key) &&
+                                                                f.Size == uSize);
 
-                    if(file == null && rom.CRC != null)
-                        file = pendingFiles.FirstOrDefault(f => f.Crc32 == rom.CRC && f.Size == uSize);
+                    if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) != null)
+                        file = pendingFiles.FirstOrDefault(f => f.Crc32 ==
+                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                   .CRCKey) &&
+                                                                f.Size == uSize);
                 }
 
                 if(file == null)
                 {
                     file = new DbFile
                     {
-                        Crc32     = rom.CRC,
+                        Crc32     = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey),
                         CreatedOn = DateTime.UtcNow,
-                        Md5       = rom.MD5,
-                        Sha1      = rom.SHA1,
-                        Sha256    = rom.SHA256,
-                        Sha384    = rom.SHA384,
-                        Sha512    = rom.SHA512,
+                        Md5       = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key),
+                        Sha1      = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key),
+                        Sha256    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key),
+                        Sha384    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key),
+                        Sha512    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key),
                         Size      = uSize,
                         UpdatedOn = DateTime.UtcNow
                     };
@@ -771,49 +810,55 @@ public sealed class DatImporter
                     newFiles.Add(file);
                 }
 
-                if(string.IsNullOrEmpty(file.Crc32) && !string.IsNullOrEmpty(rom.CRC))
+                if(string.IsNullOrEmpty(file.Crc32) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey)))
                 {
-                    file.Crc32     = rom.CRC;
+                    file.Crc32     = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(file.Md5) && !string.IsNullOrEmpty(rom.MD5))
+                if(string.IsNullOrEmpty(file.Md5) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key)))
                 {
-                    file.Md5       = rom.MD5;
+                    file.Md5       = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(file.Sha1) && !string.IsNullOrEmpty(rom.SHA1))
+                if(string.IsNullOrEmpty(file.Sha1) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key)))
                 {
-                    file.Sha1      = rom.SHA1;
+                    file.Sha1      = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(file.Sha256) && !string.IsNullOrEmpty(rom.SHA256))
+                if(string.IsNullOrEmpty(file.Sha256) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key)))
                 {
-                    file.Sha256    = rom.SHA256;
+                    file.Sha256    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(file.Sha384) && !string.IsNullOrEmpty(rom.SHA384))
+                if(string.IsNullOrEmpty(file.Sha384) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key)))
                 {
-                    file.Sha384    = rom.SHA384;
+                    file.Sha384    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(file.Sha512) && !string.IsNullOrEmpty(rom.SHA512))
+                if(string.IsNullOrEmpty(file.Sha512) &&
+                   !string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key)))
                 {
-                    file.Sha512    = rom.SHA512;
+                    file.Sha512    = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key);
                     file.UpdatedOn = DateTime.UtcNow;
                 }
 
                 DateTime? fileModificationDate = null;
 
-                if(!string.IsNullOrEmpty(rom.Date))
+                if(!string.IsNullOrEmpty(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.DateKey)))
                 {
-                    rom.Date = rom.Date.Replace("/", "\\");
+                    string romDate = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.DateKey).Replace("/", "\\");
 
-                    if(DateTime.TryParseExact(rom.Date,
+                    if(DateTime.TryParseExact(romDate,
                                               @"yyyy\\M\\d H:mm",
                                               CultureInfo.InvariantCulture,
                                               DateTimeStyles.AssumeUniversal,
@@ -824,18 +869,21 @@ public sealed class DatImporter
                 string filename;
                 string path = null;
 
-                if(rom.Name.Contains('\\'))
+                if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey).Contains('\\'))
                 {
-                    filename = Path.GetFileName(rom.Name.Replace('\\',      '/'));
-                    path     = Path.GetDirectoryName(rom.Name.Replace('\\', '/'));
+                    filename = Path.GetFileName(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey)
+                                                   .Replace('\\', '/'));
+
+                    path = Path.GetDirectoryName(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey)
+                                                    .Replace('\\', '/'));
                 }
-                else if(rom.Name.Contains('/'))
+                else if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey).Contains('/'))
                 {
-                    filename = Path.GetFileName(rom.Name);
-                    path     = Path.GetDirectoryName(rom.Name);
+                    filename = Path.GetFileName(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey));
+                    path     = Path.GetDirectoryName(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey));
                 }
                 else
-                    filename = rom.Name;
+                    filename = rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.NameKey);
 
                 newFilesByMachine.Add(new FileByMachine
                 {
@@ -919,7 +967,9 @@ public sealed class DatImporter
                                         Value = position
                                     });
 
-                if(!machines.TryGetValue(disk.Machine.Name, out Machine machine))
+                if(!machines.TryGetValue(disk.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
+                                            ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                         out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
                                           new ErrorEventArgs
@@ -930,7 +980,8 @@ public sealed class DatImporter
                     return;
                 }
 
-                if(disk.MD5 == null && disk.SHA1 == null)
+                if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key)  == null &&
+                   disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key) == null)
                 {
                     position++;
 
@@ -939,32 +990,38 @@ public sealed class DatImporter
 
                 DbDisk dbDisk = null;
 
-                if(disk.SHA1 != null && dbDisk == null) pendingDisksBySha1.TryGetValue(disk.SHA1, out dbDisk);
+                if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key) != null && dbDisk == null)
+                    pendingDisksBySha1.TryGetValue(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key),
+                                                   out dbDisk);
 
-                if(disk.MD5 != null && dbDisk == null) pendingDisksByMd5.TryGetValue(disk.MD5, out dbDisk);
+                if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key) != null && dbDisk == null)
+                    pendingDisksByMd5.TryGetValue(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key),
+                                                  out dbDisk);
 
                 if(dbDisk == null)
                 {
                     dbDisk = new DbDisk
                     {
                         CreatedOn = DateTime.UtcNow,
-                        Md5       = disk.MD5,
-                        Sha1      = disk.SHA1,
+                        Md5       = disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key),
+                        Sha1      = disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key),
                         UpdatedOn = DateTime.UtcNow
                     };
 
                     newDisks.Add(dbDisk);
                 }
 
-                if(string.IsNullOrEmpty(dbDisk.Md5) && !string.IsNullOrEmpty(disk.MD5))
+                if(string.IsNullOrEmpty(dbDisk.Md5) &&
+                   !string.IsNullOrEmpty(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key)))
                 {
-                    dbDisk.Md5       = disk.MD5;
+                    dbDisk.Md5       = disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key);
                     dbDisk.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(dbDisk.Sha1) && !string.IsNullOrEmpty(disk.SHA1))
+                if(string.IsNullOrEmpty(dbDisk.Sha1) &&
+                   !string.IsNullOrEmpty(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key)))
                 {
-                    dbDisk.Sha1      = disk.SHA1;
+                    dbDisk.Sha1      = disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key);
                     dbDisk.UpdatedOn = DateTime.UtcNow;
                 }
 
@@ -972,7 +1029,7 @@ public sealed class DatImporter
                 {
                     Disk    = dbDisk,
                     Machine = machine,
-                    Name    = disk.Name
+                    Name    = disk.GetStringFieldValue(SabreTools.Models.Metadata.Media.NameKey)
                 });
 
                 if(dbDisk.Sha1 != null) pendingDisksBySha1[dbDisk.Sha1] = dbDisk;
@@ -1033,7 +1090,9 @@ public sealed class DatImporter
                                         Value = position
                                     });
 
-                if(!machines.TryGetValue(media.Machine.Name, out Machine machine))
+                if(!machines.TryGetValue(media.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
+                                             ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                         out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
                                           new ErrorEventArgs
@@ -1044,7 +1103,9 @@ public sealed class DatImporter
                     return;
                 }
 
-                if(media.MD5 == null && media.SHA1 == null && media.SHA256 == null)
+                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key)    == null &&
+                   media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key)   == null &&
+                   media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key) == null)
                 {
                     position++;
 
@@ -1053,12 +1114,18 @@ public sealed class DatImporter
 
                 DbMedia dbMedia = null;
 
-                if(media.SHA256 != null && dbMedia == null)
-                    pendingMediasBySha256.TryGetValue(media.SHA256, out dbMedia);
+                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key) != null && dbMedia == null)
+                    pendingMediasBySha256.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media
+                                                                                   .SHA256Key),
+                                                      out dbMedia);
 
-                if(media.SHA1 != null && dbMedia == null) pendingMediasBySha1.TryGetValue(media.SHA1, out dbMedia);
+                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key) != null && dbMedia == null)
+                    pendingMediasBySha1.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key),
+                                                    out dbMedia);
 
-                if(media.MD5 != null && dbMedia == null) pendingMediasByMd5.TryGetValue(media.MD5, out dbMedia);
+                if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key) != null && dbMedia == null)
+                    pendingMediasByMd5.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key),
+                                                   out dbMedia);
 
                 // TODO: SpamSum
                 if(dbMedia == null)
@@ -1066,30 +1133,33 @@ public sealed class DatImporter
                     dbMedia = new DbMedia
                     {
                         CreatedOn = DateTime.UtcNow,
-                        Md5       = media.MD5,
-                        Sha1      = media.SHA1,
-                        Sha256    = media.SHA256,
+                        Md5       = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key),
+                        Sha1      = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key),
+                        Sha256    = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key),
                         UpdatedOn = DateTime.UtcNow
                     };
 
                     newMedias.Add(dbMedia);
                 }
 
-                if(string.IsNullOrEmpty(dbMedia.Md5) && !string.IsNullOrEmpty(media.MD5))
+                if(string.IsNullOrEmpty(dbMedia.Md5) &&
+                   !string.IsNullOrEmpty(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key)))
                 {
-                    dbMedia.Md5       = media.MD5;
+                    dbMedia.Md5       = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key);
                     dbMedia.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(dbMedia.Sha1) && !string.IsNullOrEmpty(media.SHA1))
+                if(string.IsNullOrEmpty(dbMedia.Sha1) &&
+                   !string.IsNullOrEmpty(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key)))
                 {
-                    dbMedia.Sha1      = media.SHA1;
+                    dbMedia.Sha1      = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key);
                     dbMedia.UpdatedOn = DateTime.UtcNow;
                 }
 
-                if(string.IsNullOrEmpty(dbMedia.Sha256) && !string.IsNullOrEmpty(media.SHA256))
+                if(string.IsNullOrEmpty(dbMedia.Sha256) &&
+                   !string.IsNullOrEmpty(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key)))
                 {
-                    dbMedia.Sha256    = media.SHA256;
+                    dbMedia.Sha256    = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key);
                     dbMedia.UpdatedOn = DateTime.UtcNow;
                 }
 
@@ -1097,7 +1167,7 @@ public sealed class DatImporter
                 {
                     Media   = dbMedia,
                     Machine = machine,
-                    Name    = media.Name
+                    Name    = media.GetStringFieldValue(SabreTools.Models.Metadata.Media.NameKey)
                 });
 
                 if(dbMedia.Sha256 != null) pendingMediasBySha256[dbMedia.Sha256] = dbMedia;
