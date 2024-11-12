@@ -133,7 +133,7 @@ public class FileExporter
                                        });
 
             if(machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
-                machineName = machineName.Substring(0, machineName.Length - 4);
+                machineName = machineName[..^4];
 
             string machinePath = Path.Combine(_outPath, machineName);
 
@@ -338,7 +338,7 @@ public class FileExporter
                                        });
 
             if(machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
-                machineName = machineName.Substring(0, machineName.Length - 4);
+                machineName = machineName[..^4];
 
             string machinePath = Path.Combine(_outPath, machineName);
 

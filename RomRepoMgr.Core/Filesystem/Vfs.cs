@@ -348,7 +348,7 @@ public class Vfs : IDisposable
 
     internal CachedDisk GetDisk(ulong machineId, string name)
     {
-        if(name.EndsWith(".chd", StringComparison.OrdinalIgnoreCase)) name = name.Substring(0, name.Length - 4);
+        if(name.EndsWith(".chd", StringComparison.OrdinalIgnoreCase)) name = name[..^4];
 
         ConcurrentDictionary<string, CachedDisk> cachedDisks = GetDisksFromMachine(machineId);
 
@@ -359,7 +359,7 @@ public class Vfs : IDisposable
 
     internal CachedMedia GetMedia(ulong machineId, string name)
     {
-        if(name.EndsWith(".aif", StringComparison.OrdinalIgnoreCase)) name = name.Substring(0, name.Length - 4);
+        if(name.EndsWith(".aif", StringComparison.OrdinalIgnoreCase)) name = name[..^4];
 
         ConcurrentDictionary<string, CachedMedia> cachedMedias = GetMediasFromMachine(machineId);
 
