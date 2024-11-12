@@ -303,7 +303,7 @@ public class FileExporter
                                              Value = inFs.Position
                                          });
 
-                    inFs.Read(buffer, 0, buffer.Length);
+                    inFs.EnsureRead(buffer, 0, buffer.Length);
                     outFs.Write(buffer, 0, buffer.Length);
                 }
 
@@ -315,7 +315,7 @@ public class FileExporter
                                          Value = inFs.Position
                                      });
 
-                inFs.Read(buffer, 0, buffer.Length);
+                inFs.EnsureRead(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
 
                 inFs.Close();
@@ -470,7 +470,7 @@ public class FileExporter
                                              Value = inFs.Position
                                          });
 
-                    inFs.Read(buffer, 0, buffer.Length);
+                    inFs.EnsureRead(buffer, 0, buffer.Length);
                     outFs.Write(buffer, 0, buffer.Length);
                 }
 
@@ -482,7 +482,7 @@ public class FileExporter
                                          Value = inFs.Position
                                      });
 
-                inFs.Read(buffer, 0, buffer.Length);
+                inFs.EnsureRead(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
 
                 inFs.Close();

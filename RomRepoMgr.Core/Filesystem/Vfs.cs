@@ -432,7 +432,7 @@ public class Vfs : IDisposable
 
             stream.Position = offset;
 
-            return stream.Read(buf, 0, buf.Length);
+            return stream.EnsureRead(buf, 0, buf.Length);
         }
         finally
         {

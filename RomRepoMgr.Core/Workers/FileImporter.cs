@@ -349,7 +349,7 @@ public class FileImporter
                                          });
 
                     buffer = new byte[BUFFER_SIZE];
-                    inFs.Read(buffer, 0, (int)BUFFER_SIZE);
+                    inFs.EnsureRead(buffer, 0, (int)BUFFER_SIZE);
                     checksumWorker.Update(buffer);
                 }
 
@@ -360,14 +360,14 @@ public class FileImporter
                                      });
 
                 buffer = new byte[remainder];
-                inFs.Read(buffer, 0, (int)remainder);
+                inFs.EnsureRead(buffer, 0, (int)remainder);
                 checksumWorker.Update(buffer);
             }
             else
             {
                 SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
                 buffer = new byte[inFs.Length];
-                inFs.Read(buffer, 0, (int)inFs.Length);
+                inFs.EnsureRead(buffer, 0, (int)inFs.Length);
                 checksumWorker.Update(buffer);
             }
 
@@ -527,7 +527,7 @@ public class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.Read(buffer, 0, buffer.Length);
+                inFs.EnsureRead(buffer, 0, buffer.Length);
                 zStream.Write(buffer, 0, buffer.Length);
             }
 
@@ -539,7 +539,7 @@ public class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.Read(buffer, 0, buffer.Length);
+            inFs.EnsureRead(buffer, 0, buffer.Length);
             zStream.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
@@ -802,7 +802,7 @@ public class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.Read(buffer, 0, buffer.Length);
+                inFs.EnsureRead(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
             }
 
@@ -814,7 +814,7 @@ public class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.Read(buffer, 0, buffer.Length);
+            inFs.EnsureRead(buffer, 0, buffer.Length);
             outFs.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
@@ -1139,7 +1139,7 @@ public class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.Read(buffer, 0, buffer.Length);
+                inFs.EnsureRead(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
             }
 
@@ -1151,7 +1151,7 @@ public class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.Read(buffer, 0, buffer.Length);
+            inFs.EnsureRead(buffer, 0, buffer.Length);
             outFs.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
