@@ -105,7 +105,7 @@ public static class FAT
 
         bootable = BitConverter.ToUInt16(bpbSector, 0x1FE);
 
-        bool   correctSpc  = spc == 1 || spc == 2 || spc == 4 || spc == 8 || spc == 16 || spc == 32 || spc == 64;
+        bool   correctSpc  = spc is 1 or 2 or 4 or 8 or 16 or 32 or 64;
         string msxString   = Encoding.ASCII.GetString(msxId);
         string fat32String = Encoding.ASCII.GetString(fat32Id);
 
@@ -119,13 +119,7 @@ public static class FAT
         var  apricotSectors      = BitConverter.ToUInt16(bpbSector, 0x58);
         var  apricotFatSectors   = BitConverter.ToUInt16(bpbSector, 0x5B);
 
-        bool apricotCorrectSpc = apricotSpc == 1  ||
-                                 apricotSpc == 2  ||
-                                 apricotSpc == 4  ||
-                                 apricotSpc == 8  ||
-                                 apricotSpc == 16 ||
-                                 apricotSpc == 32 ||
-                                 apricotSpc == 64;
+        bool apricotCorrectSpc = apricotSpc is 1 or 2 or 4 or 8 or 16 or 32 or 64;
 
         int  bitsInApricotBps  = CountBits(apricotBps);
         byte apricotPartitions = bpbSector[0x0C];
@@ -176,7 +170,7 @@ public static class FAT
                         numberOfFats <= 2 &&
                         rootEntries  > 0  &&
                         fatSectors   > 0  &&
-                        (bpbSignature == 0x28 || bpbSignature == 0x29):
+                        bpbSignature is 0x28 or 0x29:
                 return sectors == 0 ? bigSectors <= imageSectors : sectors <= imageSectors;
 
             // BPB
