@@ -80,9 +80,13 @@ public class App : Application
 
     void OnAboutClicked(object sender, EventArgs args)
     {
-        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
-           desktop.MainWindow is not MainWindow mainWindow                            ||
-           mainWindow.DataContext is not MainWindowViewModel mainWindowViewModel)
+        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+                                      {
+                                          MainWindow: MainWindow
+                                                      {
+                                                          DataContext: MainWindowViewModel mainWindowViewModel
+                                                      }
+                                      })
             return;
 
         mainWindowViewModel.ExecuteAboutCommand();
@@ -90,9 +94,13 @@ public class App : Application
 
     void OnQuitClicked(object sender, EventArgs args)
     {
-        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
-           desktop.MainWindow is not MainWindow mainWindow                            ||
-           mainWindow.DataContext is not MainWindowViewModel mainWindowViewModel)
+        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+                                      {
+                                          MainWindow: MainWindow
+                                                      {
+                                                          DataContext: MainWindowViewModel mainWindowViewModel
+                                                      }
+                                      })
             return;
 
         mainWindowViewModel.ExecuteExitCommand();
@@ -100,9 +108,13 @@ public class App : Application
 
     void OnPreferencesClicked(object sender, EventArgs args)
     {
-        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
-           desktop.MainWindow is not MainWindow mainWindow                            ||
-           mainWindow.DataContext is not MainWindowViewModel mainWindowViewModel)
+        if(ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+                                      {
+                                          MainWindow: MainWindow
+                                                      {
+                                                          DataContext: MainWindowViewModel mainWindowViewModel
+                                                      }
+                                      })
             return;
 
         mainWindowViewModel.ExecuteSettingsCommand();

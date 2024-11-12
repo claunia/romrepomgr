@@ -370,7 +370,7 @@ public class Winfsp : FileSystemBase
     {
         bytesTransferred = 0;
 
-        if(fileNode is not FileNode node || node.Handle <= 0) return STATUS_INVALID_HANDLE;
+        if(fileNode is not FileNode { Handle: > 0 } node) return STATUS_INVALID_HANDLE;
 
         var buf = new byte[length];
 
@@ -402,7 +402,7 @@ public class Winfsp : FileSystemBase
         fileName = default(string);
         fileInfo = default(FileInfo);
 
-        if(fileNode is not FileNode node || !node.IsDirectory) return false;
+        if(fileNode is not FileNode { IsDirectory: true } node) return false;
 
         if(context is not IEnumerator<FileEntry> enumerator)
         {
