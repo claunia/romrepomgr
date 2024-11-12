@@ -56,7 +56,7 @@ public sealed class AboutViewModel : ViewModelBase
         LicenseCommand = ReactiveCommand.Create(ExecuteLicenseCommand);
         CloseCommand   = ReactiveCommand.Create(ExecuteCloseCommand);
 
-        Assemblies = new ObservableCollection<AssemblyModel>();
+        Assemblies = [];
 
         // TODO: They do not load in time
         Task.Run(() =>

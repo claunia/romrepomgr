@@ -70,7 +70,7 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         FolderPath        = folderPath;
         _allFilesChecked  = false;
         _recursiveChecked = true;
-        ImportResults     = new ObservableCollection<ImportDatFolderItem>();
+        ImportResults     = [];
         CloseCommand      = ReactiveCommand.Create(ExecuteCloseCommand);
         StartCommand      = ReactiveCommand.Create(ExecuteStartCommand);
     }

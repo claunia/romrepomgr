@@ -57,7 +57,7 @@ public sealed class UpdateStatsViewModel : ViewModelBase
         CloseCommand          = ReactiveCommand.Create(ExecuteCloseCommand);
         IndeterminateProgress = true;
         ProgressVisible       = false;
-        RomSets               = new ObservableCollection<RomSetModel>();
+        RomSets               = [];
     }
 
     public string Title                         => Localization.UpdateStatsTitle;

@@ -162,21 +162,14 @@ public class MainWindowViewModel : ViewModelBase
 
         dlgOpen.Filters.Add(new FileDialogFilter
         {
-            Extensions = new List<string>
-            {
-                "dat",
-                "xml"
-            },
-            Name = Localization.DatFilesDialogLabel
+            Extensions = ["dat", "xml"],
+            Name       = Localization.DatFilesDialogLabel
         });
 
         dlgOpen.Filters.Add(new FileDialogFilter
         {
-            Extensions = new List<string>
-            {
-                "*"
-            },
-            Name = Localization.AllFilesDialogLabel
+            Extensions = ["*"],
+            Name       = Localization.AllFilesDialogLabel
         });
 
         string[] result = await dlgOpen.ShowAsync(_view);

@@ -45,9 +45,9 @@ public class FileImporter
         _pendingMediasBySha256 = new Dictionary<string, DbMedia>();
         _pendingMediasBySha1   = new Dictionary<string, DbMedia>();
         _pendingMediasByMd5    = new Dictionary<string, DbMedia>();
-        _newFiles              = new List<DbFile>();
-        _newDisks              = new List<DbDisk>();
-        _newMedias             = new List<DbMedia>();
+        _newFiles              = [];
+        _newDisks              = [];
+        _newMedias             = [];
         _onlyKnown             = onlyKnown;
         _deleteAfterImport     = deleteAfterImport;
         _position              = 0;

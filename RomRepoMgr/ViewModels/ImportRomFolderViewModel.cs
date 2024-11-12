@@ -68,7 +68,7 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         _removeFilesChecked     = false;
         _knownOnlyChecked       = true;
         _recurseArchivesChecked = Settings.Settings.UnArUsable;
-        ImportResults           = new ObservableCollection<ImportRomItem>();
+        ImportResults           = [];
         CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
         StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
         IsReady                 = true;

@@ -415,19 +415,19 @@ public class Winfsp : FileSystemBase
                 ConcurrentDictionary<string, CachedMedia> cachedMachineMedias =
                     _vfs.GetMediasFromMachine(node.MachineId);
 
-                node.Children = new List<FileEntry>
-                {
-                    new()
+                node.Children =
+                [
+                    new FileEntry
                     {
                         FileName = ".",
                         Info     = node.Info
                     },
-                    new()
+                    new FileEntry
                     {
                         FileName = "..",
                         Info     = node.ParentInfo
                     }
-                };
+                ];
 
                 node.Children.AddRange(cachedMachineFiles.Select(file => new FileEntry
                 {
@@ -485,19 +485,19 @@ public class Winfsp : FileSystemBase
             {
                 ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(node.RomSetId);
 
-                node.Children = new List<FileEntry>
-                {
-                    new()
+                node.Children =
+                [
+                    new FileEntry
                     {
                         FileName = ".",
                         Info     = node.Info
                     },
-                    new()
+                    new FileEntry
                     {
                         FileName = "..",
                         Info     = node.ParentInfo
                     }
-                };
+                ];
 
                 node.Children.AddRange(machines.Select(machine => new FileEntry
                 {
@@ -512,7 +512,7 @@ public class Winfsp : FileSystemBase
             }
             else
             {
-                node.Children = new List<FileEntry>();
+                node.Children = [];
 
                 node.Children.AddRange(_vfs.GetRootEntries()
                                            .Select(e => new FileEntry

@@ -60,7 +60,7 @@ public sealed class Sha512Context : IChecksum
     /// <summary>Returns a byte array of the hash value.</summary>
     public byte[] Final()
     {
-        _provider.TransformFinalBlock(new byte[0], 0, 0);
+        _provider.TransformFinalBlock([], 0, 0);
 
         return _provider.Hash;
     }
@@ -69,7 +69,7 @@ public sealed class Sha512Context : IChecksum
     /// <summary>Returns a hexadecimal representation of the hash value.</summary>
     public string End()
     {
-        _provider.TransformFinalBlock(new byte[0], 0, 0);
+        _provider.TransformFinalBlock([], 0, 0);
         var sha512Output = new StringBuilder();
 
         foreach(byte h in _provider.Hash) sha512Output.Append(h.ToString("x2"));

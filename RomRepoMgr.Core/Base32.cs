@@ -113,7 +113,7 @@ public static class Base32
         if(base32String == null) return null;
 
         // Check if empty
-        if(base32String == string.Empty) return new byte[0];
+        if(base32String == string.Empty) return [];
 
         // Convert to upper-case
         string base32StringUpperCase = base32String.ToUpperInvariant();

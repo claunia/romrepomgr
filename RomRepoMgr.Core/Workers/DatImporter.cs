@@ -479,41 +479,41 @@ public sealed class DatImporter
                                                      ? ctx.Files
                                                           .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Crc32 = t.Crc32 AND f.Size = t.Size")
                                                           .ToList()
-                                                     : new List<DbFile>();
+                                                     : [];
 
             List<DbFile> pendingFilesByMd5List = romsHaveMd5
                                                      ? ctx.Files
                                                           .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Md5 = t.Md5 AND f.Size = t.Size")
                                                           .ToList()
-                                                     : new List<DbFile>();
+                                                     : [];
 
             List<DbFile> pendingFilesBySha1List =
                 romsHaveSha1
                     ? ctx.Files
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Sha1 = t.Sha1 AND f.Size = t.Size")
                          .ToList()
-                    : new List<DbFile>();
+                    : [];
 
             List<DbFile> pendingFilesBySha256List =
                 romsHaveSha256
                     ? ctx.Files
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Sha256 = t.Sha256 AND f.Size = t.Size")
                          .ToList()
-                    : new List<DbFile>();
+                    : [];
 
             List<DbFile> pendingFilesBySha384List =
                 romsHaveSha384
                     ? ctx.Files
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Sha384 = t.Sha384 AND f.Size = t.Size")
                          .ToList()
-                    : new List<DbFile>();
+                    : [];
 
             List<DbFile> pendingFilesBySha512List =
                 romsHaveSha512
                     ? ctx.Files
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Sha512 = t.Sha512 AND f.Size = t.Size")
                          .ToList()
-                    : new List<DbFile>();
+                    : [];
 
             Dictionary<string, DbDisk> pendingDisksByMd5 =
                 disksHaveMd5
@@ -756,40 +756,52 @@ public sealed class DatImporter
                 if(file == null && hashCollision)
                 {
                     if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Sha512 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .SHA512Key) &&
                                                                 f.Size == uSize);
+                    }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Sha384 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .SHA384Key) &&
                                                                 f.Size == uSize);
+                    }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Sha256 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .SHA256Key) &&
                                                                 f.Size == uSize);
+                    }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Sha1 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .SHA1Key) &&
                                                                 f.Size == uSize);
+                    }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Md5 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .MD5Key) &&
                                                                 f.Size == uSize);
+                    }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) != null)
+                    {
                         file = pendingFiles.FirstOrDefault(f => f.Crc32 ==
                                                                 rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
                                                                    .CRCKey) &&
                                                                 f.Size == uSize);
+                    }
                 }
 
                 if(file == null)
@@ -991,12 +1003,16 @@ public sealed class DatImporter
                 DbDisk dbDisk = null;
 
                 if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key) != null && dbDisk == null)
+                {
                     pendingDisksBySha1.TryGetValue(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.SHA1Key),
                                                    out dbDisk);
+                }
 
                 if(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key) != null && dbDisk == null)
+                {
                     pendingDisksByMd5.TryGetValue(disk.GetStringFieldValue(SabreTools.Models.Metadata.Disk.MD5Key),
                                                   out dbDisk);
+                }
 
                 if(dbDisk == null)
                 {
@@ -1115,17 +1131,23 @@ public sealed class DatImporter
                 DbMedia dbMedia = null;
 
                 if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA256Key) != null && dbMedia == null)
+                {
                     pendingMediasBySha256.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media
                                                                                    .SHA256Key),
                                                       out dbMedia);
+                }
 
                 if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key) != null && dbMedia == null)
+                {
                     pendingMediasBySha1.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.SHA1Key),
                                                     out dbMedia);
+                }
 
                 if(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key) != null && dbMedia == null)
+                {
                     pendingMediasByMd5.TryGetValue(media.GetStringFieldValue(SabreTools.Models.Metadata.Media.MD5Key),
                                                    out dbMedia);
+                }
 
                 // TODO: SpamSum
                 if(dbMedia == null)
