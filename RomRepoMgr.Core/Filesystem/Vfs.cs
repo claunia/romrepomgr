@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors;
@@ -245,8 +246,8 @@ public class Vfs : IDisposable
 
         cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
 
-        foreach(FileByMachine machineFile in
-                ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == id && fbm.File.IsInRepo))
+        foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == id && fbm.File.IsInRepo)
+                                                .Include(fileByMachine => fileByMachine.File))
         {
             var cachedFile = new CachedFile
             {
@@ -281,9 +282,11 @@ public class Vfs : IDisposable
 
         cachedMachineDisks = new ConcurrentDictionary<string, CachedDisk>();
 
-        foreach(DiskByMachine machineDisk in ctx.DisksByMachines.Where(dbm => dbm.Machine.Id == id &&
-                                                                              dbm.Disk.IsInRepo    &&
-                                                                              dbm.Disk.Size != null))
+        foreach(DiskByMachine machineDisk in ctx.DisksByMachines
+                                                .Where(dbm => dbm.Machine.Id == id &&
+                                                              dbm.Disk.IsInRepo    &&
+                                                              dbm.Disk.Size != null)
+                                                .Include(diskByMachine => diskByMachine.Disk))
         {
             var cachedDisk = new CachedDisk
             {
@@ -313,9 +316,11 @@ public class Vfs : IDisposable
 
         cachedMachineMedias = new ConcurrentDictionary<string, CachedMedia>();
 
-        foreach(MediaByMachine machineMedia in ctx.MediasByMachines.Where(mbm => mbm.Machine.Id == id &&
-                                                                              mbm.Media.IsInRepo      &&
-                                                                              mbm.Media.Size != null))
+        foreach(MediaByMachine machineMedia in ctx.MediasByMachines
+                                                  .Where(mbm => mbm.Machine.Id == id &&
+                                                                mbm.Media.IsInRepo   &&
+                                                                mbm.Media.Size != null)
+                                                  .Include(mediaByMachine => mediaByMachine.Media))
         {
             var cachedDisk = new CachedMedia
             {
