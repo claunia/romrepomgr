@@ -757,50 +757,47 @@ public sealed class DatImporter
                 {
                     if(rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA512Key) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Sha512 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .SHA512Key) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Sha512 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                 .SHA512Key) &&
+                                                      f.Size == uSize);
                     }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA384Key) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Sha384 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .SHA384Key) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Sha384 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                 .SHA384Key) &&
+                                                      f.Size == uSize);
                     }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA256Key) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Sha256 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .SHA256Key) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Sha256 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
+                                                                                 .SHA256Key) &&
+                                                      f.Size == uSize);
                     }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Sha1 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .SHA1Key) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Sha1 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.SHA1Key) &&
+                                                      f.Size == uSize);
                     }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Md5 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .MD5Key) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Md5 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.MD5Key) &&
+                                                      f.Size == uSize);
                     }
 
                     if(file == null && rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) != null)
                     {
-                        file = pendingFiles.FirstOrDefault(f => f.Crc32 ==
-                                                                rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom
-                                                                   .CRCKey) &&
-                                                                f.Size == uSize);
+                        file = pendingFiles.Find(f => f.Crc32 ==
+                                                      rom.GetStringFieldValue(SabreTools.Models.Metadata.Rom.CRCKey) &&
+                                                      f.Size == uSize);
                     }
                 }
 
