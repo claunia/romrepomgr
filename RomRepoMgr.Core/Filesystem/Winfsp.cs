@@ -358,7 +358,7 @@ public class Winfsp : FileSystemBase
 
     public override void Close(object fileNode, object fileDesc)
     {
-        if(!(fileNode is FileNode node)) return;
+        if(fileNode is not FileNode node) return;
 
         if(node.Handle <= 0) return;
 
@@ -370,7 +370,7 @@ public class Winfsp : FileSystemBase
     {
         bytesTransferred = 0;
 
-        if(!(fileNode is FileNode node) || node.Handle <= 0) return STATUS_INVALID_HANDLE;
+        if(fileNode is not FileNode node || node.Handle <= 0) return STATUS_INVALID_HANDLE;
 
         var buf = new byte[length];
 
@@ -389,7 +389,7 @@ public class Winfsp : FileSystemBase
     {
         fileInfo = default(FileInfo);
 
-        if(!(fileNode is FileNode node)) return STATUS_INVALID_HANDLE;
+        if(fileNode is not FileNode node) return STATUS_INVALID_HANDLE;
 
         fileInfo = node.Info;
 
@@ -402,9 +402,9 @@ public class Winfsp : FileSystemBase
         fileName = default(string);
         fileInfo = default(FileInfo);
 
-        if(!(fileNode is FileNode node) || !node.IsDirectory) return false;
+        if(fileNode is not FileNode node || !node.IsDirectory) return false;
 
-        if(!(context is IEnumerator<FileEntry> enumerator))
+        if(context is not IEnumerator<FileEntry> enumerator)
         {
             if(node.MachineId > 0)
             {
