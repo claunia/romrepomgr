@@ -96,7 +96,7 @@ public class Vfs : IDisposable
         CleanUp();
     }
 
-    public void CleanUp()
+    void CleanUp()
     {
         foreach(KeyValuePair<long, Stream> handle in _streamsCache) handle.Value.Close();
 
