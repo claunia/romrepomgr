@@ -477,76 +477,76 @@ public sealed class DatImporter
 
             List<DbFile> pendingFilesByCrcList = romsHaveCrc
                                                      ? ctx.Files
-                                                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Crc32 = t.Crc32 AND f.Size = t.Size")
+                                                          .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomCrc32Table}] AS t WHERE f.Crc32 = t.Crc32 AND f.Size = t.Size")
                                                           .ToList()
                                                      : [];
 
             List<DbFile> pendingFilesByMd5List = romsHaveMd5
                                                      ? ctx.Files
-                                                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Md5 = t.Md5 AND f.Size = t.Size")
+                                                          .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomMd5Table}] AS t WHERE f.Md5 = t.Md5 AND f.Size = t.Size")
                                                           .ToList()
                                                      : [];
 
             List<DbFile> pendingFilesBySha1List =
                 romsHaveSha1
                     ? ctx.Files
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Sha1 = t.Sha1 AND f.Size = t.Size")
+                         .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha1Table}] AS t WHERE f.Sha1 = t.Sha1 AND f.Size = t.Size")
                          .ToList()
                     : [];
 
             List<DbFile> pendingFilesBySha256List =
                 romsHaveSha256
                     ? ctx.Files
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Sha256 = t.Sha256 AND f.Size = t.Size")
+                         .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha256Table}] AS t WHERE f.Sha256 = t.Sha256 AND f.Size = t.Size")
                          .ToList()
                     : [];
 
             List<DbFile> pendingFilesBySha384List =
                 romsHaveSha384
                     ? ctx.Files
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Sha384 = t.Sha384 AND f.Size = t.Size")
+                         .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha384Table}] AS t WHERE f.Sha384 = t.Sha384 AND f.Size = t.Size")
                          .ToList()
                     : [];
 
             List<DbFile> pendingFilesBySha512List =
                 romsHaveSha512
                     ? ctx.Files
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Sha512 = t.Sha512 AND f.Size = t.Size")
+                         .FromSql($"SELECT DISTINCT f.* FROM Files AS f, [{tmpRomSha512Table}] AS t WHERE f.Sha512 = t.Sha512 AND f.Size = t.Size")
                          .ToList()
                     : [];
 
             Dictionary<string, DbDisk> pendingDisksByMd5 =
                 disksHaveMd5
                     ? ctx.Disks
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5")
+                         .FromSql($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5")
                          .ToDictionary(f => f.Md5)
                     : new Dictionary<string, DbDisk>();
 
             Dictionary<string, DbDisk> pendingDisksBySha1 =
                 disksHaveSha1
                     ? ctx.Disks
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
+                         .FromSql($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
                          .ToDictionary(f => f.Sha1)
                     : new Dictionary<string, DbDisk>();
 
             Dictionary<string, DbMedia> pendingMediasByMd5 =
                 mediasHaveMd5
                     ? ctx.Medias
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5")
+                         .FromSql($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5")
                          .ToDictionary(f => f.Md5)
                     : new Dictionary<string, DbMedia>();
 
             Dictionary<string, DbMedia> pendingMediasBySha1 =
                 mediasHaveSha1
                     ? ctx.Medias
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
+                         .FromSql($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
                          .ToDictionary(f => f.Sha1)
                     : new Dictionary<string, DbMedia>();
 
             Dictionary<string, DbMedia> pendingMediasBySha256 =
                 mediasHaveSha256
                     ? ctx.Medias
-                         .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256")
+                         .FromSql($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256")
                          .ToDictionary(f => f.Sha256)
                     : new Dictionary<string, DbMedia>();
 
@@ -615,17 +615,17 @@ public sealed class DatImporter
             pendingFilesBySha384List.Clear();
             pendingFilesBySha512List.Clear();
 
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomCrc32Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomMd5Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha1Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha256Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha384Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha512Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskMd5Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskSha1Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaMd5Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha1Table}]");
-            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha256Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomCrc32Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomMd5Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha1Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha256Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha384Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha512Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpDiskMd5Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpDiskSha1Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaMd5Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaSha1Table}]");
+            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaSha256Table}]");
 
             SetProgressBounds?.Invoke(this,
                                       new ProgressBoundsEventArgs

@@ -143,7 +143,7 @@ public sealed class UpdateStatsViewModel : ViewModelBase
 
         Dispatcher.UIThread.Post(() => { StatusMessage = Localization.RemovingOldStatistics; });
 
-        ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
+        ctx.Database.ExecuteSql($"DELETE FROM \"RomSetStats\"");
 
         Dispatcher.UIThread.Post(() =>
         {
