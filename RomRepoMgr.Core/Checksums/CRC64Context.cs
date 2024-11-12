@@ -63,7 +63,7 @@ public sealed class Crc64Context : IChecksum
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ CRC64_ECMA_POLY;
                 else
-                    entry = entry >> 1;
+                    entry >>= 1;
             }
 
             _table[i] = entry;
@@ -88,7 +88,7 @@ public sealed class Crc64Context : IChecksum
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ polynomial;
                 else
-                    entry = entry >> 1;
+                    entry >>= 1;
             }
 
             _table[i] = entry;
@@ -164,7 +164,7 @@ public sealed class Crc64Context : IChecksum
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ polynomial;
                 else
-                    entry = entry >> 1;
+                    entry >>= 1;
             }
 
             localTable[i] = entry;
@@ -213,7 +213,7 @@ public sealed class Crc64Context : IChecksum
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ polynomial;
                 else
-                    entry = entry >> 1;
+                    entry >>= 1;
             }
 
             localTable[i] = entry;
