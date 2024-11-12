@@ -458,33 +458,16 @@ public sealed class Fuse : FileSystem
         {
             if(pieces.Length > 3) return Errno.ENOSYS;
 
-            switch(name)
-            {
-                case "user.crc32":
-                    hash = file.Crc32;
-
-                    break;
-                case "user.md5":
-                    hash = file.Md5;
-
-                    break;
-                case "user.sha1":
-                    hash = file.Sha1;
-
-                    break;
-                case "user.sha256":
-                    hash = file.Sha256;
-
-                    break;
-                case "user.sha384":
-                    hash = file.Sha384;
-
-                    break;
-                case "user.sha512":
-                    hash = file.Sha512;
-
-                    break;
-            }
+            hash = name switch
+                   {
+                       "user.crc32"  => file.Crc32,
+                       "user.md5"    => file.Md5,
+                       "user.sha1"   => file.Sha1,
+                       "user.sha256" => file.Sha256,
+                       "user.sha384" => file.Sha384,
+                       "user.sha512" => file.Sha512,
+                       _             => hash
+                   };
         }
         else
         {
@@ -492,17 +475,12 @@ public sealed class Fuse : FileSystem
 
             if(disk != null)
             {
-                switch(name)
-                {
-                    case "user.md5":
-                        hash = disk.Md5;
-
-                        break;
-                    case "user.sha1":
-                        hash = disk.Sha1;
-
-                        break;
-                }
+                hash = name switch
+                       {
+                           "user.md5"  => disk.Md5,
+                           "user.sha1" => disk.Sha1,
+                           _           => hash
+                       };
             }
             else
             {
@@ -510,25 +488,14 @@ public sealed class Fuse : FileSystem
 
                 if(media == null) return Errno.ENOENT;
 
-                switch(name)
-                {
-                    case "user.md5":
-                        hash = media.Md5;
-
-                        break;
-                    case "user.sha1":
-                        hash = media.Sha1;
-
-                        break;
-                    case "user.sha256":
-                        hash = media.Sha256;
-
-                        break;
-                    case "user.spamsum":
-                        hash = media.SpamSum;
-
-                        break;
-                }
+                hash = name switch
+                       {
+                           "user.md5"     => media.Md5,
+                           "user.sha1"    => media.Sha1,
+                           "user.sha256"  => media.Sha256,
+                           "user.spamsum" => media.SpamSum,
+                           _              => hash
+                       };
             }
         }
 
