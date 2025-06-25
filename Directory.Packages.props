@@ -9,7 +9,7 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.2"/>
     <PackageVersion Include="Avalonia" Version="11.3.2"/>
     <PackageVersion Include="DotNetZip" Version="1.16.0"/>
-    <PackageVersion Include="EFCore.BulkExtensions" Version="8.1.1"/>
+    <PackageVersion Include="EFCore.BulkExtensions" Version="9.0.1"/>
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2"/>
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.1.2"/>
     <PackageVersion Include="InclusivenessAnalyzer" Version="1.2.0"/>
