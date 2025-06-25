@@ -24,9 +24,9 @@
     <PackageVersion Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
     <PackageVersion Include="Philips.CodeAnalysis.MaintainabilityAnalyzers" Version="1.5.0"/>
     <PackageVersion Include="plist-cil" Version="2.2.0"/>
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.12.2"/>
-    <PackageVersion Include="Roslynator.CodeAnalysis.Analyzers" Version="4.12.2"/>
-    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.2"/>
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.13.1"/>
+    <PackageVersion Include="Roslynator.CodeAnalysis.Analyzers" Version="4.13.1"/>
+    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.13.1"/>
     <PackageVersion Include="SabreTools.Models" Version="1.5.8"/>
     <PackageVersion Include="SharpCompress" Version="0.39.0"/>
     <PackageVersion Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31"/>
