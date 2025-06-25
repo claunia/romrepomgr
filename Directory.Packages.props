@@ -28,7 +28,7 @@
     <PackageVersion Include="Roslynator.CodeAnalysis.Analyzers" Version="4.12.2"/>
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.2"/>
     <PackageVersion Include="SabreTools.Models" Version="1.5.8"/>
-    <PackageVersion Include="SharpCompress" Version="0.38.0"/>
+    <PackageVersion Include="SharpCompress" Version="0.39.0"/>
     <PackageVersion Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31"/>
     <PackageVersion Include="System.Security.Principal.Windows" Version="5.0.0"/>
     <PackageVersion Include="Text.Analyzers" Version="3.3.4"/>
