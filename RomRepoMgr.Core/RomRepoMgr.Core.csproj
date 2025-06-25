@@ -1,64 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <NeutralLanguage>en</NeutralLanguage>
-    <LangVersion>default</LangVersion>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="DotNetZip" Version="1.16.0" />
-    <PackageReference Include="EFCore.BulkExtensions" Version="8.1.1" />
-    <PackageReference Include="Mono.Fuse.NETStandard" Version="1.1.0"/>
-    <PackageReference Include="SabreTools.Models" Version="1.4.11" />
-    <PackageReference Include="SharpCompress" Version="0.38.0" />
-    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
-    <PackageReference Include="winfsp.net" Version="2.1.24255" />
-    <PackageReference Include="AsyncFixer" Version="1.6.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ErrorProne.NET.Structs" Version="0.1.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Philips.CodeAnalysis.MaintainabilityAnalyzers" Version="1.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.12.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="4.12.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.12.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" />
-    <PackageReference Include="Text.Analyzers" Version="3.3.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="DotNetZip"/>
+    <PackageReference Include="EFCore.BulkExtensions"/>
+    <PackageReference Include="Mono.Fuse.NETStandard"/>
+    <PackageReference Include="SabreTools.Models"/>
+    <PackageReference Include="SharpCompress"/>
+    <PackageReference Include="System.Security.Principal.Windows"/>
+    <PackageReference Include="winfsp.net"/>
+    <PackageReference Include="AsyncFixer"/>
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers"/>
+    <PackageReference Include="ErrorProne.NET.Structs"/>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers"/>
+    <PackageReference Include="Philips.CodeAnalysis.MaintainabilityAnalyzers"/>
+    <PackageReference Include="Roslynator.Analyzers"/>
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers"/>
+    <PackageReference Include="Roslynator.Formatting.Analyzers"/>
+    <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer"/>
+    <PackageReference Include="Text.Analyzers"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
-    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
-    <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj" />
-    <ProjectReference Include="..\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj" />
+    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
