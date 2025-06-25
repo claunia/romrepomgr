@@ -1,13 +1,13 @@
 <Project ToolsVersion="15.0">
   <ItemGroup>
     <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
-    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia.Desktop" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia.Diagnostics" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.2.0"/>
-    <PackageVersion Include="Avalonia" Version="11.2.0"/>
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.3.2"/>
+    <PackageVersion Include="Avalonia.Desktop" Version="11.3.2"/>
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.2"/>
+    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.3.2"/>
+    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.3.0"/>
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.2"/>
+    <PackageVersion Include="Avalonia" Version="11.3.2"/>
     <PackageVersion Include="DotNetZip" Version="1.16.0"/>
     <PackageVersion Include="EFCore.BulkExtensions" Version="8.1.1"/>
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2"/>
