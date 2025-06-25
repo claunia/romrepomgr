@@ -615,17 +615,17 @@ public sealed class DatImporter
             pendingFilesBySha384List.Clear();
             pendingFilesBySha512List.Clear();
 
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomCrc32Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomMd5Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha1Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha256Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha384Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpRomSha512Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpDiskMd5Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpDiskSha1Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaMd5Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaSha1Table}]");
-            ctx.Database.ExecuteSql($"DROP TABLE [{tmpMediaSha256Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomCrc32Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomMd5Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha1Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha256Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha384Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomSha512Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskMd5Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpDiskSha1Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaMd5Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha1Table}]");
+            ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpMediaSha256Table}]");
 
             SetProgressBounds?.Invoke(this,
                                       new ProgressBoundsEventArgs
