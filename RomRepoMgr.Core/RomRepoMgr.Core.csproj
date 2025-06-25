@@ -56,9 +56,9 @@
   <ItemGroup>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
-    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
-    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj" />
-    <ProjectReference Include="D:\repos\RomRepoMgr\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj" />
+    <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj" />
+    <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj" />
+    <ProjectReference Include="..\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj" />
   </ItemGroup>
 
   <ItemGroup>
