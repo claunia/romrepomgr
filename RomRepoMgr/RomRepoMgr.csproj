@@ -69,7 +69,6 @@
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj"/>
-    <ProjectReference Include="..\SabreTools\SabreTools.IO\SabreTools.IO.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\Localization.resx">
