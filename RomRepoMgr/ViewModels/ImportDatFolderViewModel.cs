@@ -303,15 +303,15 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
         ProgressValue = _listPosition;
 
-        var _worker = new DatImporter(_datFiles[_listPosition], Category);
-        _worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
-        _worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
-        _worker.SetMessage               += OnWorkerOnSetMessage;
-        _worker.SetProgress              += OnWorkerOnSetProgress;
-        _worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
-        _worker.WorkFinished             += OnWorkerOnWorkFinished;
-        _worker.RomSetAdded              += RomSetAdded;
-        _                                =  Task.Run(_worker.Import);
+        var worker = new DatImporter(_datFiles[_listPosition], Category);
+        worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
+        worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
+        worker.SetMessage               += OnWorkerOnSetMessage;
+        worker.SetProgress              += OnWorkerOnSetProgress;
+        worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
+        worker.WorkFinished             += OnWorkerOnWorkFinished;
+        worker.RomSetAdded              += RomSetAdded;
+        _                               =  Task.Run(worker.Import);
     }
 
     void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>

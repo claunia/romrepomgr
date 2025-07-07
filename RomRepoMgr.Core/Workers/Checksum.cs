@@ -90,27 +90,27 @@ internal sealed class Checksum
         _sha384Pkt = new Sha384Packet();
         _sha512Pkt = new Sha512Packet();
 
-        _crc32Pkt.context  = _crc32Ctx;
-        _md5Pkt.context    = _md5Ctx;
-        _sha1Pkt.context   = _sha1Ctx;
-        _sha256Pkt.context = _sha256Ctx;
-        _sha384Pkt.context = _sha384Ctx;
-        _sha512Pkt.context = _sha512Ctx;
+        _crc32Pkt.Context  = _crc32Ctx;
+        _md5Pkt.Context    = _md5Ctx;
+        _sha1Pkt.Context   = _sha1Ctx;
+        _sha256Pkt.Context = _sha256Ctx;
+        _sha384Pkt.Context = _sha384Ctx;
+        _sha512Pkt.Context = _sha512Ctx;
     }
 
     internal void Update(byte[] data)
     {
-        _crc32Pkt.data = data;
+        _crc32Pkt.Data = data;
         _crc32Thread.Start(_crc32Pkt);
-        _md5Pkt.data = data;
+        _md5Pkt.Data = data;
         _md5Thread.Start(_md5Pkt);
-        _sha1Pkt.data = data;
+        _sha1Pkt.Data = data;
         _sha1Thread.Start(_sha1Pkt);
-        _sha256Pkt.data = data;
+        _sha256Pkt.Data = data;
         _sha256Thread.Start(_sha256Pkt);
-        _sha384Pkt.data = data;
+        _sha384Pkt.Data = data;
         _sha384Thread.Start(_sha384Pkt);
-        _sha512Pkt.data = data;
+        _sha512Pkt.Data = data;
         _sha512Thread.Start(_sha512Pkt);
 
         while(_crc32Thread.IsAlive  ||
@@ -142,51 +142,51 @@ internal sealed class Checksum
 
     struct Crc32Packet
     {
-        public Crc32Context context;
-        public byte[]       data;
+        public Crc32Context Context;
+        public byte[]       Data;
     }
 
     struct Md5Packet
     {
-        public Md5Context context;
-        public byte[]     data;
+        public Md5Context Context;
+        public byte[]     Data;
     }
 
     struct Sha1Packet
     {
-        public Sha1Context context;
-        public byte[]      data;
+        public Sha1Context Context;
+        public byte[]      Data;
     }
 
     struct Sha256Packet
     {
-        public Sha256Context context;
-        public byte[]        data;
+        public Sha256Context Context;
+        public byte[]        Data;
     }
 
     struct Sha384Packet
     {
-        public Sha384Context context;
-        public byte[]        data;
+        public Sha384Context Context;
+        public byte[]        Data;
     }
 
     struct Sha512Packet
     {
-        public Sha512Context context;
-        public byte[]        data;
+        public Sha512Context Context;
+        public byte[]        Data;
     }
 
-    static void UpdateCrc32(object packet) => ((Crc32Packet)packet).context.Update(((Crc32Packet)packet).data);
+    static void UpdateCrc32(object packet) => ((Crc32Packet)packet).Context.Update(((Crc32Packet)packet).Data);
 
-    static void UpdateMd5(object packet) => ((Md5Packet)packet).context.Update(((Md5Packet)packet).data);
+    static void UpdateMd5(object packet) => ((Md5Packet)packet).Context.Update(((Md5Packet)packet).Data);
 
-    static void UpdateSha1(object packet) => ((Sha1Packet)packet).context.Update(((Sha1Packet)packet).data);
+    static void UpdateSha1(object packet) => ((Sha1Packet)packet).Context.Update(((Sha1Packet)packet).Data);
 
-    static void UpdateSha256(object packet) => ((Sha256Packet)packet).context.Update(((Sha256Packet)packet).data);
+    static void UpdateSha256(object packet) => ((Sha256Packet)packet).Context.Update(((Sha256Packet)packet).Data);
 
-    static void UpdateSha384(object packet) => ((Sha384Packet)packet).context.Update(((Sha384Packet)packet).data);
+    static void UpdateSha384(object packet) => ((Sha384Packet)packet).Context.Update(((Sha384Packet)packet).Data);
 
-    static void UpdateSha512(object packet) => ((Sha512Packet)packet).context.Update(((Sha512Packet)packet).data);
+    static void UpdateSha512(object packet) => ((Sha512Packet)packet).Context.Update(((Sha512Packet)packet).Data);
 
 #endregion Threading helpers
 }
