@@ -39,6 +39,7 @@ using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.DatFiles;
+using SabreTools.DatTools;
 using SabreTools.Models.Metadata;
 using DatItem = SabreTools.DatItems.DatItem;
 using Disk = SabreTools.DatItems.Formats.Disk;
@@ -79,8 +80,8 @@ public sealed class DatImporter
                                    Message = Localization.ParsinDatFile
                                });
 
-            var datFile = DatFile.Create();
-            datFile.ParseFile(_datPath, 0, false, true);
+            DatFile datFile = Parser.ParseStatistics(_datPath);
+            Parser.ParseInto(datFile, _datPath, throwOnError: true);
 
             SetMessage?.Invoke(this,
                                new MessageEventArgs
@@ -151,14 +152,7 @@ public sealed class DatImporter
                                    Message = Localization.GettingMachineNames
                                });
 
-            var machineNames = (from value in datFile.Items.Values
-                                from item in value
-                                select item.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
-                                          ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey)
-                                into m
-                                where m is not null
-                                select m).Distinct()
-                                         .ToList();
+            var machineNames = datFile.Items.SortedKeys.Distinct().ToList();
 
             SetMessage?.Invoke(this,
                                new MessageEventArgs
@@ -251,7 +245,7 @@ public sealed class DatImporter
                                       new ProgressBoundsEventArgs
                                       {
                                           Minimum = 0,
-                                          Maximum = datFile.Items.Values.Count
+                                          Maximum = datFile.Items.SortedKeys.Length
                                       });
 
             using(DbTransaction dbTransaction = dbConnection.BeginTransaction())
@@ -308,7 +302,7 @@ public sealed class DatImporter
                 dbcc.CommandText = $"CREATE TABLE \"{tmpMediaSha256Table}\" (\"Sha256\" TEXT NOT NULL);";
                 dbcc.ExecuteNonQuery();
 
-                foreach(List<DatItem> values in datFile.Items.Values)
+                foreach(string key in datFile.Items.SortedKeys)
                 {
                     SetProgress?.Invoke(this,
                                         new ProgressEventArgs
@@ -316,7 +310,7 @@ public sealed class DatImporter
                                             Value = position
                                         });
 
-                    foreach(DatItem item in values)
+                    foreach(DatItem item in datFile.GetItemsForBucket(key))
                     {
                         switch(item)
                         {
