@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -190,17 +191,16 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ExecuteImportDatFolderCommandAsync()
     {
-        var dlgOpen = new OpenFolderDialog
-        {
-            Title = Localization.ImportDatFolderDialogTitle
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ImportDatFolderDialogTitle
+            });
 
-        string result = await dlgOpen.ShowAsync(_view);
-
-        if(result == null) return;
+        if(result.Count < 1) return;
 
         var dialog                   = new ImportDatFolder();
-        var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result);
+        var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result[0].Path.LocalPath);
         importDatFolderViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
         dialog.DataContext                   =  importDatFolderViewModel;
         _                                    =  dialog.ShowDialog(_view);
@@ -208,17 +208,16 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ExecuteImportRomFolderCommandAsync()
     {
-        var dlgOpen = new OpenFolderDialog
-        {
-            Title = Localization.ImportRomsFolderDialogTitle
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ImportRomsFolderDialogTitle
+            });
 
-        string result = await dlgOpen.ShowAsync(_view);
-
-        if(result == null) return;
+        if(result.Count < 1) return;
 
         var dialog                   = new ImportRomFolder();
-        var importRomFolderViewModel = new ImportRomFolderViewModel(dialog, result);
+        var importRomFolderViewModel = new ImportRomFolderViewModel(dialog, result[0].Path.LocalPath);
         dialog.DataContext = importRomFolderViewModel;
         _                  = dialog.ShowDialog(_view);
     }
@@ -289,17 +288,16 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ExecuteExportRomsCommandAsync()
     {
-        var dlgOpen = new OpenFolderDialog
-        {
-            Title = Localization.ExportRomsDialogTitle
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ExportRomsDialogTitle
+            });
 
-        string result = await dlgOpen.ShowAsync(_view);
-
-        if(result == null) return;
+        if(result.Count < 1) return;
 
         var dialog    = new ExportRoms();
-        var viewModel = new ExportRomsViewModel(dialog, result, SelectedRomSet.Id);
+        var viewModel = new ExportRomsViewModel(dialog, result[0].Path.LocalPath, SelectedRomSet.Id);
         dialog.DataContext = viewModel;
         _                  = dialog.ShowDialog(_view);
     }
@@ -308,20 +306,19 @@ public class MainWindowViewModel : ViewModelBase
     {
         if(Vfs != null) return;
 
-        var dlgOpen = new OpenFolderDialog
-        {
-            Title = Localization.SelectMountPointDialogTitle
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.SelectMountPointDialogTitle
+            });
 
-        string result = await dlgOpen.ShowAsync(_view);
-
-        if(result == null) return;
+        if(result.Count < 1) return;
 
         try
         {
             Vfs          =  new Vfs();
             Vfs.Umounted += VfsOnUmounted;
-            Vfs.MountTo(result);
+            Vfs.MountTo(result[0].Path.LocalPath);
         }
         catch(Exception)
         {

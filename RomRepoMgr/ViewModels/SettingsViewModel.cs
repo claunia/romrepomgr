@@ -24,10 +24,12 @@
 *******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.EntityFrameworkCore;
 using MsBox.Avalonia;
@@ -187,30 +189,29 @@ public sealed class SettingsViewModel : ViewModelBase
 
     async Task ExecuteTemporaryCommandAsync()
     {
-        var dlgFolder = new OpenFolderDialog
-        {
-            Title = Localization.ChooseTemporaryFolder
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ChooseTemporaryFolder
+            });
 
-        string result = await dlgFolder.ShowAsync(_view);
+        if(result.Count < 1) return;
 
-        if(result == null) return;
-
-        TemporaryPath = result;
+        TemporaryPath = result[0].Path.LocalPath;
     }
 
     async Task ExecuteRepositoryCommandAsync()
     {
-        var dlgFolder = new OpenFolderDialog
-        {
-            Title = Localization.ChooseRepositoryFolder
-        };
+        IReadOnlyList<IStorageFolder> result =
+            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title         = Localization.ChooseRepositoryFolder,
+                AllowMultiple = false
+            });
 
-        string result = await dlgFolder.ShowAsync(_view);
+        if(result.Count < 1) return;
 
-        if(result == null) return;
-
-        RepositoryPath = result;
+        RepositoryPath = result[0].Path.LocalPath;
     }
 
     async Task ExecuteDatabaseCommandAsync()
