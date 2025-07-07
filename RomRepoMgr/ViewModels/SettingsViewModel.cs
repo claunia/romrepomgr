@@ -28,7 +28,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.EntityFrameworkCore;
@@ -216,16 +215,17 @@ public sealed class SettingsViewModel : ViewModelBase
 
     async Task ExecuteDatabaseCommandAsync()
     {
-        var dlgFile = new SaveFileDialog
+        IStorageFile resultFile = await _view.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            InitialFileName = "romrepo.db",
-            Directory       = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            Title           = Localization.ChooseDatabaseFile
-        };
+            SuggestedFileName      = "romrepo.db",
+            SuggestedStartLocation = await _view.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents),
+            Title                  = Localization.ChooseDatabaseFile,
+            ShowOverwritePrompt    = true
+        });
 
-        string result = await dlgFile.ShowAsync(_view);
+        if(resultFile == null) return;
 
-        if(result == null) return;
+        string result = resultFile.Path.LocalPath;
 
         if(File.Exists(result))
         {

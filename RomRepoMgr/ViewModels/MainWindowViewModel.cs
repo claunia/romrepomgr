@@ -275,17 +275,16 @@ public class MainWindowViewModel : ViewModelBase
     {
         if(SelectedRomSet == null) return;
 
-        var dlgSave = new SaveFileDialog
+        IStorageFile result = await _view.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            InitialFileName = SelectedRomSet.Filename
-        };
-
-        string result = await dlgSave.ShowAsync(_view);
+            SuggestedFileName      = SelectedRomSet.Filename,
+            SuggestedStartLocation = await _view.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents)
+        });
 
         if(result == null) return;
 
         var dialog    = new ExportDat();
-        var viewModel = new ExportDatViewModel(dialog, SelectedRomSet.Sha384, result);
+        var viewModel = new ExportDatViewModel(dialog, SelectedRomSet.Sha384, result.Path.LocalPath);
         dialog.DataContext = viewModel;
         _                  = dialog.ShowDialog(_view);
     }
