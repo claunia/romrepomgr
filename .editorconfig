@@ -1464,6 +1464,7 @@ dotnet_diagnostic.ph2045.severity = none
 dotnet_diagnostic.ph2067.severity = none
 dotnet_diagnostic.ph2068.severity = none
 dotnet_diagnostic.ph2069.severity = warning
+dotnet_diagnostic.ph2070.severity = warning
 dotnet_diagnostic.ph2075.severity = none
 dotnet_diagnostic.ph2079.severity = none
 dotnet_diagnostic.ph2081.severity = none
@@ -1477,6 +1478,7 @@ dotnet_diagnostic.ph2098.severity = warning
 dotnet_diagnostic.ph2101.severity = warning
 dotnet_diagnostic.ph2102.severity = none
 dotnet_diagnostic.mt1001.severity = warning
+dotnet_diagnostic.mt1002.severity = warning
 
 [*.{razor}]
 resharper_normalize_tag_names = false
