@@ -77,7 +77,7 @@ public class FileImporter
                                    Message = Localization.EnumeratingFiles
                                });
 
-            string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(p => p).ToArray();
+            string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Order().ToArray();
             _totalFiles += files.LongLength;
 
             SetProgressBounds?.Invoke(this,

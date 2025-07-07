@@ -231,12 +231,13 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
 
             if(_allFilesChecked)
             {
-                _datFiles = Directory
-                           .GetFiles(FolderPath,
-                                     "*.*",
-                                     _recursiveChecked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                           .OrderBy(f => f)
-                           .ToArray();
+                _datFiles = Directory.GetFiles(FolderPath,
+                                               "*.*",
+                                               _recursiveChecked
+                                                   ? SearchOption.AllDirectories
+                                                   : SearchOption.TopDirectoryOnly)
+                                     .Order()
+                                     .ToArray();
             }
             else
             {
@@ -252,7 +253,7 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
                                                        ? SearchOption.AllDirectories
                                                        : SearchOption.TopDirectoryOnly);
 
-                _datFiles = dats.Concat(xmls).OrderBy(f => f).ToArray();
+                _datFiles = dats.Concat(xmls).Order().ToArray();
             }
 
             Dispatcher.UIThread.Post(() =>
