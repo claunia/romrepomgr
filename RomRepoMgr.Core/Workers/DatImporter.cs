@@ -650,7 +650,8 @@ public sealed class DatImporter
                                     });
 
                 if(!machines.TryGetValue(rom.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
-                                           ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                           ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey)
+                                           ?.ToLowerInvariant(),
                                          out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
@@ -971,7 +972,8 @@ public sealed class DatImporter
                                     });
 
                 if(!machines.TryGetValue(disk.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
-                                            ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                            ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey)
+                                            ?.ToLowerInvariant(),
                                          out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
@@ -1098,7 +1100,8 @@ public sealed class DatImporter
                                     });
 
                 if(!machines.TryGetValue(media.GetFieldValue<SabreTools.DatItems.Machine>(DatItem.MachineKey)
-                                             ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey),
+                                             ?.GetStringFieldValue(SabreTools.Models.Metadata.Machine.NameKey)
+                                             ?.ToLowerInvariant(),
                                          out Machine machine))
                 {
                     ErrorOccurred?.Invoke(this,
