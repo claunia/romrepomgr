@@ -59,7 +59,7 @@ public class Vfs : IDisposable
                 MountPoint = mountPoint
             };
 
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 _fuse.Start();
 

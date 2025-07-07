@@ -145,6 +145,6 @@ public sealed class ExportDatViewModel : ViewModelBase
 
         if(!File.Exists(compressedDatPath)) _view.Close();
 
-        Task.Run(() => _worker.DecompressFile(compressedDatPath, _outPath));
+        _ = Task.Run(() => _worker.DecompressFile(compressedDatPath, _outPath));
     }
 }

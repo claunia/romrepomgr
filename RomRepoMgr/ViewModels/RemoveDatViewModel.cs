@@ -55,52 +55,55 @@ public sealed class RemoveDatViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
     }
 
-    internal void OnOpened() => Task.Run(() =>
+    internal void OnOpened()
     {
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-        Dispatcher.UIThread.Post(() => StatusMessage = Localization.RetrievingRomSetFromDatabase);
-
-        RomSet romSet = ctx.RomSets.Find(_romSetId);
-
-        if(romSet == null) return;
-
-        Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingRomSetFromDatabase);
-
-        ctx.RomSets.Remove(romSet);
-
-        Dispatcher.UIThread.Post(() => StatusMessage = Localization.SavingChangesToDatabase);
-
-        ctx.SaveChanges();
-
-        Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingDatFileFromRepo);
-
-        var    sha384Bytes = new byte[48];
-        string sha384      = romSet.Sha384;
-
-        for(var i = 0; i < 48; i++)
+        _ = Task.Run(() =>
         {
-            if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
-            else if(sha384[i * 2] >= 0x41 && sha384[i * 2] <= 0x46)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
-            else if(sha384[i * 2] >= 0x61 && sha384[i * 2] <= 0x66)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-            if(sha384[i * 2 + 1] >= 0x30 && sha384[i * 2 + 1] <= 0x39)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x30);
-            else if(sha384[i * 2 + 1] >= 0x41 && sha384[i * 2 + 1] <= 0x46)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x37);
-            else if(sha384[i * 2 + 1] >= 0x61 && sha384[i * 2 + 1] <= 0x66)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x57);
-        }
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RetrievingRomSetFromDatabase);
 
-        string datHash32         = Base32.ToBase32String(sha384Bytes);
-        string datFilesPath      = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
-        string compressedDatPath = Path.Combine(datFilesPath,                             datHash32 + ".lz");
+            RomSet romSet = ctx.RomSets.Find(_romSetId);
 
-        if(File.Exists(compressedDatPath)) File.Delete(compressedDatPath);
+            if(romSet == null) return;
 
-        Dispatcher.UIThread.Post(_view.Close);
-    });
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingRomSetFromDatabase);
+
+            ctx.RomSets.Remove(romSet);
+
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.SavingChangesToDatabase);
+
+            ctx.SaveChanges();
+
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingDatFileFromRepo);
+
+            var    sha384Bytes = new byte[48];
+            string sha384      = romSet.Sha384;
+
+            for(var i = 0; i < 48; i++)
+            {
+                if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
+                else if(sha384[i * 2] >= 0x41 && sha384[i * 2] <= 0x46)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
+                else if(sha384[i * 2] >= 0x61 && sha384[i * 2] <= 0x66)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
+
+                if(sha384[i * 2 + 1] >= 0x30 && sha384[i * 2 + 1] <= 0x39)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x30);
+                else if(sha384[i * 2 + 1] >= 0x41 && sha384[i * 2 + 1] <= 0x46)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x37);
+                else if(sha384[i * 2 + 1] >= 0x61 && sha384[i * 2 + 1] <= 0x66)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x57);
+            }
+
+            string datHash32         = Base32.ToBase32String(sha384Bytes);
+            string datFilesPath      = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
+            string compressedDatPath = Path.Combine(datFilesPath,                             datHash32 + ".lz");
+
+            if(File.Exists(compressedDatPath)) File.Delete(compressedDatPath);
+
+            Dispatcher.UIThread.Post(_view.Close);
+        });
+    }
 }

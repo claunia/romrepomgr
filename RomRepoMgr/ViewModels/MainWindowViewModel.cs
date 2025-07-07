@@ -149,7 +149,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         var dialog = new About();
         dialog.DataContext = new AboutViewModel(dialog);
-        dialog.ShowDialog(_view);
+        _                  = dialog.ShowDialog(_view);
     }
 
     async void ExecuteImportDatCommand()

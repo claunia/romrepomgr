@@ -498,7 +498,7 @@ public class FileExporter
         if(_filesByMachine.Count == 0)
         {
             _machinePosition++;
-            Task.Run(CompressNextMachine);
+            _ = Task.Run(CompressNextMachine);
 
             return;
         }

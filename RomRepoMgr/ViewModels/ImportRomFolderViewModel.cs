@@ -244,7 +244,7 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         worker.Finished                  += OnWorkerOnFinished;
         worker.ImportedRom               += OnWorkerOnImportedRom;
 
-        Task.Run(() => worker.ProcessPath(FolderPath, true, RecurseArchivesChecked));
+        _ = Task.Run(() => worker.ProcessPath(FolderPath, true, RecurseArchivesChecked));
     }
 
     void OnWorkerOnImportedRom(object sender, ImportedRomItemEventArgs args) =>

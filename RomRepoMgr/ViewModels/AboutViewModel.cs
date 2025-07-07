@@ -58,8 +58,7 @@ public sealed class AboutViewModel : ViewModelBase
 
         Assemblies = [];
 
-        // TODO: They do not load in time
-        Task.Run(() =>
+        _ = Task.Run(() =>
         {
             foreach(Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(a => a.FullName))
             {

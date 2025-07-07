@@ -390,8 +390,8 @@ resharper_loop_can_be_converted_to_query_highlighting                           
 resharper_loop_can_be_partly_converted_to_query_highlighting                                      = warning
 resharper_member_can_be_file_local_highlighting                                                   = warning
 resharper_member_can_be_internal_highlighting                                                     = warning
-resharper_member_can_be_made_static_global_highlighting                                           = warning
-resharper_member_can_be_made_static_local_highlighting                                            = warning
+resharper_member_can_be_made_static_global_highlighting                                           = none
+resharper_member_can_be_made_static_local_highlighting                                            = none
 resharper_member_can_be_private_global_highlighting                                               = warning
 resharper_member_can_be_private_local_highlighting                                                = warning
 resharper_member_can_be_protected_global_highlighting                                             = warning

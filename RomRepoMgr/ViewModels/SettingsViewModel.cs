@@ -146,7 +146,7 @@ public sealed class SettingsViewModel : ViewModelBase
         worker.FinishedWithText += CheckUnArFinished;
         worker.FailedWithText   += CheckUnArFailed;
 
-        Task.Run(() => worker.CheckUnAr(UnArPath));
+        _ = Task.Run(() => worker.CheckUnAr(UnArPath));
     }
 
     async void CheckUnArFailed(object sender, ErrorEventArgs args)

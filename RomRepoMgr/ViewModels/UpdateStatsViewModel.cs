@@ -128,139 +128,142 @@ public sealed class UpdateStatsViewModel : ViewModelBase
     public string                      CloseLabel   => Localization.CloseLabel;
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
-    internal void OnOpened() => Task.Run(() =>
+    internal void OnOpened()
     {
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-
-        Dispatcher.UIThread.Post(() =>
+        _ = Task.Run(() =>
         {
-            StatusMessage         = Localization.RetrievingRomSetsFromDatabase;
-            ProgressVisible       = true;
-            IndeterminateProgress = true;
-        });
-
-        long romSetCount = ctx.RomSets.LongCount();
-
-        Dispatcher.UIThread.Post(() => { StatusMessage = Localization.RemovingOldStatistics; });
-
-        ctx.Database.ExecuteSql($"DELETE FROM \"RomSetStats\"");
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            IndeterminateProgress = false;
-            MinimumValue          = 0;
-            MaximumValue          = romSetCount;
-            CurrentValue          = 0;
-        });
-
-        long pos = 0;
-
-        foreach(RomSet romSet in ctx.RomSets)
-        {
-            long currentPos = pos;
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
             Dispatcher.UIThread.Post(() =>
             {
-                StatusMessage = string.Format(Localization.CalculatingStatisticsForRomSet,
-                                              romSet.Name,
-                                              romSet.Version,
-                                              romSet.Description);
-
-                CurrentValue = currentPos;
+                StatusMessage         = Localization.RetrievingRomSetsFromDatabase;
+                ProgressVisible       = true;
+                IndeterminateProgress = true;
             });
 
-            try
-            {
-                RomSetStat stats = ctx.RomSets.Where(r => r.Id == romSet.Id)
-                                      .Select(r => new RomSetStat
-                                       {
-                                           RomSetId      = r.Id,
-                                           TotalMachines = r.Machines.Count,
-                                           CompleteMachines =
-                                               r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                     m.Disks.Count == 0 &&
-                                                                     m.Files.All(f => f.File.IsInRepo)) +
-                                               r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                     m.Files.Count == 0 &&
-                                                                     m.Disks.All(f => f.Disk.IsInRepo)) +
-                                               r.Machines.Count(m => m.Files.Count > 0                 &&
-                                                                     m.Disks.Count > 0                 &&
-                                                                     m.Files.All(f => f.File.IsInRepo) &&
-                                                                     m.Disks.All(f => f.Disk.IsInRepo)),
-                                           IncompleteMachines =
-                                               r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                     m.Disks.Count == 0 &&
-                                                                     m.Files.Any(f => !f.File.IsInRepo)) +
-                                               r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                     m.Files.Count == 0 &&
-                                                                     m.Disks.Any(f => !f.Disk.IsInRepo)) +
-                                               r.Machines.Count(m => m.Files.Count > 0 &&
-                                                                     m.Disks.Count > 0 &&
-                                                                     (m.Files.Any(f => !f.File.IsInRepo) ||
-                                                                      m.Disks.Any(f => !f.Disk.IsInRepo))),
-                                           TotalRoms =
-                                               r.Machines.Sum(m => m.Files.Count) +
-                                               r.Machines.Sum(m => m.Disks.Count) +
-                                               r.Machines.Sum(m => m.Medias.Count),
-                                           HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
-                                           MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
-                                       })
-                                      .FirstOrDefault();
+            long romSetCount = ctx.RomSets.LongCount();
 
-                ctx.RomSetStats.Add(stats);
+            Dispatcher.UIThread.Post(() => { StatusMessage = Localization.RemovingOldStatistics; });
+
+            ctx.Database.ExecuteSql($"DELETE FROM \"RomSetStats\"");
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                IndeterminateProgress = false;
+                MinimumValue          = 0;
+                MaximumValue          = romSetCount;
+                CurrentValue          = 0;
+            });
+
+            long pos = 0;
+
+            foreach(RomSet romSet in ctx.RomSets)
+            {
+                long currentPos = pos;
 
                 Dispatcher.UIThread.Post(() =>
                 {
-                    RomSets.Add(new RomSetModel
-                    {
-                        Id                 = romSet.Id,
-                        Author             = romSet.Author,
-                        Comment            = romSet.Comment,
-                        Date               = romSet.Date,
-                        Description        = romSet.Description,
-                        Filename           = romSet.Filename,
-                        Homepage           = romSet.Homepage,
-                        Name               = romSet.Name,
-                        Sha384             = romSet.Sha384,
-                        Version            = romSet.Version,
-                        TotalMachines      = stats.TotalMachines,
-                        CompleteMachines   = stats.CompleteMachines,
-                        IncompleteMachines = stats.IncompleteMachines,
-                        TotalRoms          = stats.TotalRoms,
-                        HaveRoms           = stats.HaveRoms,
-                        MissRoms           = stats.MissRoms,
-                        Category           = romSet.Category
-                    });
+                    StatusMessage = string.Format(Localization.CalculatingStatisticsForRomSet,
+                                                  romSet.Name,
+                                                  romSet.Version,
+                                                  romSet.Description);
+
+                    CurrentValue = currentPos;
                 });
+
+                try
+                {
+                    RomSetStat stats = ctx.RomSets.Where(r => r.Id == romSet.Id)
+                                          .Select(r => new RomSetStat
+                                           {
+                                               RomSetId      = r.Id,
+                                               TotalMachines = r.Machines.Count,
+                                               CompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.All(f => f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0                 &&
+                                                                         m.Disks.Count > 0                 &&
+                                                                         m.Files.All(f => f.File.IsInRepo) &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)),
+                                               IncompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.Any(f => !f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0 &&
+                                                                         m.Disks.Count > 0 &&
+                                                                         (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                          m.Disks.Any(f => !f.Disk.IsInRepo))),
+                                               TotalRoms =
+                                                   r.Machines.Sum(m => m.Files.Count) +
+                                                   r.Machines.Sum(m => m.Disks.Count) +
+                                                   r.Machines.Sum(m => m.Medias.Count),
+                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                                           })
+                                          .FirstOrDefault();
+
+                    ctx.RomSetStats.Add(stats);
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        RomSets.Add(new RomSetModel
+                        {
+                            Id                 = romSet.Id,
+                            Author             = romSet.Author,
+                            Comment            = romSet.Comment,
+                            Date               = romSet.Date,
+                            Description        = romSet.Description,
+                            Filename           = romSet.Filename,
+                            Homepage           = romSet.Homepage,
+                            Name               = romSet.Name,
+                            Sha384             = romSet.Sha384,
+                            Version            = romSet.Version,
+                            TotalMachines      = stats.TotalMachines,
+                            CompleteMachines   = stats.CompleteMachines,
+                            IncompleteMachines = stats.IncompleteMachines,
+                            TotalRoms          = stats.TotalRoms,
+                            HaveRoms           = stats.HaveRoms,
+                            MissRoms           = stats.MissRoms,
+                            Category           = romSet.Category
+                        });
+                    });
+                }
+                catch(Exception)
+                {
+                    // Ignored
+                }
+
+                pos++;
             }
-            catch(Exception)
+
+            Dispatcher.UIThread.Post(() =>
             {
-                // Ignored
-            }
+                StatusMessage         = Localization.SavingChangesToDatabase;
+                ProgressVisible       = true;
+                IndeterminateProgress = true;
+            });
 
-            pos++;
-        }
+            ctx.SaveChanges();
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            StatusMessage         = Localization.SavingChangesToDatabase;
-            ProgressVisible       = true;
-            IndeterminateProgress = true;
+            Dispatcher.UIThread.Post(() =>
+            {
+                StatusMessage   = Localization.Finished;
+                ProgressVisible = false;
+                CanClose        = true;
+            });
         });
-
-        ctx.SaveChanges();
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            StatusMessage   = Localization.Finished;
-            ProgressVisible = false;
-            CanClose        = true;
-        });
-    });
+    }
 
     void ExecuteCloseCommand() => _view.Close();
 }

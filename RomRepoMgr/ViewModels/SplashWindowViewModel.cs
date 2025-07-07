@@ -193,20 +193,23 @@ public sealed class SplashWindowViewModel : ViewModelBase
 
     internal void OnOpened() => Dispatcher.UIThread.Post(LoadSettings);
 
-    void LoadSettings() => Task.Run(() =>
+    void LoadSettings()
     {
-        try
+        _ = Task.Run(() =>
         {
-            Settings.Settings.LoadSettings();
+            try
+            {
+                Settings.Settings.LoadSettings();
 
-            Dispatcher.UIThread.Post(CheckUnAr);
-        }
-        catch(Exception e)
-        {
-            // TODO: Log error
-            Dispatcher.UIThread.Post(FailedLoadingSettings);
-        }
-    });
+                Dispatcher.UIThread.Post(CheckUnAr);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedLoadingSettings);
+            }
+        });
+    }
 
     void FailedLoadingSettings()
     {
@@ -215,24 +218,27 @@ public sealed class SplashWindowViewModel : ViewModelBase
         ExitVisible            = true;
     }
 
-    void CheckUnAr() => Task.Run(() =>
+    void CheckUnAr()
     {
-        LoadingSettingsUnknown = false;
-        LoadingSettingsOk      = true;
-
-        try
+        _ = Task.Run(() =>
         {
-            var worker = new Compression();
-            Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
+            LoadingSettingsUnknown = false;
+            LoadingSettingsOk      = true;
 
-            Dispatcher.UIThread.Post(LoadDatabase);
-        }
-        catch(Exception e)
-        {
-            // TODO: Log error
-            Dispatcher.UIThread.Post(FailedCheckUnAr);
-        }
-    });
+            try
+            {
+                var worker = new Compression();
+                Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
+
+                Dispatcher.UIThread.Post(LoadDatabase);
+            }
+            catch(Exception e)
+            {
+                // TODO: Log error
+                Dispatcher.UIThread.Post(FailedCheckUnAr);
+            }
+        });
+    }
 
     void FailedCheckUnAr()
     {
@@ -246,7 +252,7 @@ public sealed class SplashWindowViewModel : ViewModelBase
         CheckingUnArUnknown = false;
         CheckingUnArOk      = true;
 
-        Task.Run(() =>
+        _ = Task.Run(() =>
         {
             try
             {
@@ -278,7 +284,7 @@ public sealed class SplashWindowViewModel : ViewModelBase
         LoadingDatabaseUnknown = false;
         LoadingDatabaseOk      = true;
 
-        Task.Run(() =>
+        _ = Task.Run(() =>
         {
             try
             {
@@ -308,7 +314,7 @@ public sealed class SplashWindowViewModel : ViewModelBase
         MigratingDatabaseUnknown = false;
         MigratingDatabaseOk      = true;
 
-        Task.Run(() =>
+        _ = Task.Run(() =>
         {
             try
             {

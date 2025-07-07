@@ -260,6 +260,6 @@ public sealed class ExportRomsViewModel : ViewModelBase
 
         ProgressVisible = true;
 
-        Task.Run(worker.Export);
+        _ = Task.Run(worker.Export);
     }
 }

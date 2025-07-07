@@ -161,7 +161,7 @@ public sealed class ImportDatViewModel : ViewModelBase
     {
         ProgressVisible     =  true;
         _worker.RomSetAdded += RomSetAdded;
-        Task.Run(_worker.Import);
+        _                   =  Task.Run(_worker.Import);
     }
 
     public event EventHandler<RomSetEventArgs> RomSetAdded;

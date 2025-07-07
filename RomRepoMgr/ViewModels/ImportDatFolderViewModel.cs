@@ -216,52 +216,55 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
 
     internal void OnOpened() => RefreshFiles();
 
-    void RefreshFiles() => Task.Run(() =>
+    void RefreshFiles()
     {
-        Dispatcher.UIThread.Post(() =>
+        _ = Task.Run(() =>
         {
-            IsReady                 = false;
-            ProgressVisible         = true;
-            Progress2Visible        = false;
-            ProgressIsIndeterminate = true;
-            StatusMessage           = Localization.SearchingForFiles;
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsReady                 = false;
+                ProgressVisible         = true;
+                Progress2Visible        = false;
+                ProgressIsIndeterminate = true;
+                StatusMessage           = Localization.SearchingForFiles;
+            });
+
+            if(_allFilesChecked)
+            {
+                _datFiles = Directory
+                           .GetFiles(FolderPath,
+                                     "*.*",
+                                     _recursiveChecked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                           .OrderBy(f => f)
+                           .ToArray();
+            }
+            else
+            {
+                string[] dats = Directory.GetFiles(FolderPath,
+                                                   "*.dat",
+                                                   _recursiveChecked
+                                                       ? SearchOption.AllDirectories
+                                                       : SearchOption.TopDirectoryOnly);
+
+                string[] xmls = Directory.GetFiles(FolderPath,
+                                                   "*.xml",
+                                                   _recursiveChecked
+                                                       ? SearchOption.AllDirectories
+                                                       : SearchOption.TopDirectoryOnly);
+
+                _datFiles = dats.Concat(xmls).OrderBy(f => f).ToArray();
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsReady         = true;
+                ProgressVisible = false;
+                StatusMessage   = string.Format(Localization.FoundFiles, _datFiles.Length);
+                CanClose        = true;
+                CanStart        = true;
+            });
         });
-
-        if(_allFilesChecked)
-        {
-            _datFiles = Directory
-                       .GetFiles(FolderPath,
-                                 "*.*",
-                                 _recursiveChecked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                       .OrderBy(f => f)
-                       .ToArray();
-        }
-        else
-        {
-            string[] dats = Directory.GetFiles(FolderPath,
-                                               "*.dat",
-                                               _recursiveChecked
-                                                   ? SearchOption.AllDirectories
-                                                   : SearchOption.TopDirectoryOnly);
-
-            string[] xmls = Directory.GetFiles(FolderPath,
-                                               "*.xml",
-                                               _recursiveChecked
-                                                   ? SearchOption.AllDirectories
-                                                   : SearchOption.TopDirectoryOnly);
-
-            _datFiles = dats.Concat(xmls).OrderBy(f => f).ToArray();
-        }
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            IsReady         = true;
-            ProgressVisible = false;
-            StatusMessage   = string.Format(Localization.FoundFiles, _datFiles.Length);
-            CanClose        = true;
-            CanStart        = true;
-        });
-    });
+    }
 
     void ExecuteCloseCommand() => _view.Close();
 
@@ -307,7 +310,7 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         _worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
         _worker.WorkFinished             += OnWorkerOnWorkFinished;
         _worker.RomSetAdded              += RomSetAdded;
-        Task.Run(_worker.Import);
+        _                                =  Task.Run(_worker.Import);
     }
 
     void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
