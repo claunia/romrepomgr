@@ -256,7 +256,7 @@ public class MainWindowViewModel : ViewModelBase
         var window    = new EditDat();
         var viewModel = new EditDatViewModel(window, SelectedRomSet);
 
-        viewModel.RomSetModified += (sender, args) =>
+        viewModel.RomSetModified += (_, args) =>
         {
             RomSetModel old = RomSets.FirstOrDefault(r => r.Id == args.RomSet.Id);
 

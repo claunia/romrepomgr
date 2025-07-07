@@ -1341,7 +1341,7 @@ public class FileImporter
 
         long counter = 0;
 
-        unarProcess.OutputDataReceived += (sender, e) =>
+        unarProcess.OutputDataReceived += (_, e) =>
         {
             counter++;
 
