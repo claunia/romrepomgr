@@ -119,24 +119,23 @@ public sealed class ExportDatViewModel : ViewModelBase
         ProgressVisible = true;
         StatusMessage   = Localization.DecompressingDat;
 
-        var    sha384Bytes = new byte[48];
-        string sha384      = _datHash;
+        var sha384Bytes = new byte[48];
 
         for(var i = 0; i < 48; i++)
         {
-            if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
-            else if(sha384[i * 2] >= 0x41 && sha384[i * 2] <= 0x46)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
-            else if(sha384[i * 2] >= 0x61 && sha384[i * 2] <= 0x66)
-                sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
+            if(_datHash[i * 2] >= 0x30 && _datHash[i * 2] <= 0x39)
+                sha384Bytes[i] = (byte)((_datHash[i * 2] - 0x30) * 0x10);
+            else if(_datHash[i * 2] >= 0x41 && _datHash[i * 2] <= 0x46)
+                sha384Bytes[i] = (byte)((_datHash[i * 2] - 0x37) * 0x10);
+            else if(_datHash[i * 2] >= 0x61 && _datHash[i * 2] <= 0x66)
+                sha384Bytes[i] = (byte)((_datHash[i * 2] - 0x57) * 0x10);
 
-            if(sha384[i * 2 + 1] >= 0x30 && sha384[i * 2 + 1] <= 0x39)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x30);
-            else if(sha384[i * 2 + 1] >= 0x41 && sha384[i * 2 + 1] <= 0x46)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x37);
-            else if(sha384[i * 2 + 1] >= 0x61 && sha384[i * 2 + 1] <= 0x66)
-                sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x57);
+            if(_datHash[i * 2 + 1] >= 0x30 && _datHash[i * 2 + 1] <= 0x39)
+                sha384Bytes[i] += (byte)(_datHash[i * 2 + 1] - 0x30);
+            else if(_datHash[i * 2 + 1] >= 0x41 && _datHash[i * 2 + 1] <= 0x46)
+                sha384Bytes[i] += (byte)(_datHash[i * 2 + 1] - 0x37);
+            else if(_datHash[i * 2 + 1] >= 0x61 && _datHash[i * 2 + 1] <= 0x66)
+                sha384Bytes[i] += (byte)(_datHash[i * 2 + 1] - 0x57);
         }
 
         string datHash32         = Base32.ToBase32String(sha384Bytes);
