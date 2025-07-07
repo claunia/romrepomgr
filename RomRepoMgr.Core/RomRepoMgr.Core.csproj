@@ -25,6 +25,7 @@
     <ProjectReference Include="..\RomRepoMgr.Settings\RomRepoMgr.Settings.csproj"/>
     <ProjectReference Include="..\SabreTools\SabreTools.DatFiles\SabreTools.DatFiles.csproj"/>
     <ProjectReference Include="..\SabreTools\SabreTools.DatItems\SabreTools.DatItems.csproj"/>
+    <ProjectReference Include="..\SabreTools\SabreTools.DatTools\SabreTools.DatTools.csproj" />
     <ProjectReference Include="..\SabreTools\SabreTools.FileTypes\SabreTools.FileTypes.csproj"/>
   </ItemGroup>
 
