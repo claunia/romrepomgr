@@ -170,20 +170,20 @@ public sealed class SettingsViewModel : ViewModelBase
 
     async Task ExecuteUnArCommandAsync()
     {
-        var dlgFile = new OpenFileDialog
+        IReadOnlyList<IStorageFile> result = await _view.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title         = Localization.ChooseUnArExecutable,
-            AllowMultiple = false
-        };
+            AllowMultiple = false,
+            SuggestedStartLocation =
+                !string.IsNullOrWhiteSpace(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles))
+                    ? await _view.StorageProvider.TryGetFolderFromPathAsync(Environment.GetFolderPath(Environment
+                                                                               .SpecialFolder.ProgramFiles))
+                    : await _view.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Desktop)
+        });
 
-        if(!string.IsNullOrWhiteSpace(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)))
-            dlgFile.Directory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        if(result.Count != 1) return;
 
-        string[] result = await dlgFile.ShowAsync(_view);
-
-        if(result?.Length != 1) return;
-
-        UnArPath = result[0];
+        UnArPath = result[0].Path.LocalPath;
         CheckUnAr();
     }
 

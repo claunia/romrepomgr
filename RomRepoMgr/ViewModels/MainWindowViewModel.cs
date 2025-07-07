@@ -157,30 +157,34 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ExecuteImportDatCommandAsync()
     {
-        var dlgOpen = new OpenFileDialog
+        var datFileType = new FilePickerFileType(Localization.DatFilesDialogLabel)
         {
-            AllowMultiple = false,
-            Title         = Localization.ImportDatFileDialogTitle
+            Patterns = new[]
+            {
+                "*.dat", "*.xml"
+            },
+            AppleUniformTypeIdentifiers = new[]
+            {
+                "public.xml", "public.json"
+            },
+            MimeTypes = new[]
+            {
+                "application/xml", "text/*"
+            }
         };
 
-        dlgOpen.Filters.Add(new FileDialogFilter
+        IReadOnlyList<IStorageFile> result = await _view.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Extensions = ["dat", "xml"],
-            Name       = Localization.DatFilesDialogLabel
+            Title                  = Localization.ImportDatFileDialogTitle,
+            AllowMultiple          = false,
+            SuggestedStartLocation = await _view.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents),
+            FileTypeFilter         = [datFileType, FilePickerFileTypes.All]
         });
 
-        dlgOpen.Filters.Add(new FileDialogFilter
-        {
-            Extensions = ["*"],
-            Name       = Localization.AllFilesDialogLabel
-        });
-
-        string[] result = await dlgOpen.ShowAsync(_view);
-
-        if(result?.Length != 1) return;
+        if(result.Count != 1) return;
 
         var dialog             = new ImportDat();
-        var importDatViewModel = new ImportDatViewModel(dialog, result[0]);
+        var importDatViewModel = new ImportDatViewModel(dialog, result[0].Path.LocalPath);
         importDatViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
         dialog.DataContext             =  importDatViewModel;
         _                              =  dialog.ShowDialog(_view);
