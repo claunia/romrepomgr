@@ -25,6 +25,7 @@
 
 using System;
 using System.Reactive;
+using System.Threading.Tasks;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
@@ -61,7 +62,7 @@ public class EditDatViewModel : ViewModelBase
         _date         = romSet.Date;
         _description  = romSet.Description;
         _homepage     = romSet.Homepage;
-        SaveCommand   = ReactiveCommand.Create(ExecuteSaveCommand);
+        SaveCommand   = ReactiveCommand.CreateFromTask(ExecuteSaveCommandAsync);
         CancelCommand = ReactiveCommand.Create(ExecuteCloseCommand);
         CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
     }
@@ -193,9 +194,9 @@ public class EditDatViewModel : ViewModelBase
 
     void ExecuteCloseCommand() => _view.Close();
 
-    async void ExecuteSaveCommand()
+    async Task ExecuteSaveCommandAsync()
     {
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        await using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
         RomSet romSetDb = await ctx.RomSets.FindAsync(_romSet.Id);
 

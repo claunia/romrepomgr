@@ -29,6 +29,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -54,18 +55,18 @@ public class MainWindowViewModel : ViewModelBase
     {
         _view                  = view;
         ExitCommand            = ReactiveCommand.Create(ExecuteExitCommand);
-        SettingsCommand        = ReactiveCommand.Create(ExecuteSettingsCommand);
+        SettingsCommand        = ReactiveCommand.CreateFromTask(ExecuteSettingsCommandAsync);
         AboutCommand           = ReactiveCommand.Create(ExecuteAboutCommand);
-        ImportDatCommand       = ReactiveCommand.Create(ExecuteImportDatCommand);
-        ImportDatFolderCommand = ReactiveCommand.Create(ExecuteImportDatFolderCommand);
-        ImportRomFolderCommand = ReactiveCommand.Create(ExecuteImportRomFolderCommand);
-        DeleteRomSetCommand    = ReactiveCommand.Create(ExecuteDeleteRomSetCommand);
+        ImportDatCommand       = ReactiveCommand.CreateFromTask(ExecuteImportDatCommandAsync);
+        ImportDatFolderCommand = ReactiveCommand.CreateFromTask(ExecuteImportDatFolderCommandAsync);
+        ImportRomFolderCommand = ReactiveCommand.CreateFromTask(ExecuteImportRomFolderCommandAsync);
+        DeleteRomSetCommand    = ReactiveCommand.CreateFromTask(ExecuteDeleteRomSetCommandAsync);
         EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
-        ExportDatCommand       = ReactiveCommand.Create(ExecuteExportDatCommand);
-        ExportRomsCommand      = ReactiveCommand.Create(ExecuteExportRomsCommand);
-        MountCommand           = ReactiveCommand.Create(ExecuteMountCommand);
+        ExportDatCommand       = ReactiveCommand.CreateFromTask(ExecuteExportDatCommandAsync);
+        ExportRomsCommand      = ReactiveCommand.CreateFromTask(ExecuteExportRomsCommandAsync);
+        MountCommand           = ReactiveCommand.CreateFromTask(ExecuteMountCommandAsync);
         UmountCommand          = ReactiveCommand.Create(ExecuteUmountCommand);
-        UpdateStatsCommand     = ReactiveCommand.Create(ExecuteUpdateStatsCommand);
+        UpdateStatsCommand     = ReactiveCommand.CreateFromTask(ExecuteUpdateStatsCommandAsync);
         RomSets                = new ObservableCollection<RomSetModel>(romSets);
     }
 
@@ -135,11 +136,12 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
     }
 
-    internal async void ExecuteSettingsCommand()
+    internal Task ExecuteSettingsCommandAsync()
     {
         var dialog = new SettingsDialog();
         dialog.DataContext = new SettingsViewModel(dialog);
-        await dialog.ShowDialog(_view);
+
+        return dialog.ShowDialog(_view);
     }
 
     internal void ExecuteExitCommand() =>
@@ -152,7 +154,7 @@ public class MainWindowViewModel : ViewModelBase
         _                  = dialog.ShowDialog(_view);
     }
 
-    async void ExecuteImportDatCommand()
+    async Task ExecuteImportDatCommandAsync()
     {
         var dlgOpen = new OpenFileDialog
         {
@@ -180,13 +182,13 @@ public class MainWindowViewModel : ViewModelBase
         var importDatViewModel = new ImportDatViewModel(dialog, result[0]);
         importDatViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
         dialog.DataContext             =  importDatViewModel;
-        await dialog.ShowDialog(_view);
+        _                              =  dialog.ShowDialog(_view);
     }
 
     void ImportDatViewModelOnRomSetAdded(object sender, RomSetEventArgs e) =>
         Dispatcher.UIThread.Post(() => RomSets.Add(e.RomSet));
 
-    async void ExecuteImportDatFolderCommand()
+    async Task ExecuteImportDatFolderCommandAsync()
     {
         var dlgOpen = new OpenFolderDialog
         {
@@ -201,10 +203,10 @@ public class MainWindowViewModel : ViewModelBase
         var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result);
         importDatFolderViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
         dialog.DataContext                   =  importDatFolderViewModel;
-        await dialog.ShowDialog(_view);
+        _                                    =  dialog.ShowDialog(_view);
     }
 
-    async void ExecuteImportRomFolderCommand()
+    async Task ExecuteImportRomFolderCommandAsync()
     {
         var dlgOpen = new OpenFolderDialog
         {
@@ -218,10 +220,10 @@ public class MainWindowViewModel : ViewModelBase
         var dialog                   = new ImportRomFolder();
         var importRomFolderViewModel = new ImportRomFolderViewModel(dialog, result);
         dialog.DataContext = importRomFolderViewModel;
-        await dialog.ShowDialog(_view);
+        _                  = dialog.ShowDialog(_view);
     }
 
-    async void ExecuteDeleteRomSetCommand()
+    async Task ExecuteDeleteRomSetCommandAsync()
     {
         if(SelectedRomSet == null) return;
 
@@ -266,7 +268,7 @@ public class MainWindowViewModel : ViewModelBase
         window.Show();
     }
 
-    async void ExecuteExportDatCommand()
+    async Task ExecuteExportDatCommandAsync()
     {
         if(SelectedRomSet == null) return;
 
@@ -282,10 +284,10 @@ public class MainWindowViewModel : ViewModelBase
         var dialog    = new ExportDat();
         var viewModel = new ExportDatViewModel(dialog, SelectedRomSet.Sha384, result);
         dialog.DataContext = viewModel;
-        await dialog.ShowDialog(_view);
+        _                  = dialog.ShowDialog(_view);
     }
 
-    async void ExecuteExportRomsCommand()
+    async Task ExecuteExportRomsCommandAsync()
     {
         var dlgOpen = new OpenFolderDialog
         {
@@ -299,10 +301,10 @@ public class MainWindowViewModel : ViewModelBase
         var dialog    = new ExportRoms();
         var viewModel = new ExportRomsViewModel(dialog, result, SelectedRomSet.Id);
         dialog.DataContext = viewModel;
-        await dialog.ShowDialog(_view);
+        _                  = dialog.ShowDialog(_view);
     }
 
-    async void ExecuteMountCommand()
+    async Task ExecuteMountCommandAsync()
     {
         if(Vfs != null) return;
 
@@ -333,7 +335,7 @@ public class MainWindowViewModel : ViewModelBase
 
     void ExecuteUmountCommand() => Vfs?.Umount();
 
-    async void ExecuteUpdateStatsCommand()
+    async Task ExecuteUpdateStatsCommandAsync()
     {
         ButtonResult result = await MessageBoxManager
                                    .GetMessageBoxStandard(Localization.DatabaseMenuUpdateStatsText,
@@ -347,6 +349,6 @@ public class MainWindowViewModel : ViewModelBase
         var view      = new UpdateStats();
         var viewModel = new UpdateStatsViewModel(view);
         view.DataContext = viewModel;
-        await view.ShowDialog(_view);
+        _                = view.ShowDialog(_view);
     }
 }

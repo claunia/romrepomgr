@@ -64,10 +64,10 @@ public sealed class SettingsViewModel : ViewModelBase
         _unArChanged       = false;
 
         CloseCommand      = ReactiveCommand.Create(ExecuteCloseCommand);
-        UnArCommand       = ReactiveCommand.Create(ExecuteUnArCommand);
-        TemporaryCommand  = ReactiveCommand.Create(ExecuteTemporaryCommand);
-        RepositoryCommand = ReactiveCommand.Create(ExecuteRepositoryCommand);
-        DatabaseCommand   = ReactiveCommand.Create(ExecuteDatabaseCommand);
+        UnArCommand       = ReactiveCommand.CreateFromTask(ExecuteUnArCommandAsync);
+        TemporaryCommand  = ReactiveCommand.CreateFromTask(ExecuteTemporaryCommandAsync);
+        RepositoryCommand = ReactiveCommand.CreateFromTask(ExecuteRepositoryCommandAsync);
+        DatabaseCommand   = ReactiveCommand.CreateFromTask(ExecuteDatabaseCommandAsync);
         SaveCommand       = ReactiveCommand.Create(ExecuteSaveCommand);
 
         DatabasePath   = Settings.Settings.Current.DatabasePath;
@@ -149,13 +149,13 @@ public sealed class SettingsViewModel : ViewModelBase
         _ = Task.Run(() => worker.CheckUnAr(UnArPath));
     }
 
-    async void CheckUnArFailed(object sender, ErrorEventArgs args)
+    void CheckUnArFailed(object sender, ErrorEventArgs args)
     {
         UnArVersion = "";
         UnArPath    = "";
 
-        await MessageBoxManager.GetMessageBoxStandard(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error)
-                               .ShowWindowDialogAsync(_view);
+        _ = MessageBoxManager.GetMessageBoxStandard(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error)
+                             .ShowWindowDialogAsync(_view);
     }
 
     void CheckUnArFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
@@ -166,7 +166,7 @@ public sealed class SettingsViewModel : ViewModelBase
 
     void ExecuteCloseCommand() => _view.Close();
 
-    async void ExecuteUnArCommand()
+    async Task ExecuteUnArCommandAsync()
     {
         var dlgFile = new OpenFileDialog
         {
@@ -185,7 +185,7 @@ public sealed class SettingsViewModel : ViewModelBase
         CheckUnAr();
     }
 
-    async void ExecuteTemporaryCommand()
+    async Task ExecuteTemporaryCommandAsync()
     {
         var dlgFolder = new OpenFolderDialog
         {
@@ -199,7 +199,7 @@ public sealed class SettingsViewModel : ViewModelBase
         TemporaryPath = result;
     }
 
-    async void ExecuteRepositoryCommand()
+    async Task ExecuteRepositoryCommandAsync()
     {
         var dlgFolder = new OpenFolderDialog
         {
@@ -213,7 +213,7 @@ public sealed class SettingsViewModel : ViewModelBase
         RepositoryPath = result;
     }
 
-    async void ExecuteDatabaseCommand()
+    async Task ExecuteDatabaseCommandAsync()
     {
         var dlgFile = new SaveFileDialog
         {

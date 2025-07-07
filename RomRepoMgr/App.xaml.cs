@@ -117,6 +117,6 @@ public class App : Application
                                       })
             return;
 
-        mainWindowViewModel.ExecuteSettingsCommand();
+        _ = mainWindowViewModel.ExecuteSettingsCommandAsync();
     }
 }
