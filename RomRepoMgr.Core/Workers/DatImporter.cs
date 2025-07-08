@@ -514,35 +514,35 @@ public sealed class DatImporter
                     ? ctx.Disks
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskMd5Table}] AS t WHERE f.Md5 = t.Md5")
                          .ToDictionary(f => f.Md5)
-                    : new Dictionary<string, DbDisk>();
+                    : [];
 
             Dictionary<string, DbDisk> pendingDisksBySha1 =
                 disksHaveSha1
                     ? ctx.Disks
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Disks AS f, [{tmpDiskSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
                          .ToDictionary(f => f.Sha1)
-                    : new Dictionary<string, DbDisk>();
+                    : [];
 
             Dictionary<string, DbMedia> pendingMediasByMd5 =
                 mediasHaveMd5
                     ? ctx.Medias
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaMd5Table}] AS t WHERE f.Md5 = t.Md5")
                          .ToDictionary(f => f.Md5)
-                    : new Dictionary<string, DbMedia>();
+                    : [];
 
             Dictionary<string, DbMedia> pendingMediasBySha1 =
                 mediasHaveSha1
                     ? ctx.Medias
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha1Table}] AS t WHERE f.Sha1 = t.Sha1")
                          .ToDictionary(f => f.Sha1)
-                    : new Dictionary<string, DbMedia>();
+                    : [];
 
             Dictionary<string, DbMedia> pendingMediasBySha256 =
                 mediasHaveSha256
                     ? ctx.Medias
                          .FromSqlRaw($"SELECT DISTINCT f.* FROM Medias AS f, [{tmpMediaSha256Table}] AS t WHERE f.Sha256 = t.Sha256")
                          .ToDictionary(f => f.Sha256)
-                    : new Dictionary<string, DbMedia>();
+                    : [];
 
             var pendingFilesByCrc    = new Dictionary<string, DbFile>();
             var pendingFilesByMd5    = new Dictionary<string, DbFile>();

@@ -197,7 +197,7 @@ public class Vfs : IDisposable
 
         if(cachedMachines != null) return cachedMachines;
 
-        cachedMachines = new ConcurrentDictionary<string, CachedMachine>();
+        cachedMachines = [];
 
         using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
@@ -233,7 +233,7 @@ public class Vfs : IDisposable
 
         using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-        cachedMachineFiles = new ConcurrentDictionary<string, CachedFile>();
+        cachedMachineFiles = [];
 
         foreach(FileByMachine machineFile in ctx.FilesByMachines.Where(fbm => fbm.Machine.Id == id && fbm.File.IsInRepo)
                                                 .Include(fileByMachine => fileByMachine.File))
@@ -269,7 +269,7 @@ public class Vfs : IDisposable
 
         using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-        cachedMachineDisks = new ConcurrentDictionary<string, CachedDisk>();
+        cachedMachineDisks = [];
 
         foreach(DiskByMachine machineDisk in ctx.DisksByMachines
                                                 .Where(dbm => dbm.Machine.Id == id &&
@@ -303,7 +303,7 @@ public class Vfs : IDisposable
 
         using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-        cachedMachineMedias = new ConcurrentDictionary<string, CachedMedia>();
+        cachedMachineMedias = [];
 
         foreach(MediaByMachine machineMedia in ctx.MediasByMachines
                                                   .Where(mbm => mbm.Machine.Id == id &&

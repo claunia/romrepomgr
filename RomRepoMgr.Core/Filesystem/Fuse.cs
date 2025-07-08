@@ -25,9 +25,9 @@ public sealed class Fuse : FileSystem
 
     public Fuse(Vfs vfs)
     {
-        _directoryCache      = new ConcurrentDictionary<long, List<DirectoryEntry>>();
+        _directoryCache      = [];
         _lastHandle          = 0;
-        _fileStatHandleCache = new ConcurrentDictionary<long, Stat>();
+        _fileStatHandleCache = [];
         Name                 = "romrepomgrfs";
         _vfs                 = vfs;
     }
