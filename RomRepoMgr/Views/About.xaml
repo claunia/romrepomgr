@@ -57,13 +57,13 @@
                       VerticalAlignment="Center"
                       RowDefinitions="Auto,Auto">
                     <TextBlock Grid.Row="0"
-                               Text="{Binding SoftwareName}"
+                               Text="{Binding SoftwareName, Mode=OneWay}"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                FontSize="16"
                                FontWeight="Bold" />
                     <TextBlock Grid.Row="1"
-                               Text="{Binding VersionText}"
+                               Text="{Binding VersionText, Mode=OneWay}"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center" />
                 </Grid>
@@ -77,18 +77,18 @@
                     </TabItem.Header>
                     <Grid RowDefinitions="Auto,12,Auto,12,Auto,Auto,*">
                         <TextBlock Grid.Row="0"
-                                   Text="{Binding SuiteName}" />
+                                   Text="{Binding SuiteName, Mode=OneWay}" />
                         <TextBlock Grid.Row="2"
-                                   Text="{Binding Copyright}" />
+                                   Text="{Binding Copyright, Mode=OneWay}" />
                         <Button Grid.Row="4"
                                 BorderThickness="0"
                                 Background="Transparent"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Padding="0"
-                                Command="{Binding WebsiteCommand}">
+                                Command="{Binding WebsiteCommand, Mode=OneWay}">
                             <!-- TODO: TextDecorations="Underline" in next Avalonia UI version -->
-                            <TextBlock Text="{Binding Website}"
+                            <TextBlock Text="{Binding Website, Mode=OneWay}"
                                        Foreground="Blue" />
                         </Button>
                         <Button Grid.Row="5"
@@ -97,7 +97,7 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Padding="0"
-                                Command="{Binding LicenseCommand}">
+                                Command="{Binding LicenseCommand, Mode=OneWay}">
                             <!-- TODO: TextDecorations="Underline" in next Avalonia UI version -->
                             <TextBlock Text="{x:Static resources:Localization.LicenseLabel}"
                                        Foreground="Blue" />
@@ -108,17 +108,17 @@
                     <TabItem.Header>
                         <TextBlock Text="{x:Static resources:Localization.LibrariesLabel}" />
                     </TabItem.Header>
-                    <DataGrid ItemsSource="{Binding Assemblies}"
+                    <DataGrid ItemsSource="{Binding Assemblies, Mode=OneWay}"
                               HorizontalScrollBarVisibility="Visible">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Name}"
+                            <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}"
                                                 Width="Auto"
                                                 IsReadOnly="True">
                                 <DataGridTextColumn.Header>
                                     <TextBlock Text="{x:Static resources:Localization.AssembliesLibraryText}" />
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Binding="{Binding Version}"
+                            <DataGridTextColumn Binding="{Binding Version, Mode=OneWay}"
                                                 Width="Auto"
                                                 IsReadOnly="True">
                                 <DataGridTextColumn.Header>
@@ -139,7 +139,7 @@
             <Button Grid.Row="2"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Command="{Binding CloseCommand}">
+                    Command="{Binding CloseCommand, Mode=OneWay}">
                 <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>

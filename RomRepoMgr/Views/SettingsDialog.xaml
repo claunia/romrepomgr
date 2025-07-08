@@ -55,13 +55,13 @@
                 <TextBox Grid.Column="1"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         Text="{Binding DatabasePath}"
+                         Text="{Binding DatabasePath, Mode=TwoWay}"
                          IsReadOnly="True"
                          Padding="5" />
                 <Button Grid.Column="2"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding DatabaseCommand}"
+                        Command="{Binding DatabaseCommand, Mode=OneWay}"
                         Padding="5">
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
@@ -77,13 +77,13 @@
                 <TextBox Grid.Column="1"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         Text="{Binding RepositoryPath}"
+                         Text="{Binding RepositoryPath, Mode=TwoWay}"
                          IsReadOnly="True"
                          Padding="5" />
                 <Button Grid.Column="2"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding RepositoryCommand}"
+                        Command="{Binding RepositoryCommand, Mode=OneWay}"
                         Padding="5">
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
@@ -99,13 +99,13 @@
                 <TextBox Grid.Column="1"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         Text="{Binding TemporaryPath}"
+                         Text="{Binding TemporaryPath, Mode=TwoWay}"
                          IsReadOnly="True"
                          Padding="5" />
                 <Button Grid.Column="2"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding TemporaryCommand}"
+                        Command="{Binding TemporaryCommand, Mode=OneWay}"
                         Padding="5">
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
@@ -121,13 +121,13 @@
                 <TextBox Grid.Column="1"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         Text="{Binding UnArPath}"
+                         Text="{Binding UnArPath, Mode=TwoWay}"
                          IsReadOnly="True"
                          Padding="5" />
                 <Button Grid.Column="2"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding UnArCommand}"
+                        Command="{Binding UnArCommand, Mode=OneWay}"
                         Padding="5">
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
@@ -135,19 +135,19 @@
             <TextBlock Grid.Row="4"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"
-                       Text="{Binding UnArVersion}"
+                       Text="{Binding UnArVersion, Mode=OneWay}"
                        FontWeight="Bold" />
             <StackPanel Grid.Row="5"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding SaveCommand}">
+                        Command="{Binding SaveCommand, Mode=OneWay}">
                     <TextBlock Text="{x:Static resources:Localization.SaveLabel}" />
                 </Button>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding CloseCommand}">
+                        Command="{Binding CloseCommand, Mode=OneWay}">
                     <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
                 </Button>
             </StackPanel>

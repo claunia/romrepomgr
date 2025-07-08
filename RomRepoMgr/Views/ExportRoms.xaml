@@ -50,39 +50,39 @@
                         HorizontalAlignment="Stretch">
                 <TextBlock Text="{x:Static resources:Localization.PathLabel}"
                            FontWeight="Bold" />
-                <TextBlock Text="{Binding FolderPath}" />
+                <TextBlock Text="{Binding FolderPath, Mode=OneWay}" />
             </StackPanel>
             <TextBlock Grid.Row="1"
-                       Text="{Binding StatusMessage}"
+                       Text="{Binding StatusMessage, Mode=OneWay}"
                        FontWeight="Bold"
                        HorizontalAlignment="Center" />
             <ProgressBar Grid.Row="2"
-                         Minimum="{Binding ProgressMinimum}"
-                         Maximum="{Binding ProgressMaximum}"
-                         Value="{Binding ProgressValue}"
-                         IsIndeterminate="{Binding ProgressIsIndeterminate}"
-                         IsVisible="{Binding ProgressVisible}" />
+                         Minimum="{Binding ProgressMinimum, Mode=OneWay}"
+                         Maximum="{Binding ProgressMaximum, Mode=OneWay}"
+                         Value="{Binding ProgressValue, Mode=OneWay}"
+                         IsIndeterminate="{Binding ProgressIsIndeterminate, Mode=OneWay}"
+                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
             <StackPanel Grid.Row="3"
-                        IsVisible="{Binding Progress2Visible}">
-                <TextBlock Text="{Binding Status2Message}" />
-                <ProgressBar Minimum="{Binding Progress2Minimum}"
-                             Maximum="{Binding Progress2Maximum}"
-                             Value="{Binding Progress2Value}"
-                             IsIndeterminate="{Binding Progress2IsIndeterminate}" />
+                        IsVisible="{Binding Progress2Visible, Mode=OneWay}">
+                <TextBlock Text="{Binding Status2Message, Mode=OneWay}" />
+                <ProgressBar Minimum="{Binding Progress2Minimum, Mode=OneWay}"
+                             Maximum="{Binding Progress2Maximum, Mode=OneWay}"
+                             Value="{Binding Progress2Value, Mode=OneWay}"
+                             IsIndeterminate="{Binding Progress2IsIndeterminate, Mode=OneWay}" />
             </StackPanel>
             <StackPanel Grid.Row="4"
-                        IsVisible="{Binding Progress3Visible}">
-                <TextBlock Text="{Binding Status3Message}" />
-                <ProgressBar Minimum="{Binding Progress3Minimum}"
-                             Maximum="{Binding Progress3Maximum}"
-                             Value="{Binding Progress3Value}"
-                             IsIndeterminate="{Binding Progress3IsIndeterminate}" />
+                        IsVisible="{Binding Progress3Visible, Mode=OneWay}">
+                <TextBlock Text="{Binding Status3Message, Mode=OneWay}" />
+                <ProgressBar Minimum="{Binding Progress3Minimum, Mode=OneWay}"
+                             Maximum="{Binding Progress3Maximum, Mode=OneWay}"
+                             Value="{Binding Progress3Value, Mode=OneWay}"
+                             IsIndeterminate="{Binding Progress3IsIndeterminate, Mode=OneWay}" />
             </StackPanel>
             <Button Grid.Row="5"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    IsEnabled="{Binding CanClose}"
-                    Command="{Binding CloseCommand}">
+                    IsEnabled="{Binding CanClose, Mode=OneWay}"
+                    Command="{Binding CloseCommand, Mode=OneWay}">
                 <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>

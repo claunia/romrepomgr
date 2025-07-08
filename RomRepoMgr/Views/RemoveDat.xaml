@@ -46,7 +46,7 @@
     <Border Padding="15">
         <Grid RowDefinitions="Auto,auto">
             <TextBlock Grid.Row="0"
-                       Text="{Binding StatusMessage}"
+                       Text="{Binding StatusMessage, Mode=OneWay}"
                        HorizontalAlignment="Center" />
             <ProgressBar Grid.Row="1"
                          IsIndeterminate="True"

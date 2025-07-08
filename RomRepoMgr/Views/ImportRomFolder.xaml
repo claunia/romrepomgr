@@ -50,62 +50,62 @@
                         HorizontalAlignment="Stretch">
                 <TextBlock Text="{x:Static resources:Localization.PathLabel}"
                            FontWeight="Bold" />
-                <TextBlock Text="{Binding FolderPath}" />
+                <TextBlock Text="{Binding FolderPath, Mode=OneWay}" />
             </StackPanel>
             <CheckBox Grid.Row="1"
-                      IsChecked="{Binding RemoveFilesChecked}"
-                      IsEnabled="{Binding RemoveFilesEnabled}"
-                      IsVisible="{Binding IsReady}">
+                      IsChecked="{Binding RemoveFilesChecked, Mode=TwoWay}"
+                      IsEnabled="{Binding RemoveFilesEnabled, Mode=OneWay}"
+                      IsVisible="{Binding IsReady, Mode=OneWay}">
                 <CheckBox.Content>
                     <TextBlock Text="{x:Static resources:Localization.RemoveFilesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <CheckBox Grid.Row="2"
-                      IsChecked="{Binding KnownOnlyChecked}"
-                      IsVisible="{Binding IsReady}">
+                      IsChecked="{Binding KnownOnlyChecked, Mode=TwoWay}"
+                      IsVisible="{Binding IsReady, Mode=OneWay}">
                 <CheckBox.Content>
                     <TextBlock Text="{x:Static resources:Localization.KnownOnlyLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <CheckBox Grid.Row="3"
-                      IsChecked="{Binding RecurseArchivesChecked}"
-                      IsEnabled="{Binding RecurseArchivesEnabled}"
-                      IsVisible="{Binding IsReady}">
+                      IsChecked="{Binding RecurseArchivesChecked, Mode=TwoWay}"
+                      IsEnabled="{Binding RecurseArchivesEnabled, Mode=OneWay}"
+                      IsVisible="{Binding IsReady, Mode=OneWay}">
                 <CheckBox.Content>
                     <TextBlock Text="{x:Static resources:Localization.RecurseArchivesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <TextBlock Grid.Row="4"
-                       Text="{Binding StatusMessage}"
+                       Text="{Binding StatusMessage, Mode=OneWay}"
                        FontWeight="Bold"
                        HorizontalAlignment="Center" />
             <ProgressBar Grid.Row="5"
-                         Minimum="{Binding ProgressMinimum}"
-                         Maximum="{Binding ProgressMaximum}"
-                         Value="{Binding ProgressValue}"
-                         IsIndeterminate="{Binding ProgressIsIndeterminate}"
-                         IsVisible="{Binding ProgressVisible}" />
+                         Minimum="{Binding ProgressMinimum, Mode=OneWay}"
+                         Maximum="{Binding ProgressMaximum, Mode=OneWay}"
+                         Value="{Binding ProgressValue, Mode=OneWay}"
+                         IsIndeterminate="{Binding ProgressIsIndeterminate, Mode=OneWay}"
+                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
             <StackPanel Grid.Row="6"
-                        IsVisible="{Binding Progress2Visible}">
-                <TextBlock Text="{Binding Status2Message}" />
-                <ProgressBar Minimum="{Binding Progress2Minimum}"
-                             Maximum="{Binding Progress2Maximum}"
-                             Value="{Binding Progress2Value}"
-                             IsIndeterminate="{Binding Progress2IsIndeterminate}" />
+                        IsVisible="{Binding Progress2Visible, Mode=OneWay}">
+                <TextBlock Text="{Binding Status2Message, Mode=OneWay}" />
+                <ProgressBar Minimum="{Binding Progress2Minimum, Mode=OneWay}"
+                             Maximum="{Binding Progress2Maximum, Mode=OneWay}"
+                             Value="{Binding Progress2Value, Mode=OneWay}"
+                             IsIndeterminate="{Binding Progress2IsIndeterminate, Mode=OneWay}" />
             </StackPanel>
             <DataGrid Grid.Row="7"
-                      ItemsSource="{Binding ImportResults}"
+                      ItemsSource="{Binding ImportResults, Mode=OneWay}"
                       HorizontalScrollBarVisibility="Visible"
-                      IsVisible="{Binding IsImporting}">
+                      IsVisible="{Binding IsImporting, Mode=OneWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Filename}"
+                    <DataGridTextColumn Binding="{Binding Filename, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.ResultFilenameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Status}"
+                    <DataGridTextColumn Binding="{Binding Status, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
@@ -119,14 +119,14 @@
                         HorizontalAlignment="Right">
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        IsEnabled="{Binding CanClose}"
-                        Command="{Binding CloseCommand}">
+                        IsEnabled="{Binding CanClose, Mode=OneWay}"
+                        Command="{Binding CloseCommand, Mode=OneWay}">
                     <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
                 </Button>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        IsEnabled="{Binding CanStart}"
-                        Command="{Binding StartCommand}">
+                        IsEnabled="{Binding CanStart, Mode=OneWay}"
+                        Command="{Binding StartCommand, Mode=OneWay}">
                     <TextBlock Text="{x:Static resources:Localization.StartLabel}" />
                 </Button>
             </StackPanel>

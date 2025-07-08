@@ -23,7 +23,7 @@
                 VerticalAlignment="Top"
                 Orientation="Vertical"
                 Margin="5">
-        <TextBlock Text="{Binding LoadingText}"
+        <TextBlock Text="{Binding LoadingText, Mode=OneWay}"
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top" />
@@ -31,21 +31,21 @@
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingSettingsOk}">
+                   IsVisible="{Binding LoadingSettingsOk, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-checked.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingSettingsError}">
+                   IsVisible="{Binding LoadingSettingsError, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-error.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingSettingsUnknown}">
+                   IsVisible="{Binding LoadingSettingsUnknown, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
@@ -57,21 +57,21 @@
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding CheckingUnArOk}">
+                   IsVisible="{Binding CheckingUnArOk, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-checked.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding CheckingUnArError}">
+                   IsVisible="{Binding CheckingUnArError, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-error.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding CheckingUnArUnknown}">
+                   IsVisible="{Binding CheckingUnArUnknown, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
@@ -83,21 +83,21 @@
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingDatabaseOk}">
+                   IsVisible="{Binding LoadingDatabaseOk, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-checked.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingDatabaseError}">
+                   IsVisible="{Binding LoadingDatabaseError, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-error.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingDatabaseUnknown}">
+                   IsVisible="{Binding LoadingDatabaseUnknown, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
@@ -109,21 +109,21 @@
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding MigratingDatabaseOk}">
+                   IsVisible="{Binding MigratingDatabaseOk, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-checked.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding MigratingDatabaseError}">
+                   IsVisible="{Binding MigratingDatabaseError, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-error.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding MigratingDatabaseUnknown}">
+                   IsVisible="{Binding MigratingDatabaseUnknown, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
@@ -135,21 +135,21 @@
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingRomSetsOk}">
+                   IsVisible="{Binding LoadingRomSetsOk, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-checked.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingRomSetsError}">
+                   IsVisible="{Binding LoadingRomSetsError, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-error.svg" />
                 </Image.Source>
             </Image>
             <Image MaxWidth="24"
                    MaxHeight="24"
-                   IsVisible="{Binding LoadingRomSetsUnknown}">
+                   IsVisible="{Binding LoadingRomSetsUnknown, Mode=OneWay}">
                 <Image.Source>
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>

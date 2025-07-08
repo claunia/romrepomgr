@@ -44,114 +44,114 @@
     <Border Padding="15">
         <Grid RowDefinitions="Auto,Auto,*,Auto">
             <TextBlock Grid.Row="0"
-                       Text="{Binding StatusMessage}"
+                       Text="{Binding StatusMessage, Mode=OneWay}"
                        HorizontalAlignment="Center" />
             <ProgressBar Grid.Row="1"
-                         IsIndeterminate="{Binding IndeterminateProgress}"
-                         Maximum="{Binding MaximumValue}"
-                         Minimum="{Binding MinimumValue}"
-                         Value="{Binding CurrentValue}"
+                         IsIndeterminate="{Binding IndeterminateProgress, Mode=OneWay}"
+                         Maximum="{Binding MaximumValue, Mode=OneWay}"
+                         Minimum="{Binding MinimumValue, Mode=OneWay}"
+                         Value="{Binding CurrentValue, Mode=OneWay}"
                          HorizontalAlignment="Stretch"
-                         IsVisible="{Binding ProgressVisible}" />
+                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
             <DataGrid Grid.Row="2"
-                      ItemsSource="{Binding RomSets}"
+                      ItemsSource="{Binding RomSets, Mode=OneWay}"
                       HorizontalScrollBarVisibility="Visible"
                       SelectedItem="{Binding SelectedRomSet, Mode=TwoWay}"
                       CanUserSortColumns="True"
                       CanUserResizeColumns="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Name}"
+                    <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetNameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Version}"
+                    <DataGridTextColumn Binding="{Binding Version, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetVersionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Author}"
+                    <DataGridTextColumn Binding="{Binding Author, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetAuthorLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Category}"
+                    <DataGridTextColumn Binding="{Binding Category, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetCategoryLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Date}"
+                    <DataGridTextColumn Binding="{Binding Date, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetDateLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Description}"
+                    <DataGridTextColumn Binding="{Binding Description, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetDescriptionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Comment}"
+                    <DataGridTextColumn Binding="{Binding Comment, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetCommentLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Homepage}"
+                    <DataGridTextColumn Binding="{Binding Homepage, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.HomepageLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding TotalMachines}"
+                    <DataGridTextColumn Binding="{Binding TotalMachines, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetTotalMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding CompleteMachines}"
+                    <DataGridTextColumn Binding="{Binding CompleteMachines, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetCompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding IncompleteMachines}"
+                    <DataGridTextColumn Binding="{Binding IncompleteMachines, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetIncompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding TotalRoms}"
+                    <DataGridTextColumn Binding="{Binding TotalRoms, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetTotalRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding HaveRoms}"
+                    <DataGridTextColumn Binding="{Binding HaveRoms, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{x:Static resources:Localization.RomSetHaveRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding MissRoms}"
+                    <DataGridTextColumn Binding="{Binding MissRoms, Mode=OneWay}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
@@ -163,8 +163,8 @@
             <Button Grid.Row="3"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    IsEnabled="{Binding CanClose}"
-                    Command="{Binding CloseCommand}">
+                    IsEnabled="{Binding CanClose, Mode=OneWay}"
+                    Command="{Binding CloseCommand, Mode=OneWay}">
                 <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>
