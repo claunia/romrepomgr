@@ -372,4 +372,10 @@ Tardará mucho tiempo...</value>
     <data name="UpdateStatsTitle" xml:space="preserve">
     <value>Actualizando estadísticas de sets de ROMs</value>
   </data>
+    <data name="NativeMenuPreferencesText" xml:space="preserve">
+        <value>_Preferencias</value>
+    </data>
+    <data name="NativeMenuQuitText" xml:space="preserve">
+        <value>_Salir</value>
+    </data>
 </root>

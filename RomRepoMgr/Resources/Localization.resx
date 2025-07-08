@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <root>
-    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root"
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
                 xmlns="">
         <xsd:element name="root" msdata:IsDataSet="true"></xsd:element>
     </xsd:schema>
@@ -379,4 +380,10 @@ This will take a long time...</value>
     <data name="RetrievingRomSetsFromDatabase" xml:space="preserve">
     <value>Retrieving ROM sets from database...</value>
   </data>
+    <data name="NativeMenuPreferencesText" xml:space="preserve">
+        <value>_Preferences</value>
+    </data>
+    <data name="NativeMenuQuitText" xml:space="preserve">
+        <value>_Quit</value>
+    </data>
 </root>

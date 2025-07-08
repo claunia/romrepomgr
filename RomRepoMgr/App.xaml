@@ -1,21 +1,21 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:RomRepoMgr"
+             xmlns:resources="clr-namespace:RomRepoMgr.Resources"
              x:Class="RomRepoMgr.App">
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Styles>
-        <FluentTheme />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <FluentTheme /> <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
     </Application.Styles>
     <NativeMenu.Menu>
         <NativeMenu>
-            <NativeMenuItem Header="_About"
+            <NativeMenuItem Header="{x:Static resources:Localization.HelpMenuAboutText}"
                             Click="OnAboutClicked" />
-            <NativeMenuItem Header="_Preferences"
+            <NativeMenuItem Header="{x:Static resources:Localization.NativeMenuPreferencesText}"
                             Click="OnPreferencesClicked" />
-            <NativeMenuItem Header="_Quit"
+            <NativeMenuItem Header="{x:Static resources:Localization.NativeMenuQuitText}"
                             Click="OnQuitClicked" />
         </NativeMenu>
     </NativeMenu.Menu>
