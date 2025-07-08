@@ -128,11 +128,9 @@ public static class FAT
         {
             // exFAT
             case "EXFAT   ":
-                return false;
 
             // NTFS
             case "NTFS    " when bootable == 0xAA55 && numberOfFats == 0 && fatSectors == 0:
-                return false;
 
             // QNX4
             case "FQNX4FS ":
@@ -171,7 +169,6 @@ public static class FAT
                         rootEntries  > 0  &&
                         fatSectors   > 0  &&
                         bpbSignature is 0x28 or 0x29:
-                return sectors == 0 ? bigSectors <= imageSectors : sectors <= imageSectors;
 
             // BPB
             case 1 when correctSpc                      &&
@@ -233,14 +230,14 @@ public static class FAT
         {
             for(var c = 0; c < 11; c++)
             {
-                if(rootDir[c + e] < 0x20 && rootDir[c + e] != 0x00 && rootDir[c + e] != 0x05 ||
-                   rootDir[c + e] == 0xFF                                                    ||
-                   rootDir[c + e] == 0x2E)
-                {
-                    validRootDir = false;
+                if((rootDir[c + e] >= 0x20 || rootDir[c + e] == 0x00 || rootDir[c + e] == 0x05) &&
+                   rootDir[c + e] != 0xFF                                                       &&
+                   rootDir[c + e] != 0x2E)
+                    continue;
 
-                    break;
-                }
+                validRootDir = false;
+
+                break;
             }
 
             if(!validRootDir) break;
