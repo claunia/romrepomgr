@@ -43,15 +43,9 @@
         <vm:SettingsViewModel />
     </Design.DataContext>
     <Border Padding="15">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="*,250,Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
@@ -72,10 +66,8 @@
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
             </Grid>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,250,Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
@@ -96,10 +88,8 @@
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
             </Grid>
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="*,250,Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
@@ -120,10 +110,8 @@
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
             </Grid>
-            <Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" /> <ColumnDefinition Width="250" /> <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="3"
+                  ColumnDefinitions="*,250,Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"

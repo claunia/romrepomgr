@@ -44,12 +44,7 @@
         <vm:ExportRomsViewModel />
     </Design.DataContext>
     <Border Padding="15">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" /> <RowDefinition Height="*" /> <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*,Auto">
             <StackPanel Grid.Row="0"
                         Orientation="Horizontal"
                         HorizontalAlignment="Stretch">
