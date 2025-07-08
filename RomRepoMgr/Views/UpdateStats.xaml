@@ -29,13 +29,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
         x:Class="RomRepoMgr.Views.UpdateStats"
         Icon="/Assets/avalonia-logo.ico"
         CanResize="False"
-        Title="{Binding Title}"
+        Title="{x:Static resources:Localization.UpdateStatsTitle}"
         WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:UpdateStatsViewModel />
@@ -67,98 +68,98 @@
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetNameLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetNameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Version}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetVersionLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetVersionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Author}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetAuthorLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetAuthorLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Category}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetCategoryLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetCategoryLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Date}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetDateLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetDateLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Description}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetDescriptionLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetDescriptionLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Comment}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetCommentLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetCommentLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Homepage}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetHomepageLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.HomepageLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding TotalMachines}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetTotalMachinesLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetTotalMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding CompleteMachines}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetCompleteMachinesLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetCompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding IncompleteMachines}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetIncompleteMachinesLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetIncompleteMachinesLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding TotalRoms}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetTotalRomsLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetTotalRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding HaveRoms}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetHaveRomsLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetHaveRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding MissRoms}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding RomSetMissRomsLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.RomSetMissRomsLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
@@ -168,7 +169,7 @@
                     VerticalAlignment="Center"
                     IsEnabled="{Binding CanClose}"
                     Command="{Binding CloseCommand}">
-                <TextBlock Text="{Binding CloseLabel}" />
+                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>
     </Border>

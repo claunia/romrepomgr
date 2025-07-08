@@ -37,7 +37,6 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
-using RomRepoMgr.Resources;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -180,13 +179,7 @@ public sealed class SplashWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
     }
 
-    public string LoadingText           => "ROM Repository Manager";
-    public string LoadingSettingsText   => Localization.LoadingSettingsText;
-    public string CheckingUnArText      => Localization.CheckingUnArText;
-    public string LoadingDatabaseText   => Localization.LoadingDatabaseText;
-    public string MigratingDatabaseText => Localization.MigratingDatabaseText;
-    public string LoadingRomSetsText    => Localization.LoadingRomSetsText;
-    public string ExitButtonText        => Localization.ExitButtonText;
+    public string LoadingText => "ROM Repository Manager";
 
     void ExecuteExitCommand() =>
         (Application.Current.ApplicationLifetime as ClassicDesktopStyleApplicationLifetime)?.Shutdown();

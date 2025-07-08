@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="450"
         d:DesignHeight="250"
@@ -49,7 +50,7 @@
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
             </Image>
-            <TextBlock Text="{Binding LoadingSettingsText}"
+            <TextBlock Text="{x:Static resources:Localization.LoadingSettingsText}"
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
@@ -75,7 +76,7 @@
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
             </Image>
-            <TextBlock Text="{Binding CheckingUnArText}"
+            <TextBlock Text="{x:Static resources:Localization.CheckingUnArText}"
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
@@ -101,7 +102,7 @@
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
             </Image>
-            <TextBlock Text="{Binding LoadingDatabaseText}"
+            <TextBlock Text="{x:Static resources:Localization.LoadingDatabaseText}"
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
@@ -127,7 +128,7 @@
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
             </Image>
-            <TextBlock Text="{Binding MigratingDatabaseText}"
+            <TextBlock Text="{x:Static resources:Localization.MigratingDatabaseText}"
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
@@ -153,13 +154,13 @@
                     <svg:SvgImage Source="/Assets/emblem-question.svg" />
                 </Image.Source>
             </Image>
-            <TextBlock Text="{Binding LoadingRomSetsText}"
+            <TextBlock Text="{x:Static resources:Localization.LoadingRomSetsText}"
                        VerticalAlignment="Center" />
         </StackPanel>
         <Button Command="{Binding ExitCommand}"
                 IsVisible="{Binding ExitVisible}"
                 HorizontalAlignment="Right">
-            <TextBlock Text="{Binding ExitButtonText}" />
+            <TextBlock Text="{x:Static resources:Localization.ExitButtonText}" />
         </Button>
     </StackPanel>
 </Window>

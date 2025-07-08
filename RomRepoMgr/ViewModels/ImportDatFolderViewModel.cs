@@ -75,11 +75,7 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         StartCommand      = ReactiveCommand.Create(ExecuteStartCommand);
     }
 
-    public string PathLabel      => Localization.PathLabel;
-    public string CategoryLabel  => Localization.RomSetCategoryLabel;
-    public string FolderPath     { get; }
-    public string AllFilesLabel  => Localization.AllFilesLabel;
-    public string RecursiveLabel => Localization.RecursiveLabel;
+    public string FolderPath { get; }
 
     public bool AllFilesChecked
     {
@@ -191,13 +187,7 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _category, value);
     }
 
-    public string Title => Localization.ImportDatFolderTitle;
-
-    public ObservableCollection<ImportDatFolderItem> ImportResults       { get; }
-    public string                                    ResultFilenameLabel => Localization.ResultFilenameLabel;
-    public string                                    ResultStatusLabel   => Localization.ResultStatusLabel;
-    public string                                    CloseLabel          => Localization.CloseLabel;
-    public string                                    StartLabel          => Localization.StartLabel;
+    public ObservableCollection<ImportDatFolderItem> ImportResults { get; }
 
     public bool CanClose
     {

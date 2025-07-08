@@ -39,8 +39,6 @@ public sealed class RemoveDatViewModel(RemoveDat view, long romSetId) : ViewMode
 {
     string _statusMessage;
 
-    public string Title => Localization.RemoveDatTitle;
-
     public string StatusMessage
     {
         get => _statusMessage;

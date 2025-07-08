@@ -30,7 +30,6 @@ using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
-using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
@@ -68,7 +67,6 @@ public sealed class ExportRomsViewModel : ViewModelBase
         CanClose     = false;
     }
 
-    public string PathLabel  => Localization.PathLabel;
     public string FolderPath { get; }
 
     public bool ProgressVisible
@@ -178,9 +176,6 @@ public sealed class ExportRomsViewModel : ViewModelBase
         get => _progress3IsIndeterminate;
         set => this.RaiseAndSetIfChanged(ref _progress3IsIndeterminate, value);
     }
-
-    public string Title      => Localization.ExportRomsTitle;
-    public string CloseLabel => Localization.CloseLabel;
 
     public bool CanClose
     {

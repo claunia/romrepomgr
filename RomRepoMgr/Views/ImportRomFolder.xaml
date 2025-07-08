@@ -29,6 +29,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -37,7 +38,7 @@
         x:Class="RomRepoMgr.Views.ImportRomFolder"
         Icon="/Assets/avalonia-logo.ico"
         CanResize="False"
-        Title="{Binding Title}"
+        Title="{x:Static resources:Localization.ImportRomFolderTitle}"
         WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:ImportRomFolderViewModel />
@@ -52,7 +53,7 @@
             <StackPanel Grid.Row="0"
                         Orientation="Horizontal"
                         HorizontalAlignment="Stretch">
-                <TextBlock Text="{Binding PathLabel}"
+                <TextBlock Text="{x:Static resources:Localization.PathLabel}"
                            FontWeight="Bold" />
                 <TextBlock Text="{Binding FolderPath}" />
             </StackPanel>
@@ -61,14 +62,14 @@
                       IsEnabled="{Binding RemoveFilesEnabled}"
                       IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
-                    <TextBlock Text="{Binding RemoveFilesLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.RemoveFilesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <CheckBox Grid.Row="2"
                       IsChecked="{Binding KnownOnlyChecked}"
                       IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
-                    <TextBlock Text="{Binding KnownOnlyLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.KnownOnlyLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <CheckBox Grid.Row="3"
@@ -76,7 +77,7 @@
                       IsEnabled="{Binding RecurseArchivesEnabled}"
                       IsVisible="{Binding IsReady}">
                 <CheckBox.Content>
-                    <TextBlock Text="{Binding RecurseArchivesLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.RecurseArchivesLabel}" />
                 </CheckBox.Content>
             </CheckBox>
             <TextBlock Grid.Row="4"
@@ -106,14 +107,14 @@
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding ResultFilenameLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.ResultFilenameLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Status}"
                                         Width="Auto"
                                         IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding ResultStatusLabel}" />
+                            <TextBlock Text="{x:Static resources:Localization.ResultStatusLabel}" />
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
@@ -125,13 +126,13 @@
                         VerticalAlignment="Center"
                         IsEnabled="{Binding CanClose}"
                         Command="{Binding CloseCommand}">
-                    <TextBlock Text="{Binding CloseLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
                 </Button>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         IsEnabled="{Binding CanStart}"
                         Command="{Binding StartCommand}">
-                    <TextBlock Text="{Binding StartLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.StartLabel}" />
                 </Button>
             </StackPanel>
         </Grid>

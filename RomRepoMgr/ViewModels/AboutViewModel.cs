@@ -34,7 +34,6 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.Models;
-using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
@@ -82,23 +81,14 @@ public sealed class AboutViewModel : ViewModelBase
         });
     }
 
-    public string                              AboutLabel            => Localization.AboutLabel;
-    public string                              LibrariesLabel        => Localization.LibrariesLabel;
-    public string                              AuthorsLabel          => Localization.AuthorsLabel;
-    public string                              Title                 => Localization.AboutTitle;
-    public string                              SoftwareName          => "RomRepoMgr";
-    public string                              SuiteName             => "ROM Repository Manager";
-    public string                              Copyright             => "© 2020-2024 Natalia Portillo";
-    public string                              Website               => "https://www.claunia.com";
-    public string                              License               => Localization.LicenseLabel;
-    public string                              CloseLabel            => Localization.CloseLabel;
-    public string                              AssembliesLibraryText => Localization.AssembliesLibraryText;
-    public string                              AssembliesVersionText => Localization.AssembliesVersionText;
-    public string                              Authors               => Localization.AuthorsText;
-    public ReactiveCommand<Unit, Unit>         WebsiteCommand        { get; }
-    public ReactiveCommand<Unit, Unit>         LicenseCommand        { get; }
-    public ReactiveCommand<Unit, Unit>         CloseCommand          { get; }
-    public ObservableCollection<AssemblyModel> Assemblies            { get; }
+    public string                              SoftwareName   => "RomRepoMgr";
+    public string                              SuiteName      => "ROM Repository Manager";
+    public string                              Copyright      => "© 2020-2024 Natalia Portillo";
+    public string                              Website        => "https://www.claunia.com";
+    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
+    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }
+    public ObservableCollection<AssemblyModel> Assemblies     { get; }
 
     public string VersionText
     {

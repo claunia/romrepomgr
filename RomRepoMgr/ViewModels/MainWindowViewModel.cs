@@ -71,41 +71,8 @@ public class MainWindowViewModel : ViewModelBase
         RomSets                = new ObservableCollection<RomSetModel>(romSets);
     }
 
-    public ObservableCollection<RomSetModel> RomSets { get; }
-    public string RomSetLabel => Localization.RomSets;
-    public string RomSetNameLabel => Localization.RomSetNameLabel;
-    public string RomSetVersionLabel => Localization.RomSetVersionLabel;
-    public string RomSetAuthorLabel => Localization.RomSetAuthorLabel;
-    public string RomSetCategoryLabel => Localization.RomSetCategoryLabel;
-    public string RomSetDateLabel => Localization.RomSetDateLabel;
-    public string RomSetDescriptionLabel => Localization.RomSetDescriptionLabel;
-    public string RomSetCommentLabel => Localization.RomSetCommentLabel;
-    public string RomSetTotalMachinesLabel => Localization.RomSetTotalMachinesLabel;
-    public string RomSetCompleteMachinesLabel => Localization.RomSetCompleteMachinesLabel;
-    public string RomSetIncompleteMachinesLabel => Localization.RomSetIncompleteMachinesLabel;
-    public string RomSetTotalRomsLabel => Localization.RomSetTotalRomsLabel;
-    public string RomSetHaveRomsLabel => Localization.RomSetHaveRomsLabel;
-    public string RomSetMissRomsLabel => Localization.RomSetMissRomsLabel;
-    public bool IsVfsAvailable => Vfs.IsAvailable;
-    public string FileMenuText => Localization.FileMenuText;
-    public string FileMenuImportDatFileText => Localization.FileMenuImportDatFileText;
-    public string FileMenuImportDatFolderText => Localization.FileMenuImportDatFolderText;
-    public string FileMenuSettingsText => Localization.FileMenuSettingsText;
-    public string FileMenuExitText => Localization.FileMenuExitText;
-    public string FilesystemMenuText => Localization.FilesystemMenuText;
-    public string FilesystemMenuMountText => Localization.FilesystemMenuMountText;
-    public string RomsMenuText => Localization.RomsMenuText;
-    public string RomsMenuImportText => Localization.RomsMenuImportText;
-    public string RomSetsMenuText => Localization.RomSetsMenuText;
-    public string RomSetsMenuSaveRomsText => Localization.RomSetsMenuSaveRomsText;
-    public string RomSetsMenuSaveDatText => Localization.RomSetsMenuSaveDatText;
-    public string RomSetsMenuEditText => Localization.RomSetsMenuEditText;
-    public string RomSetsMenuDeleteText => Localization.RomSetsMenuDeleteText;
-    public string HelpMenuText => Localization.HelpMenuText;
-    public string HelpMenuAboutText => Localization.HelpMenuAboutText;
-    public string FilesystemMenuUmountText => Localization.FilesystemMenuUmountText;
-    public string DatabaseMenuText => Localization.DatabaseMenuText;
-    public string DatabaseMenuUpdateStatsText => Localization.DatabaseMenuUpdateStatsText;
+    public ObservableCollection<RomSetModel> RomSets        { get; }
+    public bool                              IsVfsAvailable => Vfs.IsAvailable;
 
     public bool NativeMenuSupported =>
         NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
@@ -159,18 +126,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         var datFileType = new FilePickerFileType(Localization.DatFilesDialogLabel)
         {
-            Patterns =
-            [
-                "*.dat", "*.xml"
-            ],
-            AppleUniformTypeIdentifiers =
-            [
-                "public.xml", "public.json"
-            ],
-            MimeTypes =
-            [
-                "application/xml", "text/*"
-            ]
+            Patterns                    = ["*.dat", "*.xml"],
+            AppleUniformTypeIdentifiers = ["public.xml", "public.json"],
+            MimeTypes                   = ["application/xml", "text/*"]
         };
 
         IReadOnlyList<IStorageFile> result = await _view.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions

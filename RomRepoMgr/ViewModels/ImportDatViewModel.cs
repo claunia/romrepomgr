@@ -30,7 +30,6 @@ using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
-using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
@@ -64,8 +63,6 @@ public sealed class ImportDatViewModel : ViewModelBase
         _worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
         _worker.WorkFinished             += OnWorkerOnWorkFinished;
     }
-
-    public string Title => Localization.ImportDatTitle;
 
     public string StatusMessage
     {
@@ -121,7 +118,6 @@ public sealed class ImportDatViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _canClose, value);
     }
 
-    public string                      CloseLabel   => Localization.CloseLabel;
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
     void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>

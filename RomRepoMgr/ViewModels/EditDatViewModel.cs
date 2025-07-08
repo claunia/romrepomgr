@@ -31,7 +31,6 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
-using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
@@ -66,25 +65,6 @@ public class EditDatViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.Create(ExecuteCloseCommand);
         CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
     }
-
-    public string NameLabel               => Localization.RomSetNameLabel;
-    public string VersionLabel            => Localization.RomSetVersionLabel;
-    public string AuthorLabel             => Localization.RomSetAuthorLabel;
-    public string CategoryLabel           => Localization.RomSetCategoryLabel;
-    public string CommentLabel            => Localization.RomSetCommentLabel;
-    public string DateLabel               => Localization.RomSetDateLabel;
-    public string DescriptionLabel        => Localization.RomSetDescriptionLabel;
-    public string HomepageLabel           => Localization.HomepageLabel;
-    public string TotalMachinesLabel      => Localization.TotalMachinesLabel;
-    public string CompleteMachinesLabel   => Localization.CompleteMachinesLabel;
-    public string IncompleteMachinesLabel => Localization.IncompleteMachinesLabel;
-    public string TotalRomsLabel          => Localization.TotalRomsLabel;
-    public string HaveRomsLabel           => Localization.HaveRomsLabel;
-    public string MissRomsLabel           => Localization.MissRomsLabel;
-    public string Title                   => Localization.EditDatTitle;
-    public string SaveLabel               => Localization.SaveLabel;
-    public string CancelLabel             => Localization.CancelLabel;
-    public string CloseLabel              => Localization.CloseLabel;
 
     public ReactiveCommand<Unit, Unit> SaveCommand        { get; }
     public ReactiveCommand<Unit, Unit> CancelCommand      { get; }

@@ -9,8 +9,8 @@
 
 namespace RomRepoMgr.Resources {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -21,21 +21,21 @@ namespace RomRepoMgr.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Localization {
-        
+    public class Localization {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Localization() {
+        public Localization() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RomRepoMgr.Resources.Localization", typeof(Localization).Assembly);
@@ -44,13 +44,13 @@ namespace RomRepoMgr.Resources {
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -58,1068 +58,1068 @@ namespace RomRepoMgr.Resources {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to About.
         /// </summary>
-        internal static string AboutLabel {
+        public static string AboutLabel {
             get {
                 return ResourceManager.GetString("AboutLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to About ROM Repository Manager.
         /// </summary>
-        internal static string AboutTitle {
+        public static string AboutTitle {
             get {
                 return ResourceManager.GetString("AboutTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to All files.
         /// </summary>
-        internal static string AllFilesDialogLabel {
+        public static string AllFilesDialogLabel {
             get {
                 return ResourceManager.GetString("AllFilesDialogLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Check all files..
         /// </summary>
-        internal static string AllFilesLabel {
+        public static string AllFilesLabel {
             get {
                 return ResourceManager.GetString("AllFilesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Library.
         /// </summary>
-        internal static string AssembliesLibraryText {
+        public static string AssembliesLibraryText {
             get {
                 return ResourceManager.GetString("AssembliesLibraryText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Version.
         /// </summary>
-        internal static string AssembliesVersionText {
+        public static string AssembliesVersionText {
             get {
                 return ResourceManager.GetString("AssembliesVersionText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Authors.
         /// </summary>
-        internal static string AuthorsLabel {
+        public static string AuthorsLabel {
             get {
                 return ResourceManager.GetString("AuthorsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Developers:
         ///    Natalia Portillo
         ///.
         /// </summary>
-        internal static string AuthorsText {
+        public static string AuthorsText {
             get {
                 return ResourceManager.GetString("AuthorsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Calculating statistics for {0} - {1} ({2}).
         /// </summary>
-        internal static string CalculatingStatisticsForRomSet {
+        public static string CalculatingStatisticsForRomSet {
             get {
                 return ResourceManager.GetString("CalculatingStatisticsForRomSet", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
-        internal static string CancelLabel {
+        public static string CancelLabel {
             get {
                 return ResourceManager.GetString("CancelLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Checking The Unarchiver....
         /// </summary>
-        internal static string CheckingUnArText {
+        public static string CheckingUnArText {
             get {
                 return ResourceManager.GetString("CheckingUnArText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Choose database to open / create.
         /// </summary>
-        internal static string ChooseDatabaseFile {
+        public static string ChooseDatabaseFile {
             get {
                 return ResourceManager.GetString("ChooseDatabaseFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Choose....
         /// </summary>
-        internal static string ChooseLabel {
+        public static string ChooseLabel {
             get {
                 return ResourceManager.GetString("ChooseLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Choose repository folder.
         /// </summary>
-        internal static string ChooseRepositoryFolder {
+        public static string ChooseRepositoryFolder {
             get {
                 return ResourceManager.GetString("ChooseRepositoryFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Choose temporary folder.
         /// </summary>
-        internal static string ChooseTemporaryFolder {
+        public static string ChooseTemporaryFolder {
             get {
                 return ResourceManager.GetString("ChooseTemporaryFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Choose UnArchiver executable.
         /// </summary>
-        internal static string ChooseUnArExecutable {
+        public static string ChooseUnArExecutable {
             get {
                 return ResourceManager.GetString("ChooseUnArExecutable", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
-        internal static string CloseLabel {
+        public static string CloseLabel {
             get {
                 return ResourceManager.GetString("CloseLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Complete games.
         /// </summary>
-        internal static string CompleteMachinesLabel {
+        public static string CompleteMachinesLabel {
             get {
                 return ResourceManager.GetString("CompleteMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to An error occurred trying to delete the chosen file..
         /// </summary>
-        internal static string DatabaseFileCannotDeleteCaption {
+        public static string DatabaseFileCannotDeleteCaption {
             get {
                 return ResourceManager.GetString("DatabaseFileCannotDeleteCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Could not delete file.
         /// </summary>
-        internal static string DatabaseFileCannotDeleteTitle {
+        public static string DatabaseFileCannotDeleteTitle {
             get {
                 return ResourceManager.GetString("DatabaseFileCannotDeleteTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do you want to delete the file?.
         /// </summary>
-        internal static string DatabaseFileDeleteCaption {
+        public static string DatabaseFileDeleteCaption {
             get {
                 return ResourceManager.GetString("DatabaseFileDeleteCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File exists.
         /// </summary>
-        internal static string DatabaseFileExistsMsgBoxTitle {
+        public static string DatabaseFileExistsMsgBoxTitle {
             get {
                 return ResourceManager.GetString("DatabaseFileExistsMsgBoxTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Database file.
         /// </summary>
-        internal static string DatabaseFileLabel {
+        public static string DatabaseFileLabel {
             get {
                 return ResourceManager.GetString("DatabaseFileLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do you want to try to open the existing file as a database?.
         /// </summary>
-        internal static string DatabaseFileMsgBoxTryOpen {
+        public static string DatabaseFileMsgBoxTryOpen {
             get {
                 return ResourceManager.GetString("DatabaseFileMsgBoxTryOpen", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do you want to try to open the existing file as a database?.
         /// </summary>
-        internal static string DatabaseFileTryOpenCaption {
+        public static string DatabaseFileTryOpenCaption {
             get {
                 return ResourceManager.GetString("DatabaseFileTryOpenCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to An error occurred trying to use the chosen file as a database.
         ///Do you want to delete the file?.
         /// </summary>
-        internal static string DatabaseFileUnusableDeleteMsgBoxCaption {
+        public static string DatabaseFileUnusableDeleteMsgBoxCaption {
             get {
                 return ResourceManager.GetString("DatabaseFileUnusableDeleteMsgBoxCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to An error occurred trying to use the chosen file as a database..
         /// </summary>
-        internal static string DatabaseFileUnusableMsgBoxCaption {
+        public static string DatabaseFileUnusableMsgBoxCaption {
             get {
                 return ResourceManager.GetString("DatabaseFileUnusableMsgBoxCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Could not use database.
         /// </summary>
-        internal static string DatabaseFileUnusableMsgBoxTitle {
+        public static string DatabaseFileUnusableMsgBoxTitle {
             get {
                 return ResourceManager.GetString("DatabaseFileUnusableMsgBoxTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Database.
         /// </summary>
-        internal static string DatabaseMenuText {
+        public static string DatabaseMenuText {
             get {
                 return ResourceManager.GetString("DatabaseMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Update statistics.
         /// </summary>
-        internal static string DatabaseMenuUpdateStatsText {
+        public static string DatabaseMenuUpdateStatsText {
             get {
                 return ResourceManager.GetString("DatabaseMenuUpdateStatsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to DAT files.
         /// </summary>
-        internal static string DatFilesDialogLabel {
+        public static string DatFilesDialogLabel {
             get {
                 return ResourceManager.GetString("DatFilesDialogLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Decompressing DAT file....
         /// </summary>
-        internal static string DecompressingDat {
+        public static string DecompressingDat {
             get {
                 return ResourceManager.GetString("DecompressingDat", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to delete the ROM set {0}?.
         /// </summary>
-        internal static string DeleteRomSetMsgBoxCaption {
+        public static string DeleteRomSetMsgBoxCaption {
             get {
                 return ResourceManager.GetString("DeleteRomSetMsgBoxCaption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Delete ROM set.
         /// </summary>
-        internal static string DeleteRomSetMsgBoxTitle {
+        public static string DeleteRomSetMsgBoxTitle {
             get {
                 return ResourceManager.GetString("DeleteRomSetMsgBoxTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit DAT.
         /// </summary>
-        internal static string EditDatTitle {
+        public static string EditDatTitle {
             get {
                 return ResourceManager.GetString("EditDatTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
-        internal static string Error {
+        public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
-        internal static string ExitButtonText {
+        public static string ExitButtonText {
             get {
                 return ResourceManager.GetString("ExitButtonText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exporting DAT file....
         /// </summary>
-        internal static string ExportDatTitle {
+        public static string ExportDatTitle {
             get {
                 return ResourceManager.GetString("ExportDatTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Export ROMs to folder....
         /// </summary>
-        internal static string ExportRomsDialogTitle {
+        public static string ExportRomsDialogTitle {
             get {
                 return ResourceManager.GetString("ExportRomsDialogTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exporting ROM files to folder....
         /// </summary>
-        internal static string ExportRomsTitle {
+        public static string ExportRomsTitle {
             get {
                 return ResourceManager.GetString("ExportRomsTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to E_xit.
         /// </summary>
-        internal static string FileMenuExitText {
+        public static string FileMenuExitText {
             get {
                 return ResourceManager.GetString("FileMenuExitText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import DAT _file.
         /// </summary>
-        internal static string FileMenuImportDatFileText {
+        public static string FileMenuImportDatFileText {
             get {
                 return ResourceManager.GetString("FileMenuImportDatFileText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import DAT f_older.
         /// </summary>
-        internal static string FileMenuImportDatFolderText {
+        public static string FileMenuImportDatFolderText {
             get {
                 return ResourceManager.GetString("FileMenuImportDatFolderText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Settings.
         /// </summary>
-        internal static string FileMenuSettingsText {
+        public static string FileMenuSettingsText {
             get {
                 return ResourceManager.GetString("FileMenuSettingsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _File.
         /// </summary>
-        internal static string FileMenuText {
+        public static string FileMenuText {
             get {
                 return ResourceManager.GetString("FileMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Mount.
         /// </summary>
-        internal static string FilesystemMenuMountText {
+        public static string FilesystemMenuMountText {
             get {
                 return ResourceManager.GetString("FilesystemMenuMountText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File_system.
         /// </summary>
-        internal static string FilesystemMenuText {
+        public static string FilesystemMenuText {
             get {
                 return ResourceManager.GetString("FilesystemMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Umount.
         /// </summary>
-        internal static string FilesystemMenuUmountText {
+        public static string FilesystemMenuUmountText {
             get {
                 return ResourceManager.GetString("FilesystemMenuUmountText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Finished.
         /// </summary>
-        internal static string Finished {
+        public static string Finished {
             get {
                 return ResourceManager.GetString("Finished", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Found {0} files....
         /// </summary>
-        internal static string FoundFiles {
+        public static string FoundFiles {
             get {
                 return ResourceManager.GetString("FoundFiles", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Have ROMs.
         /// </summary>
-        internal static string HaveRomsLabel {
+        public static string HaveRomsLabel {
             get {
                 return ResourceManager.GetString("HaveRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _About.
         /// </summary>
-        internal static string HelpMenuAboutText {
+        public static string HelpMenuAboutText {
             get {
                 return ResourceManager.GetString("HelpMenuAboutText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Help.
         /// </summary>
-        internal static string HelpMenuText {
+        public static string HelpMenuText {
             get {
                 return ResourceManager.GetString("HelpMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Homepage.
         /// </summary>
-        internal static string HomepageLabel {
+        public static string HomepageLabel {
             get {
                 return ResourceManager.GetString("HomepageLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import DAT file....
         /// </summary>
-        internal static string ImportDatFileDialogTitle {
+        public static string ImportDatFileDialogTitle {
             get {
                 return ResourceManager.GetString("ImportDatFileDialogTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import DATs from folder....
         /// </summary>
-        internal static string ImportDatFolderDialogTitle {
+        public static string ImportDatFolderDialogTitle {
             get {
                 return ResourceManager.GetString("ImportDatFolderDialogTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import DAT files from folder....
         /// </summary>
-        internal static string ImportDatFolderTitle {
+        public static string ImportDatFolderTitle {
             get {
                 return ResourceManager.GetString("ImportDatFolderTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Importing DAT file....
         /// </summary>
-        internal static string ImportDatTitle {
+        public static string ImportDatTitle {
             get {
                 return ResourceManager.GetString("ImportDatTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Importing {0}....
         /// </summary>
-        internal static string ImportingItem {
+        public static string ImportingItem {
             get {
                 return ResourceManager.GetString("ImportingItem", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import ROM files from folder....
         /// </summary>
-        internal static string ImportRomFolderTitle {
+        public static string ImportRomFolderTitle {
             get {
                 return ResourceManager.GetString("ImportRomFolderTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Import ROMs from folder....
         /// </summary>
-        internal static string ImportRomsFolderDialogTitle {
+        public static string ImportRomsFolderDialogTitle {
             get {
                 return ResourceManager.GetString("ImportRomsFolderDialogTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Incomplete games.
         /// </summary>
-        internal static string IncompleteMachinesLabel {
+        public static string IncompleteMachinesLabel {
             get {
                 return ResourceManager.GetString("IncompleteMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Only import known files..
         /// </summary>
-        internal static string KnownOnlyLabel {
+        public static string KnownOnlyLabel {
             get {
                 return ResourceManager.GetString("KnownOnlyLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Libraries.
         /// </summary>
-        internal static string LibrariesLabel {
+        public static string LibrariesLabel {
             get {
                 return ResourceManager.GetString("LibrariesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to License: GNU General Public License Version 3.
         /// </summary>
-        internal static string LicenseLabel {
+        public static string LicenseLabel {
             get {
                 return ResourceManager.GetString("LicenseLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Loading database....
         /// </summary>
-        internal static string LoadingDatabaseText {
+        public static string LoadingDatabaseText {
             get {
                 return ResourceManager.GetString("LoadingDatabaseText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Loading ROM sets....
         /// </summary>
-        internal static string LoadingRomSetsText {
+        public static string LoadingRomSetsText {
             get {
                 return ResourceManager.GetString("LoadingRomSetsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Loading settings....
         /// </summary>
-        internal static string LoadingSettingsText {
+        public static string LoadingSettingsText {
             get {
                 return ResourceManager.GetString("LoadingSettingsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Migrating database....
         /// </summary>
-        internal static string MigratingDatabaseText {
+        public static string MigratingDatabaseText {
             get {
                 return ResourceManager.GetString("MigratingDatabaseText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Missing ROMs.
         /// </summary>
-        internal static string MissRomsLabel {
+        public static string MissRomsLabel {
             get {
                 return ResourceManager.GetString("MissRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
-        internal static string OK {
+        public static string OK {
             get {
                 return ResourceManager.GetString("OK", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Path:.
         /// </summary>
-        internal static string PathLabel {
+        public static string PathLabel {
             get {
                 return ResourceManager.GetString("PathLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Try to detect archives and import their contents..
         /// </summary>
-        internal static string RecurseArchivesLabel {
+        public static string RecurseArchivesLabel {
             get {
                 return ResourceManager.GetString("RecurseArchivesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Recurse subfolders..
         /// </summary>
-        internal static string RecursiveLabel {
+        public static string RecursiveLabel {
             get {
                 return ResourceManager.GetString("RecursiveLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Removing ROM set....
         /// </summary>
-        internal static string RemoveDatTitle {
+        public static string RemoveDatTitle {
             get {
                 return ResourceManager.GetString("RemoveDatTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Remove files after import successful..
         /// </summary>
-        internal static string RemoveFilesLabel {
+        public static string RemoveFilesLabel {
             get {
                 return ResourceManager.GetString("RemoveFilesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Removing DAT file from repo....
         /// </summary>
-        internal static string RemovingDatFileFromRepo {
+        public static string RemovingDatFileFromRepo {
             get {
                 return ResourceManager.GetString("RemovingDatFileFromRepo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Removing old statistics.
         /// </summary>
-        internal static string RemovingOldStatistics {
+        public static string RemovingOldStatistics {
             get {
                 return ResourceManager.GetString("RemovingOldStatistics", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Removing ROM set from database....
         /// </summary>
-        internal static string RemovingRomSetFromDatabase {
+        public static string RemovingRomSetFromDatabase {
             get {
                 return ResourceManager.GetString("RemovingRomSetFromDatabase", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Repository folder.
         /// </summary>
-        internal static string RepositoryFolderLabel {
+        public static string RepositoryFolderLabel {
             get {
                 return ResourceManager.GetString("RepositoryFolderLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Filename.
         /// </summary>
-        internal static string ResultFilenameLabel {
+        public static string ResultFilenameLabel {
             get {
                 return ResourceManager.GetString("ResultFilenameLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Status.
         /// </summary>
-        internal static string ResultStatusLabel {
+        public static string ResultStatusLabel {
             get {
                 return ResourceManager.GetString("ResultStatusLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Retrieving ROM set from database....
         /// </summary>
-        internal static string RetrievingRomSetFromDatabase {
+        public static string RetrievingRomSetFromDatabase {
             get {
                 return ResourceManager.GetString("RetrievingRomSetFromDatabase", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Retrieving ROM sets from database....
         /// </summary>
-        internal static string RetrievingRomSetsFromDatabase {
+        public static string RetrievingRomSetsFromDatabase {
             get {
                 return ResourceManager.GetString("RetrievingRomSetsFromDatabase", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Author.
         /// </summary>
-        internal static string RomSetAuthorLabel {
+        public static string RomSetAuthorLabel {
             get {
                 return ResourceManager.GetString("RomSetAuthorLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Category.
         /// </summary>
-        internal static string RomSetCategoryLabel {
+        public static string RomSetCategoryLabel {
             get {
                 return ResourceManager.GetString("RomSetCategoryLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Comment.
         /// </summary>
-        internal static string RomSetCommentLabel {
+        public static string RomSetCommentLabel {
             get {
                 return ResourceManager.GetString("RomSetCommentLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Complete.
         /// </summary>
-        internal static string RomSetCompleteMachinesLabel {
+        public static string RomSetCompleteMachinesLabel {
             get {
                 return ResourceManager.GetString("RomSetCompleteMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Date.
         /// </summary>
-        internal static string RomSetDateLabel {
+        public static string RomSetDateLabel {
             get {
                 return ResourceManager.GetString("RomSetDateLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Description.
         /// </summary>
-        internal static string RomSetDescriptionLabel {
+        public static string RomSetDescriptionLabel {
             get {
                 return ResourceManager.GetString("RomSetDescriptionLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Have.
         /// </summary>
-        internal static string RomSetHaveRomsLabel {
+        public static string RomSetHaveRomsLabel {
             get {
                 return ResourceManager.GetString("RomSetHaveRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Incomplete.
         /// </summary>
-        internal static string RomSetIncompleteMachinesLabel {
+        public static string RomSetIncompleteMachinesLabel {
             get {
                 return ResourceManager.GetString("RomSetIncompleteMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Miss.
         /// </summary>
-        internal static string RomSetMissRomsLabel {
+        public static string RomSetMissRomsLabel {
             get {
                 return ResourceManager.GetString("RomSetMissRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
-        internal static string RomSetNameLabel {
+        public static string RomSetNameLabel {
             get {
                 return ResourceManager.GetString("RomSetNameLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ROM sets.
         /// </summary>
-        internal static string RomSets {
+        public static string RomSets {
             get {
                 return ResourceManager.GetString("RomSets", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Delete.
         /// </summary>
-        internal static string RomSetsMenuDeleteText {
+        public static string RomSetsMenuDeleteText {
             get {
                 return ResourceManager.GetString("RomSetsMenuDeleteText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Edit.
         /// </summary>
-        internal static string RomSetsMenuEditText {
+        public static string RomSetsMenuEditText {
             get {
                 return ResourceManager.GetString("RomSetsMenuEditText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Save DAT _file.
         /// </summary>
-        internal static string RomSetsMenuSaveDatText {
+        public static string RomSetsMenuSaveDatText {
             get {
                 return ResourceManager.GetString("RomSetsMenuSaveDatText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Save ROMs to folder.
         /// </summary>
-        internal static string RomSetsMenuSaveRomsText {
+        public static string RomSetsMenuSaveRomsText {
             get {
                 return ResourceManager.GetString("RomSetsMenuSaveRomsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ROM _sets.
         /// </summary>
-        internal static string RomSetsMenuText {
+        public static string RomSetsMenuText {
             get {
                 return ResourceManager.GetString("RomSetsMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Games.
         /// </summary>
-        internal static string RomSetTotalMachinesLabel {
+        public static string RomSetTotalMachinesLabel {
             get {
                 return ResourceManager.GetString("RomSetTotalMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ROMs.
         /// </summary>
-        internal static string RomSetTotalRomsLabel {
+        public static string RomSetTotalRomsLabel {
             get {
                 return ResourceManager.GetString("RomSetTotalRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Version.
         /// </summary>
-        internal static string RomSetVersionLabel {
+        public static string RomSetVersionLabel {
             get {
                 return ResourceManager.GetString("RomSetVersionLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _Import folder.
         /// </summary>
-        internal static string RomsMenuImportText {
+        public static string RomsMenuImportText {
             get {
                 return ResourceManager.GetString("RomsMenuImportText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to _ROMs.
         /// </summary>
-        internal static string RomsMenuText {
+        public static string RomsMenuText {
             get {
                 return ResourceManager.GetString("RomsMenuText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
-        internal static string SaveLabel {
+        public static string SaveLabel {
             get {
                 return ResourceManager.GetString("SaveLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Saving changes to database....
         /// </summary>
-        internal static string SavingChangesToDatabase {
+        public static string SavingChangesToDatabase {
             get {
                 return ResourceManager.GetString("SavingChangesToDatabase", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Searching for files....
         /// </summary>
-        internal static string SearchingForFiles {
+        public static string SearchingForFiles {
             get {
                 return ResourceManager.GetString("SearchingForFiles", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select mount point....
         /// </summary>
-        internal static string SelectMountPointDialogTitle {
+        public static string SelectMountPointDialogTitle {
             get {
                 return ResourceManager.GetString("SelectMountPointDialogTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
-        internal static string SettingsTitle {
+        public static string SettingsTitle {
             get {
                 return ResourceManager.GetString("SettingsTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Start.
         /// </summary>
-        internal static string StartLabel {
+        public static string StartLabel {
             get {
                 return ResourceManager.GetString("StartLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Temporary folder.
         /// </summary>
-        internal static string TemporaryFolderLabel {
+        public static string TemporaryFolderLabel {
             get {
                 return ResourceManager.GetString("TemporaryFolderLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The Unarchiver version {0}.
         /// </summary>
-        internal static string TheUnarchiverVersionLabel {
+        public static string TheUnarchiverVersionLabel {
             get {
                 return ResourceManager.GetString("TheUnarchiverVersionLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Total games.
         /// </summary>
-        internal static string TotalMachinesLabel {
+        public static string TotalMachinesLabel {
             get {
                 return ResourceManager.GetString("TotalMachinesLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Total ROMs.
         /// </summary>
-        internal static string TotalRomsLabel {
+        public static string TotalRomsLabel {
             get {
                 return ResourceManager.GetString("TotalRomsLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Path to UnAr.
         /// </summary>
-        internal static string UnArPathLabel {
+        public static string UnArPathLabel {
             get {
                 return ResourceManager.GetString("UnArPathLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do you want to update ROM set statistics in database?
         ///This will take a long time....
         /// </summary>
-        internal static string UpdateStatsConfirmationDialogText {
+        public static string UpdateStatsConfirmationDialogText {
             get {
                 return ResourceManager.GetString("UpdateStatsConfirmationDialogText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Updating ROM sets statistics.
         /// </summary>
-        internal static string UpdateStatsTitle {
+        public static string UpdateStatsTitle {
             get {
                 return ResourceManager.GetString("UpdateStatsTitle", resourceCulture);
             }

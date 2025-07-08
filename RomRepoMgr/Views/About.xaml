@@ -29,6 +29,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -37,7 +38,7 @@
         x:Class="RomRepoMgr.Views.About"
         Icon="/Assets/avalonia-logo.ico"
         CanResize="False"
-        Title="{Binding Title}">
+        Title="{x:Static resources:Localization.AboutTitle}">
     <Design.DataContext>
         <vm:AboutViewModel />
     </Design.DataContext>
@@ -79,15 +80,9 @@
                         VerticalAlignment="Stretch">
                 <TabItem>
                     <TabItem.Header>
-                        <TextBlock Text="{Binding AboutLabel}" />
+                        <TextBlock Text="{x:Static resources:Localization.AboutLabel}" />
                     </TabItem.Header>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" /> <RowDefinition Height="12" />
-                            <RowDefinition Height="Auto" /> <RowDefinition Height="12" />
-                            <RowDefinition Height="Auto" /> <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                    <Grid RowDefinitions="Auto,12,Auto,12,Auto,Auto,*">
                         <TextBlock Grid.Row="0"
                                    Text="{Binding SuiteName}" />
                         <TextBlock Grid.Row="2"
@@ -111,14 +106,14 @@
                                 Padding="0"
                                 Command="{Binding LicenseCommand}">
                             <!-- TODO: TextDecorations="Underline" in next Avalonia UI version -->
-                            <TextBlock Text="{Binding License}"
+                            <TextBlock Text="{x:Static resources:Localization.LicenseLabel}"
                                        Foreground="Blue" />
                         </Button>
                     </Grid>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
-                        <TextBlock Text="{Binding LibrariesLabel}" />
+                        <TextBlock Text="{x:Static resources:Localization.LibrariesLabel}" />
                     </TabItem.Header>
                     <DataGrid ItemsSource="{Binding Assemblies}"
                               HorizontalScrollBarVisibility="Visible">
@@ -127,14 +122,14 @@
                                                 Width="Auto"
                                                 IsReadOnly="True">
                                 <DataGridTextColumn.Header>
-                                    <TextBlock Text="{Binding AssembliesLibraryText}" />
+                                    <TextBlock Text="{x:Static resources:Localization.AssembliesLibraryText}" />
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
                             <DataGridTextColumn Binding="{Binding Version}"
                                                 Width="Auto"
                                                 IsReadOnly="True">
                                 <DataGridTextColumn.Header>
-                                    <TextBlock Text="{Binding AssembliesVersionText}" />
+                                    <TextBlock Text="{x:Static resources:Localization.AssembliesVersionText}" />
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
                         </DataGrid.Columns>
@@ -142,17 +137,17 @@
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
-                        <TextBlock Text="{Binding AuthorsLabel}" />
+                        <TextBlock Text="{x:Static resources:Localization.AuthorsLabel}" />
                     </TabItem.Header>
                     <TextBox IsReadOnly="True"
-                             Text="{Binding Authors}" />
+                             Text="{x:Static resources:Localization.AuthorsText}" />
                 </TabItem>
             </TabControl>
             <Button Grid.Row="2"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Command="{Binding CloseCommand}">
-                <TextBlock Text="{Binding CloseLabel}" />
+                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>
     </Border>

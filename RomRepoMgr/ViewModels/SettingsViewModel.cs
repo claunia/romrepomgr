@@ -79,14 +79,6 @@ public sealed class SettingsViewModel : ViewModelBase
         if(!string.IsNullOrWhiteSpace(UnArPath)) CheckUnAr();
     }
 
-    public string ChooseLabel     => Localization.ChooseLabel;
-    public string Title           => Localization.SettingsTitle;
-    public string CloseLabel      => Localization.CloseLabel;
-    public string DatabaseLabel   => Localization.DatabaseFileLabel;
-    public string RepositoryLabel => Localization.RepositoryFolderLabel;
-    public string TemporaryLabel  => Localization.TemporaryFolderLabel;
-    public string UnArPathLabel   => Localization.UnArPathLabel;
-
     public ReactiveCommand<Unit, Unit> UnArCommand       { get; }
     public ReactiveCommand<Unit, Unit> TemporaryCommand  { get; }
     public ReactiveCommand<Unit, Unit> RepositoryCommand { get; }
@@ -138,8 +130,6 @@ public sealed class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _unArVersion, value);
     }
 
-    public string SaveLabel => Localization.SaveLabel;
-
     void CheckUnAr()
     {
         var worker = new Compression();
@@ -155,7 +145,7 @@ public sealed class SettingsViewModel : ViewModelBase
         UnArVersion = "";
         UnArPath    = "";
 
-        _ = MessageBoxManager.GetMessageBoxStandard(Localization.Error, $"{args.Message}", ButtonEnum.Ok, Icon.Error)
+        _ = MessageBoxManager.GetMessageBoxStandard(Localization.Error, args.Message, ButtonEnum.Ok, Icon.Error)
                              .ShowWindowDialogAsync(_view);
     }
 

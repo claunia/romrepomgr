@@ -29,6 +29,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -37,7 +38,7 @@
         x:Class="RomRepoMgr.Views.ImportDat"
         Icon="/Assets/avalonia-logo.ico"
         CanResize="False"
-        Title="{Binding Title}"
+        Title="{x:Static resources:Localization.ImportDatTitle}"
         WindowStartupLocation="CenterOwner">
     <Design.DataContext>
         <vm:ImportDatViewModel />
@@ -68,7 +69,7 @@
                     VerticalAlignment="Center"
                     IsEnabled="{Binding CanClose}"
                     Command="{Binding CloseCommand}">
-                <TextBlock Text="{Binding CloseLabel}" />
+                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
             </Button>
         </Grid>
     </Border>

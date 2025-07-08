@@ -77,11 +77,7 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         _removeFilesEnabled     = false;
     }
 
-    public string PathLabel              => Localization.PathLabel;
     public string FolderPath             { get; }
-    public string RemoveFilesLabel       => Localization.RemoveFilesLabel;
-    public string KnownOnlyLabel         => Localization.KnownOnlyLabel;
-    public string RecurseArchivesLabel   => Localization.RecurseArchivesLabel;
     public bool   RecurseArchivesEnabled => Settings.Settings.UnArUsable;
 
     public bool RemoveFilesChecked
@@ -198,13 +194,7 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isImporting, value);
     }
 
-    public string Title => Localization.ImportRomFolderTitle;
-
-    public ObservableCollection<ImportRomItem> ImportResults       { get; }
-    public string                              ResultFilenameLabel => Localization.ResultFilenameLabel;
-    public string                              ResultStatusLabel   => Localization.ResultStatusLabel;
-    public string                              CloseLabel          => Localization.CloseLabel;
-    public string                              StartLabel          => Localization.StartLabel;
+    public ObservableCollection<ImportRomItem> ImportResults { get; }
 
     public bool CanClose
     {

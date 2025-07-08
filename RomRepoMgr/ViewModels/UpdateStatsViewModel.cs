@@ -60,21 +60,6 @@ public sealed class UpdateStatsViewModel : ViewModelBase
         RomSets               = [];
     }
 
-    public string Title                         => Localization.UpdateStatsTitle;
-    public string RomSetNameLabel               => Localization.RomSetNameLabel;
-    public string RomSetVersionLabel            => Localization.RomSetVersionLabel;
-    public string RomSetAuthorLabel             => Localization.RomSetAuthorLabel;
-    public string RomSetCategoryLabel           => Localization.RomSetCategoryLabel;
-    public string RomSetDateLabel               => Localization.RomSetDateLabel;
-    public string RomSetDescriptionLabel        => Localization.RomSetDescriptionLabel;
-    public string RomSetCommentLabel            => Localization.RomSetCommentLabel;
-    public string RomSetTotalMachinesLabel      => Localization.RomSetTotalMachinesLabel;
-    public string RomSetCompleteMachinesLabel   => Localization.RomSetCompleteMachinesLabel;
-    public string RomSetIncompleteMachinesLabel => Localization.RomSetIncompleteMachinesLabel;
-    public string RomSetTotalRomsLabel          => Localization.RomSetTotalRomsLabel;
-    public string RomSetHaveRomsLabel           => Localization.RomSetHaveRomsLabel;
-    public string RomSetMissRomsLabel           => Localization.RomSetMissRomsLabel;
-
     public string StatusMessage
     {
         get => _statusMessage;
@@ -125,7 +110,6 @@ public sealed class UpdateStatsViewModel : ViewModelBase
 
     public ObservableCollection<RomSetModel> RomSets { get; }
 
-    public string                      CloseLabel   => Localization.CloseLabel;
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
     internal void OnOpened()

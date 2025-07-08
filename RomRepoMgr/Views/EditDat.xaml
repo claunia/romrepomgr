@@ -29,6 +29,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:resources="clr-namespace:RomRepoMgr.Resources"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -37,7 +38,7 @@
         x:Class="RomRepoMgr.Views.EditDat"
         Icon="/Assets/avalonia-logo.ico"
         CanResize="False"
-        Title="{Binding Title}"
+        Title="{x:Static resources:Localization.EditDatTitle}"
         WindowStartupLocation="CenterScreen">
     <Design.DataContext>
         <vm:EditDatViewModel />
@@ -58,7 +59,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding NameLabel}"
+                           Text="{x:Static resources:Localization.RomSetNameLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -74,7 +75,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding VersionLabel}"
+                           Text="{x:Static resources:Localization.RomSetVersionLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -90,7 +91,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding AuthorLabel}"
+                           Text="{x:Static resources:Localization.RomSetAuthorLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -106,7 +107,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding CategoryLabel}"
+                           Text="{x:Static resources:Localization.RomSetCategoryLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -122,7 +123,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding CommentLabel}"
+                           Text="{x:Static resources:Localization.RomSetCommentLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -138,7 +139,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding DateLabel}"
+                           Text="{x:Static resources:Localization.RomSetDateLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -154,7 +155,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding DescriptionLabel}"
+                           Text="{x:Static resources:Localization.RomSetDescriptionLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -170,7 +171,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding HomepageLabel}"
+                           Text="{x:Static resources:Localization.HomepageLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBox Grid.Column="1"
@@ -186,7 +187,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding TotalMachinesLabel}"
+                           Text="{x:Static resources:Localization.TotalMachinesLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -202,7 +203,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding CompleteMachinesLabel}"
+                           Text="{x:Static resources:Localization.CompleteMachinesLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -218,7 +219,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding IncompleteMachinesLabel}"
+                           Text="{x:Static resources:Localization.IncompleteMachinesLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -234,7 +235,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding TotalRomsLabel}"
+                           Text="{x:Static resources:Localization.TotalRomsLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -250,7 +251,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding HaveRomsLabel}"
+                           Text="{x:Static resources:Localization.HaveRomsLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -266,7 +267,7 @@
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Text="{Binding MissRomsLabel}"
+                           Text="{x:Static resources:Localization.MissRomsLabel}"
                            FontWeight="Bold"
                            Padding="5" />
                 <TextBlock Grid.Column="1"
@@ -282,19 +283,19 @@
                         VerticalAlignment="Center"
                         Command="{Binding SaveCommand}"
                         IsVisible="{Binding Modified}">
-                    <TextBlock Text="{Binding SaveLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.SaveLabel}" />
                 </Button>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Command="{Binding CancelCommand}"
                         IsVisible="{Binding Modified}">
-                    <TextBlock Text="{Binding CancelLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.CancelLabel}" />
                 </Button>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Command="{Binding CloseCommand}"
                         IsVisible="{Binding !Modified}">
-                    <TextBlock Text="{Binding CloseLabel}" />
+                    <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
                 </Button>
             </StackPanel>
         </Grid>

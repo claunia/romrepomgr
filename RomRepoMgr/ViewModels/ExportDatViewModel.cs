@@ -62,8 +62,6 @@ public sealed class ExportDatViewModel : ViewModelBase
         _worker.FailedWithText   += OnWorkerOnFailedWithText;
     }
 
-    public string Title => Localization.ExportDatTitle;
-
     public string StatusMessage
     {
         get => _statusMessage;
@@ -94,7 +92,6 @@ public sealed class ExportDatViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _canClose, value);
     }
 
-    public string                      CloseLabel   => Localization.CloseLabel;
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
     void OnWorkerOnFinishedWithText(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
