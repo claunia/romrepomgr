@@ -98,34 +98,7 @@ public sealed class AboutViewModel : ViewModelBase
 
     void ExecuteWebsiteCommand()
     {
-        var process = new Process
-        {
-            StartInfo =
-            {
-                UseShellExecute = false,
-                CreateNoWindow  = true,
-                Arguments       = "https://www.claunia.com"
-            }
-        };
-
-        if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            process.StartInfo.FileName  = "cmd";
-            process.StartInfo.Arguments = $"/c start {process.StartInfo.Arguments.Replace("&", "^&")}";
-        }
-        else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
-                RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-            process.StartInfo.FileName = "xdg-open";
-        else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            process.StartInfo.FileName = "open";
-        else
-        {
-            if(Debugger.IsAttached) throw new ArgumentOutOfRangeException();
-
-            return;
-        }
-
-        process.Start();
+        _ = _view.Launcher.LaunchUriAsync(new Uri("https://www.claunia.com"));
     }
 
     void ExecuteLicenseCommand()
