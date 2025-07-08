@@ -28,7 +28,7 @@ using Avalonia.Markup.Xaml;
 
 namespace RomRepoMgr.Views;
 
-public sealed class SettingsDialog : Window
+public sealed partial class SettingsDialog : Window
 {
     public SettingsDialog() => InitializeComponent();
 

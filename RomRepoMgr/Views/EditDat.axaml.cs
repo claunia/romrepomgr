@@ -28,7 +28,7 @@ using Avalonia.Markup.Xaml;
 
 namespace RomRepoMgr.Views;
 
-public sealed class EditDat : Window
+public sealed partial class EditDat : Window
 {
     public EditDat() => InitializeComponent();
 

@@ -28,7 +28,7 @@ using Avalonia.Markup.Xaml;
 
 namespace RomRepoMgr.Views;
 
-public sealed class ImportRomFolder : Window
+public sealed partial class ImportRomFolder : Window
 {
     public ImportRomFolder() => InitializeComponent();
 

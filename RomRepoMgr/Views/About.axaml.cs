@@ -28,7 +28,7 @@ using Avalonia.Markup.Xaml;
 
 namespace RomRepoMgr.Views;
 
-public sealed class About : Window
+public sealed partial class About : Window
 {
     public About() => InitializeComponent();
 

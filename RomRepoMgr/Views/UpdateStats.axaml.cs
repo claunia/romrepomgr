@@ -30,7 +30,7 @@ using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views;
 
-public sealed class UpdateStats : Window
+public sealed partial class UpdateStats : Window
 {
     public UpdateStats() => InitializeComponent();
 

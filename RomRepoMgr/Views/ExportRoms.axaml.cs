@@ -30,7 +30,7 @@ using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views;
 
-public sealed class ExportRoms : Window
+public sealed partial class ExportRoms : Window
 {
     public ExportRoms() => InitializeComponent();
 

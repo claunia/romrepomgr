@@ -30,7 +30,7 @@ using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views;
 
-public sealed class SplashWindow : Window
+public sealed partial class SplashWindow : Window
 {
     public SplashWindow() => InitializeComponent();
 

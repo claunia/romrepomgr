@@ -29,7 +29,7 @@ using Avalonia.Markup.Xaml;
 
 namespace RomRepoMgr.Views;
 
-public class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     public MainWindow()
     {

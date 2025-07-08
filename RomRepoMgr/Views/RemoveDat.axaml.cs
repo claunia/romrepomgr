@@ -30,7 +30,7 @@ using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views;
 
-public sealed class RemoveDat : Window
+public sealed partial class RemoveDat : Window
 {
     public RemoveDat() => InitializeComponent();
 

@@ -30,7 +30,7 @@ using RomRepoMgr.ViewModels;
 
 namespace RomRepoMgr.Views;
 
-public sealed class ImportDat : Window
+public sealed partial class ImportDat : Window
 {
     public ImportDat() => InitializeComponent();
 
