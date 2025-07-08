@@ -159,18 +159,18 @@ public class MainWindowViewModel : ViewModelBase
     {
         var datFileType = new FilePickerFileType(Localization.DatFilesDialogLabel)
         {
-            Patterns = new[]
-            {
+            Patterns =
+            [
                 "*.dat", "*.xml"
-            },
-            AppleUniformTypeIdentifiers = new[]
-            {
+            ],
+            AppleUniformTypeIdentifiers =
+            [
                 "public.xml", "public.json"
-            },
-            MimeTypes = new[]
-            {
+            ],
+            MimeTypes =
+            [
                 "application/xml", "text/*"
-            }
+            ]
         };
 
         IReadOnlyList<IStorageFile> result = await _view.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
