@@ -196,6 +196,6 @@ public sealed class Context(DbContextOptions options) : DbContext(options)
             entity.HasOne(e => e.Media).WithMany(e => e.Machines).OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<RomSetStat>(entity => { entity.HasOne(e => e.RomSet).WithOne(e => e.Statistics); });
+        modelBuilder.Entity<RomSetStat>(entity => entity.HasOne(e => e.RomSet).WithOne(e => e.Statistics));
     }
 }

@@ -127,7 +127,7 @@ public sealed class UpdateStatsViewModel : ViewModelBase
 
             long romSetCount = ctx.RomSets.LongCount();
 
-            Dispatcher.UIThread.Post(() => { StatusMessage = Localization.RemovingOldStatistics; });
+            Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingOldStatistics);
 
             ctx.Database.ExecuteSql($"DELETE FROM \"RomSetStats\"");
 
