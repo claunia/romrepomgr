@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -19,28 +20,16 @@ namespace RomRepoMgr.Core.Filesystem;
 // TODO: Do not show machines or romsets with no ROMs in repo
 public class Vfs : IDisposable
 {
-    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>   _machineDisksCache;
-    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache;
-    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedMedia>>  _machineMediasCache;
-    readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache;
-    readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache;
-    readonly ConcurrentDictionary<long, Stream>                                      _streamsCache;
+    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>   _machineDisksCache  = [];
+    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache  = [];
+    readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedMedia>>  _machineMediasCache = [];
+    readonly ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>> _machinesStatCache  = [];
+    readonly ConcurrentDictionary<long, RomSet>                                      _romSetsCache       = [];
+    readonly ConcurrentDictionary<long, Stream>                                      _streamsCache       = [];
     Fuse                                                                             _fuse;
     long                                                                             _lastHandle;
-    ConcurrentDictionary<string, long>                                               _rootDirectoryCache;
+    ConcurrentDictionary<string, long>                                               _rootDirectoryCache = [];
     Winfsp                                                                           _winfsp;
-
-    public Vfs()
-    {
-        _rootDirectoryCache = new ConcurrentDictionary<string, long>();
-        _romSetsCache       = new ConcurrentDictionary<long, RomSet>();
-        _machinesStatCache  = new ConcurrentDictionary<long, ConcurrentDictionary<string, CachedMachine>>();
-        _machineFilesCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>();
-        _machineDisksCache  = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>();
-        _machineMediasCache = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedMedia>>();
-        _streamsCache       = new ConcurrentDictionary<long, Stream>();
-        _lastHandle         = 0;
-    }
 
     public static bool IsAvailable => OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()
                                           ? Fuse.IsAvailable
@@ -666,6 +655,12 @@ public class Vfs : IDisposable
         _streamsCache[handle] = Stream.Synchronized(new FileStream(repoPath, FileMode.Open, FileAccess.Read));
 
         return handle;
+    }
+
+    [ContractInvariantMethod]
+    void ObjectInvariant()
+    {
+        Contract.Invariant(_machineMediasCache.All(pair => pair.Value != null));
     }
 }
 

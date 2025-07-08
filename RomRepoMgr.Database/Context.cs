@@ -29,10 +29,8 @@ using RomRepoMgr.Database.Models;
 
 namespace RomRepoMgr.Database;
 
-public sealed class Context : DbContext
+public sealed class Context(DbContextOptions options) : DbContext(options)
 {
-    public Context(DbContextOptions options) : base(options) {}
-
     public DbSet<DbFile>         Files            { get; set; }
     public DbSet<RomSet>         RomSets          { get; set; }
     public DbSet<Machine>        Machines         { get; set; }

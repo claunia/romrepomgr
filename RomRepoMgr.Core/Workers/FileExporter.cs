@@ -15,22 +15,14 @@ using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
 
-public class FileExporter
+public class FileExporter(long romSetId, string outPath)
 {
-    const    long                     BUFFER_SIZE = 131072;
-    readonly string                   _outPath;
-    readonly long                     _romSetId;
+    const long                        BUFFER_SIZE = 131072;
     long                              _filePosition;
     Dictionary<string, FileByMachine> _filesByMachine;
     long                              _machinePosition;
     Machine[]                         _machines;
     string                            _zipCurrentEntryName;
-
-    public FileExporter(long romSetId, string outPath)
-    {
-        _romSetId = romSetId;
-        _outPath  = outPath;
-    }
 
     public event EventHandler                          WorkFinished;
     public event EventHandler<ProgressBoundsEventArgs> SetProgressBounds;
@@ -53,7 +45,7 @@ public class FileExporter
 
         using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
 
-        RomSet romSet = ctx.RomSets.Find(_romSetId);
+        RomSet romSet = ctx.RomSets.Find(romSetId);
 
         if(romSet == null)
         {
@@ -74,7 +66,7 @@ public class FileExporter
                                Message = Localization.ExportingRoms
                            });
 
-        _machines = ctx.Machines.Where(m => m.RomSet.Id == _romSetId).ToArray();
+        _machines = ctx.Machines.Where(m => m.RomSet.Id == romSetId).ToArray();
 
         SetProgressBounds?.Invoke(this,
                                   new ProgressBoundsEventArgs
@@ -135,7 +127,7 @@ public class FileExporter
             if(machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
                 machineName = machineName[..^4];
 
-            string machinePath = Path.Combine(_outPath, machineName);
+            string machinePath = Path.Combine(outPath, machineName);
 
             if(!Directory.Exists(machinePath)) Directory.CreateDirectory(machinePath);
 
@@ -340,7 +332,7 @@ public class FileExporter
             if(machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
                 machineName = machineName[..^4];
 
-            string machinePath = Path.Combine(_outPath, machineName);
+            string machinePath = Path.Combine(outPath, machineName);
 
             if(!Directory.Exists(machinePath)) Directory.CreateDirectory(machinePath);
 
@@ -512,7 +504,7 @@ public class FileExporter
 
         if(!machineName.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase)) machineName += ".zip";
 
-        var zf = new ZipFile(Path.Combine(_outPath, machineName), Encoding.UTF8)
+        var zf = new ZipFile(Path.Combine(outPath, machineName), Encoding.UTF8)
         {
             CompressionLevel                   = CompressionLevel.BestCompression,
             CompressionMethod                  = CompressionMethod.Deflate,

@@ -14,12 +14,9 @@ using FileInfo = Fsp.Interop.FileInfo;
 namespace RomRepoMgr.Core.Filesystem;
 
 [SupportedOSPlatform("windows")]
-public class Winfsp : FileSystemBase
+public class Winfsp(Vfs vfs) : FileSystemBase
 {
-    readonly Vfs   _vfs;
     FileSystemHost _host;
-
-    public Winfsp(Vfs vfs) => _vfs = vfs;
 
     public static bool IsAvailable
     {
@@ -128,7 +125,7 @@ public class Winfsp : FileSystemBase
     {
         volumeInfo = new VolumeInfo();
 
-        _vfs.GetInfo(out _, out ulong totalSize);
+        vfs.GetInfo(out _, out ulong totalSize);
 
         volumeInfo.FreeSize  = 0;
         volumeInfo.TotalSize = totalSize;
@@ -144,7 +141,7 @@ public class Winfsp : FileSystemBase
         fileInfo       = default(FileInfo);
         normalizedName = default(string);
 
-        string[] pieces = _vfs.SplitPath(fileName);
+        string[] pieces = vfs.SplitPath(fileName);
 
         // Root directory
         if(pieces.Length == 0)
@@ -169,11 +166,11 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        long romSetId = _vfs.GetRomSetId(pieces[0]);
+        long romSetId = vfs.GetRomSetId(pieces[0]);
 
         if(romSetId <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-        RomSet romSet = _vfs.GetRomSet(romSetId);
+        RomSet romSet = vfs.GetRomSet(romSetId);
 
         if(romSet == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -207,7 +204,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+        CachedMachine machine = vfs.GetMachine(romSetId, pieces[1]);
 
         if(machine == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -242,7 +239,7 @@ public class Winfsp : FileSystemBase
         }
 
         long       handle = 0;
-        CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
+        CachedFile file   = vfs.GetFile(machine.Id, pieces[2]);
 
         if(file != null)
         {
@@ -250,7 +247,7 @@ public class Winfsp : FileSystemBase
 
             if(file.Sha384 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.Open(file.Sha384, (long)file.Size);
+            handle = vfs.Open(file.Sha384, (long)file.Size);
 
             if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -280,7 +277,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+        CachedDisk disk = vfs.GetDisk(machine.Id, pieces[2]);
 
         if(disk != null)
         {
@@ -288,7 +285,7 @@ public class Winfsp : FileSystemBase
 
             if(disk.Sha1 == null && disk.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+            handle = vfs.OpenDisk(disk.Sha1, disk.Md5);
 
             if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -318,7 +315,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+        CachedMedia media = vfs.GetMedia(machine.Id, pieces[2]);
 
         if(media == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -326,7 +323,7 @@ public class Winfsp : FileSystemBase
 
         if(media.Sha256 == null && media.Sha1 == null && media.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-        handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
+        handle = vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
 
         if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -362,7 +359,7 @@ public class Winfsp : FileSystemBase
 
         if(node.Handle <= 0) return;
 
-        _vfs.Close(node.Handle);
+        vfs.Close(node.Handle);
     }
 
     public override int Read(object   fileNode, object fileDesc, IntPtr buffer, ulong offset, uint length,
@@ -374,7 +371,7 @@ public class Winfsp : FileSystemBase
 
         var buf = new byte[length];
 
-        int ret = _vfs.Read(node.Handle, buf, (long)offset);
+        int ret = vfs.Read(node.Handle, buf, (long)offset);
 
         if(ret < 0) return STATUS_INVALID_HANDLE;
 
@@ -408,12 +405,12 @@ public class Winfsp : FileSystemBase
         {
             if(node.MachineId > 0)
             {
-                ConcurrentDictionary<string, CachedFile> cachedMachineFiles = _vfs.GetFilesFromMachine(node.MachineId);
+                ConcurrentDictionary<string, CachedFile> cachedMachineFiles = vfs.GetFilesFromMachine(node.MachineId);
 
-                ConcurrentDictionary<string, CachedDisk> cachedMachineDisks = _vfs.GetDisksFromMachine(node.MachineId);
+                ConcurrentDictionary<string, CachedDisk> cachedMachineDisks = vfs.GetDisksFromMachine(node.MachineId);
 
                 ConcurrentDictionary<string, CachedMedia> cachedMachineMedias =
-                    _vfs.GetMediasFromMachine(node.MachineId);
+                    vfs.GetMediasFromMachine(node.MachineId);
 
                 node.Children =
                 [
@@ -483,7 +480,7 @@ public class Winfsp : FileSystemBase
             }
             else if(node.RomSetId > 0)
             {
-                ConcurrentDictionary<string, CachedMachine> machines = _vfs.GetMachinesFromRomSet(node.RomSetId);
+                ConcurrentDictionary<string, CachedMachine> machines = vfs.GetMachinesFromRomSet(node.RomSetId);
 
                 node.Children =
                 [
@@ -514,12 +511,12 @@ public class Winfsp : FileSystemBase
             {
                 node.Children = [];
 
-                node.Children.AddRange(_vfs.GetRootEntries()
-                                           .Select(e => new FileEntry
-                                            {
-                                                FileName = e,
-                                                IsRomSet = true
-                                            }));
+                node.Children.AddRange(vfs.GetRootEntries()
+                                          .Select(e => new FileEntry
+                                           {
+                                               FileName = e,
+                                               IsRomSet = true
+                                           }));
             }
 
             if(marker != null)
@@ -540,11 +537,11 @@ public class Winfsp : FileSystemBase
 
             if(entry.IsRomSet)
             {
-                long romSetId = _vfs.GetRomSetId(entry.FileName);
+                long romSetId = vfs.GetRomSetId(entry.FileName);
 
                 if(romSetId <= 0) continue;
 
-                RomSet romSet = _vfs.GetRomSet(romSetId);
+                RomSet romSet = vfs.GetRomSet(romSetId);
 
                 if(romSet is null) continue;
 
@@ -569,7 +566,7 @@ public class Winfsp : FileSystemBase
     {
         fileAttributes = 0;
 
-        string[] pieces = _vfs.SplitPath(fileName);
+        string[] pieces = vfs.SplitPath(fileName);
 
         // Root directory
         if(pieces.Length == 0)
@@ -588,11 +585,11 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        long romSetId = _vfs.GetRomSetId(pieces[0]);
+        long romSetId = vfs.GetRomSetId(pieces[0]);
 
         if(romSetId <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-        RomSet romSet = _vfs.GetRomSet(romSetId);
+        RomSet romSet = vfs.GetRomSet(romSetId);
 
         if(romSet == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -604,7 +601,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedMachine machine = _vfs.GetMachine(romSetId, pieces[1]);
+        CachedMachine machine = vfs.GetMachine(romSetId, pieces[1]);
 
         if(machine == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -617,7 +614,7 @@ public class Winfsp : FileSystemBase
         }
 
         long       handle = 0;
-        CachedFile file   = _vfs.GetFile(machine.Id, pieces[2]);
+        CachedFile file   = vfs.GetFile(machine.Id, pieces[2]);
 
         if(file != null)
         {
@@ -625,7 +622,7 @@ public class Winfsp : FileSystemBase
 
             if(file.Sha384 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.Open(file.Sha384, (long)file.Size);
+            handle = vfs.Open(file.Sha384, (long)file.Size);
 
             if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -634,7 +631,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedDisk disk = _vfs.GetDisk(machine.Id, pieces[2]);
+        CachedDisk disk = vfs.GetDisk(machine.Id, pieces[2]);
 
         if(disk != null)
         {
@@ -642,7 +639,7 @@ public class Winfsp : FileSystemBase
 
             if(disk.Sha1 == null && disk.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-            handle = _vfs.OpenDisk(disk.Sha1, disk.Md5);
+            handle = vfs.OpenDisk(disk.Sha1, disk.Md5);
 
             if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -651,7 +648,7 @@ public class Winfsp : FileSystemBase
             return STATUS_SUCCESS;
         }
 
-        CachedMedia media = _vfs.GetMedia(machine.Id, pieces[2]);
+        CachedMedia media = vfs.GetMedia(machine.Id, pieces[2]);
 
         if(media == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
@@ -659,7 +656,7 @@ public class Winfsp : FileSystemBase
 
         if(media.Sha256 == null && media.Sha1 == null && media.Md5 == null) return STATUS_OBJECT_NAME_NOT_FOUND;
 
-        handle = _vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
+        handle = vfs.OpenMedia(media.Sha256, media.Sha1, media.Md5);
 
         if(handle <= 0) return STATUS_OBJECT_NAME_NOT_FOUND;
 

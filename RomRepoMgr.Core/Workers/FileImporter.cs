@@ -18,41 +18,22 @@ using SharpCompress.Compressors.LZMA;
 
 namespace RomRepoMgr.Core.Workers;
 
-public class FileImporter
+public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 {
     const    long                        BUFFER_SIZE = 131072;
-    readonly Context                     _ctx;
-    readonly bool                        _deleteAfterImport;
-    readonly List<DbDisk>                _newDisks;
-    readonly List<DbFile>                _newFiles;
-    readonly List<DbMedia>               _newMedias;
-    readonly bool                        _onlyKnown;
-    readonly Dictionary<string, DbDisk>  _pendingDisksByMd5;
-    readonly Dictionary<string, DbDisk>  _pendingDisksBySha1;
-    readonly Dictionary<string, DbFile>  _pendingFiles;
-    readonly Dictionary<string, DbMedia> _pendingMediasByMd5;
-    readonly Dictionary<string, DbMedia> _pendingMediasBySha1;
-    readonly Dictionary<string, DbMedia> _pendingMediasBySha256;
+    readonly Context                     _ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+    readonly List<DbDisk>                _newDisks = [];
+    readonly List<DbFile>                _newFiles = [];
+    readonly List<DbMedia>               _newMedias = [];
+    readonly Dictionary<string, DbDisk>  _pendingDisksByMd5 = [];
+    readonly Dictionary<string, DbDisk>  _pendingDisksBySha1 = [];
+    readonly Dictionary<string, DbFile>  _pendingFiles = [];
+    readonly Dictionary<string, DbMedia> _pendingMediasByMd5 = [];
+    readonly Dictionary<string, DbMedia> _pendingMediasBySha1 = [];
+    readonly Dictionary<string, DbMedia> _pendingMediasBySha256 = [];
     string                               _lastMessage;
     long                                 _position;
     long                                 _totalFiles;
-
-    public FileImporter(bool onlyKnown, bool deleteAfterImport)
-    {
-        _pendingFiles          = new Dictionary<string, DbFile>();
-        _pendingDisksByMd5     = new Dictionary<string, DbDisk>();
-        _pendingDisksBySha1    = new Dictionary<string, DbDisk>();
-        _pendingMediasBySha256 = new Dictionary<string, DbMedia>();
-        _pendingMediasBySha1   = new Dictionary<string, DbMedia>();
-        _pendingMediasByMd5    = new Dictionary<string, DbMedia>();
-        _newFiles              = [];
-        _newDisks              = [];
-        _newMedias             = [];
-        _onlyKnown             = onlyKnown;
-        _deleteAfterImport     = deleteAfterImport;
-        _position              = 0;
-        _ctx                   = Context.Create(Settings.Settings.Current.DatabasePath);
-    }
 
     public event EventHandler                           SetIndeterminateProgress2;
     public event EventHandler<ProgressBoundsEventArgs>  SetProgressBounds2;
@@ -388,7 +369,7 @@ public class FileImporter
 
             if(dbFile == null)
             {
-                if(_onlyKnown)
+                if(onlyKnown)
                 {
                     _lastMessage = Localization.UnknownFile;
 
@@ -493,7 +474,7 @@ public class FileImporter
 
                 inFs.Close();
 
-                if(_deleteAfterImport) File.Delete(path);
+                if(deleteAfterImport) File.Delete(path);
 
                 return true;
             }
@@ -559,7 +540,7 @@ public class FileImporter
 
             if(!fileInDb) _newFiles.Add(dbFile);
 
-            if(_deleteAfterImport) File.Delete(path);
+            if(deleteAfterImport) File.Delete(path);
 
             return true;
         }
@@ -655,7 +636,7 @@ public class FileImporter
 
             if(dbDisk == null)
             {
-                if(_onlyKnown)
+                if(onlyKnown)
                 {
                     _lastMessage = Localization.UnknownFile;
 
@@ -770,7 +751,7 @@ public class FileImporter
 
                     inFs.Close();
 
-                    if(_deleteAfterImport) File.Delete(path);
+                    if(deleteAfterImport) File.Delete(path);
 
                     return true;
                 }
@@ -833,7 +814,7 @@ public class FileImporter
 
             if(!diskInDb) _newDisks.Add(dbDisk);
 
-            if(_deleteAfterImport) File.Delete(path);
+            if(deleteAfterImport) File.Delete(path);
 
             if(knownDiskWasBigger) File.Delete(repoPath + ".bak");
 
@@ -954,7 +935,7 @@ public class FileImporter
 
             if(dbMedia == null)
             {
-                if(_onlyKnown)
+                if(onlyKnown)
                 {
                     _lastMessage = Localization.UnknownFile;
 
@@ -1107,7 +1088,7 @@ public class FileImporter
 
                     inFs.Close();
 
-                    if(_deleteAfterImport) File.Delete(path);
+                    if(deleteAfterImport) File.Delete(path);
 
                     return true;
                 }
@@ -1170,7 +1151,7 @@ public class FileImporter
 
             if(!mediaInDb) _newMedias.Add(dbMedia);
 
-            if(_deleteAfterImport) File.Delete(path);
+            if(deleteAfterImport) File.Delete(path);
 
             if(knownMediaWasBigger) File.Delete(repoPath + ".bak");
 
