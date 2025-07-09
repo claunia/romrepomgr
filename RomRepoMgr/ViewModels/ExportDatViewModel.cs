@@ -49,6 +49,9 @@ public sealed class ExportDatViewModel : ViewModelBase
     bool                 _progressVisible;
     string               _statusMessage;
 
+    // Mock
+    public ExportDatViewModel() {}
+
     public ExportDatViewModel(ExportDat view, string datHash, string outPath)
     {
         _view                    =  view;

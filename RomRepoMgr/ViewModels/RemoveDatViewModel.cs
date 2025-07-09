@@ -35,9 +35,20 @@ using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class RemoveDatViewModel(RemoveDat view, long romSetId) : ViewModelBase
+public sealed class RemoveDatViewModel : ViewModelBase
 {
-    string _statusMessage;
+    readonly long      _romSetId;
+    readonly RemoveDat _view;
+    string             _statusMessage;
+
+    // Mock
+    public RemoveDatViewModel() {}
+
+    public RemoveDatViewModel(RemoveDat view, long romSetId)
+    {
+        _view     = view;
+        _romSetId = romSetId;
+    }
 
     public string StatusMessage
     {
@@ -53,7 +64,7 @@ public sealed class RemoveDatViewModel(RemoveDat view, long romSetId) : ViewMode
 
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.RetrievingRomSetFromDatabase);
 
-            RomSet romSet = ctx.RomSets.Find(romSetId);
+            RomSet romSet = ctx.RomSets.Find(_romSetId);
 
             if(romSet == null) return;
 
@@ -93,7 +104,7 @@ public sealed class RemoveDatViewModel(RemoveDat view, long romSetId) : ViewMode
 
             if(File.Exists(compressedDatPath)) File.Delete(compressedDatPath);
 
-            Dispatcher.UIThread.Post(view.Close);
+            Dispatcher.UIThread.Post(_view.Close);
         });
     }
 }

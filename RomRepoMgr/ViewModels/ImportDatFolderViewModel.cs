@@ -64,6 +64,14 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
     string                   _status2Message;
     string                   _statusMessage;
 
+    // Mock
+    public ImportDatFolderViewModel()
+    {
+#pragma warning disable PH2080
+        FolderPath = "C:\\ROMs";
+#pragma warning restore PH2080
+    }
+
     public ImportDatFolderViewModel(ImportDatFolder view, string folderPath)
     {
         _view             = view;

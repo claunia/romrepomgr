@@ -58,6 +58,14 @@ public sealed class ExportRomsViewModel : ViewModelBase
     string              _status3Message;
     string              _statusMessage;
 
+    // Mock
+    public ExportRomsViewModel()
+    {
+#pragma warning disable PH2080
+        FolderPath = "C:\\ExportedRoms";
+#pragma warning restore PH2080
+    }
+
     public ExportRomsViewModel(ExportRoms view, string folderPath, long romSetId)
     {
         _view        = view;

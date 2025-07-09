@@ -51,6 +51,9 @@ public sealed class UpdateStatsViewModel : ViewModelBase
     RomSetModel          _selectedRomSet;
     string               _statusMessage;
 
+    // Mock
+    public UpdateStatsViewModel() {}
+
     public UpdateStatsViewModel(UpdateStats view)
     {
         _view                 = view;

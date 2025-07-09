@@ -52,6 +52,9 @@ public class MainWindowViewModel : ViewModelBase
     RomSetModel         _selectedRomSet;
     Vfs                 _vfs;
 
+    // Mock
+    public MainWindowViewModel() {}
+
     public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
     {
         _view                  = view;

@@ -49,6 +49,41 @@ public class EditDatViewModel : ViewModelBase
     string               _name;
     string               _version;
 
+    // Mock
+    public EditDatViewModel()
+    {
+        var romSet = new RomSetModel
+        {
+            Author             = "Author",
+            Comment            = "Comment",
+            Category           = "Category",
+            Date               = "Date",
+            Description        = "Description",
+            Homepage           = "http://example.com",
+            Name               = "Name",
+            Version            = "Version",
+            Filename           = "Filename.dat",
+            Sha384             = "MOCKEDSHA384HASH",
+            TotalMachines      = 100,
+            CompleteMachines   = 80,
+            IncompleteMachines = 20,
+            TotalRoms          = 1000,
+            HaveRoms           = 800,
+            MissRoms           = 200,
+            Id                 = 1
+        };
+
+        _romSet      = romSet;
+        _name        = romSet.Name;
+        _version     = romSet.Version;
+        _author      = romSet.Author;
+        _comment     = romSet.Comment;
+        _category    = romSet.Category;
+        _date        = romSet.Date;
+        _description = romSet.Description;
+        _homepage    = romSet.Homepage;
+    }
+
     public EditDatViewModel(EditDat view, RomSetModel romSet)
     {
         _view         = view;

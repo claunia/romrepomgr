@@ -48,6 +48,9 @@ public sealed class ImportDatViewModel : ViewModelBase
     bool                 _progressVisible;
     string               _statusMessage;
 
+    // Mock
+    public ImportDatViewModel() {}
+
     public ImportDatViewModel(ImportDat view, string datPath)
     {
         _view                            =  view;

@@ -56,6 +56,9 @@ public sealed class SettingsViewModel : ViewModelBase
     string                  _unArPath;
     string                  _unArVersion;
 
+    // Mock
+    public SettingsViewModel() {}
+
     public SettingsViewModel(SettingsDialog view)
     {
         _view              = view;
