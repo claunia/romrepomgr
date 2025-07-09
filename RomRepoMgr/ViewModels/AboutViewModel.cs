@@ -25,11 +25,9 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
@@ -43,10 +41,35 @@ public sealed class AboutViewModel : ViewModelBase
     readonly About _view;
     string         _versionText;
 
+    public AboutViewModel()
+    {
+        LoadData();
+    }
+
     public AboutViewModel(About view)
     {
         _view = view;
 
+        LoadData();
+    }
+
+    public string                              SoftwareName   => "RomRepoMgr";
+    public string                              SuiteName      => "ROM Repository Manager";
+    public string                              Copyright      => "© 2020-2024 Natalia Portillo";
+    public string                              Website        => "https://www.claunia.com";
+    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; private set; }
+    public ObservableCollection<AssemblyModel> Assemblies     { get; private set; }
+
+    public string VersionText
+    {
+        get => _versionText;
+        private set => this.RaiseAndSetIfChanged(ref _versionText, value);
+    }
+
+    void LoadData()
+    {
         VersionText =
             (Attribute.GetCustomAttribute(typeof(App).Assembly, typeof(AssemblyInformationalVersionAttribute)) as
                  AssemblyInformationalVersionAttribute)?.InformationalVersion;
@@ -79,21 +102,6 @@ public sealed class AboutViewModel : ViewModelBase
                 });
             }
         });
-    }
-
-    public string                              SoftwareName   => "RomRepoMgr";
-    public string                              SuiteName      => "ROM Repository Manager";
-    public string                              Copyright      => "© 2020-2024 Natalia Portillo";
-    public string                              Website        => "https://www.claunia.com";
-    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; }
-    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; }
-    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; }
-    public ObservableCollection<AssemblyModel> Assemblies     { get; }
-
-    public string VersionText
-    {
-        get => _versionText;
-        set => this.RaiseAndSetIfChanged(ref _versionText, value);
     }
 
     void ExecuteWebsiteCommand()
