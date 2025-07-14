@@ -386,4 +386,7 @@ This will take a long time...</value>
     <data name="NativeMenuQuitText" xml:space="preserve">
         <value>_Quit</value>
     </data>
+    <data name="ProgressLabel" xml:space="preserve">
+        <value>Progress</value>
+    </data>
 </root>

@@ -764,5 +764,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("NativeMenuQuitText", resourceCulture);
             }
         }
+        
+        public static string ProgressLabel {
+            get {
+                return ResourceManager.GetString("ProgressLabel", resourceCulture);
+            }
+        }
     }
 }

@@ -1,139 +1,125 @@
-﻿<!--
-// /***************************************************************************
-// RomRepoMgr - ROM repository manager
-// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
-//
-// Author(s)      : Natalia Portillo <claunia@claunia.com>
-//
-// ‐‐[ License ] ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
-//
-//     This program is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU General public License as
-//     published by the Free Software Foundation, either version 3 of the
-//     License, or (at your option) any later version.
-//
-//     This program is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General public License for more details.
-//
-//     You should have received a copy of the GNU General public License
-//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
-// Copyright © 2020-2024 Natalia Portillo
-// ****************************************************************************/
--->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels;assembly=RomRepoMgr"
+        xmlns:vm="clr-namespace:RomRepoMgr.ViewModels"
         xmlns:resources="clr-namespace:RomRepoMgr.Resources"
+        xmlns:models="clr-namespace:RomRepoMgr.Models"
         mc:Ignorable="d"
-        Width="480"
-        Height="360"
+        Width="800"
+        Height="600"
         x:Class="RomRepoMgr.Views.ImportDatFolder"
-        Icon="/Assets/avalonia-logo.ico"
-        CanResize="False"
         Title="{x:Static resources:Localization.ImportDatFolderTitle}"
-        WindowStartupLocation="CenterOwner">
+        Icon="/Assets/avalonia-logo.ico"
+        CanResize="False">
     <Design.DataContext>
         <vm:ImportDatFolderViewModel />
     </Design.DataContext>
-    <Border Padding="15">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*,Auto">
-            <StackPanel Grid.Row="0"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Stretch">
-                <TextBlock Text="{x:Static resources:Localization.PathLabel}"
-                           FontWeight="Bold" />
-                <TextBlock Text="{Binding FolderPath, Mode=OneWay}" />
-            </StackPanel>
-            <Grid Grid.Row="1"
-                  ColumnDefinitions="Auto,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetCategoryLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Category, Mode=OneWay}"
-                         Padding="5" />
-            </Grid>
-            <CheckBox Grid.Row="2"
-                      IsChecked="{Binding AllFilesChecked, Mode=TwoWay}"
-                      IsEnabled="{Binding IsReady, Mode=OneWay}">
-                <CheckBox.Content>
-                    <TextBlock Text="{x:Static resources:Localization.AllFilesLabel}" />
-                </CheckBox.Content>
-            </CheckBox>
-            <CheckBox Grid.Row="3"
-                      IsChecked="{Binding RecursiveChecked, Mode=TwoWay}"
-                      IsEnabled="{Binding IsReady, Mode=OneWay}">
-                <CheckBox.Content>
-                    <TextBlock Text="{x:Static resources:Localization.RecursiveLabel}" />
-                </CheckBox.Content>
-            </CheckBox>
-            <TextBlock Grid.Row="4"
-                       Text="{Binding StatusMessage, Mode=OneWay}"
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, *, Auto"
+          Margin="16"
+          RowSpacing="8">
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Stretch"
+                    Spacing="8">
+            <Button Content="{x:Static resources:Localization.ChooseLabel}"
+                    Command="{Binding SelectFolderCommand, Mode=OneWay}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center" />
+            <TextBlock Text="{x:Static resources:Localization.PathLabel}"
                        FontWeight="Bold"
-                       HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="5"
-                         Minimum="{Binding ProgressMinimum, Mode=OneWay}"
-                         Maximum="{Binding ProgressMaximum, Mode=OneWay}"
-                         Value="{Binding ProgressValue, Mode=OneWay}"
-                         IsIndeterminate="{Binding ProgressIsIndeterminate, Mode=OneWay}"
-                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
-            <StackPanel Grid.Row="6"
-                        IsVisible="{Binding Progress2Visible, Mode=OneWay}">
-                <TextBlock Text="{Binding Status2Message, Mode=OneWay}" />
-                <ProgressBar Minimum="{Binding Progress2Minimum, Mode=OneWay}"
-                             Maximum="{Binding Progress2Maximum, Mode=OneWay}"
-                             Value="{Binding Progress2Value, Mode=OneWay}"
-                             IsIndeterminate="{Binding Progress2IsIndeterminate, Mode=OneWay}" />
-            </StackPanel>
-            <DataGrid Grid.Row="7"
-                      ItemsSource="{Binding ImportResults, Mode=OneWay}"
-                      HorizontalScrollBarVisibility="Visible"
-                      IsVisible="{Binding IsImporting, Mode=OneWay}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Filename, Mode=OneWay}"
-                                        Width="Auto"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{x:Static resources:Localization.ResultFilenameLabel}" />
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Status, Mode=OneWay}"
-                                        Width="Auto"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{x:Static resources:Localization.ResultStatusLabel}" />
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Grid.Row="8"
-                        Orientation="Horizontal"
-                        IsVisible="{Binding IsReady, Mode=OneWay}"
-                        HorizontalAlignment="Right">
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        IsEnabled="{Binding CanClose, Mode=OneWay}"
-                        Command="{Binding CloseCommand, Mode=OneWay}">
-                    <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
-                </Button>
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        IsEnabled="{Binding CanStart, Mode=OneWay}"
-                        Command="{Binding StartCommand, Mode=OneWay}">
-                    <TextBlock Text="{x:Static resources:Localization.StartLabel}" />
-                </Button>
-            </StackPanel>
+                       VerticalAlignment="Center" />
+            <TextBlock Text="{Binding FolderPath, Mode=OneWay}"
+                       VerticalAlignment="Center" />
+        </StackPanel>
+        <Grid Grid.Row="1"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="8">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetCategoryLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Category, Mode=OneWay}" />
         </Grid>
-    </Border>
+        <CheckBox Grid.Row="2"
+                  IsChecked="{Binding AllFilesChecked, Mode=TwoWay}"
+                  IsEnabled="{Binding IsReady, Mode=OneWay}">
+            <CheckBox.Content>
+                <TextBlock Text="{x:Static resources:Localization.AllFilesLabel}" />
+            </CheckBox.Content>
+        </CheckBox>
+        <CheckBox Grid.Row="3"
+                  IsChecked="{Binding RecursiveChecked, Mode=TwoWay}"
+                  IsEnabled="{Binding IsReady, Mode=OneWay}">
+            <CheckBox.Content>
+                <TextBlock Text="{x:Static resources:Localization.RecursiveLabel}" />
+            </CheckBox.Content>
+        </CheckBox>
+        <TextBlock Grid.Row="4"
+                   Text="{Binding StatusMessage, Mode=OneWay}"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center" />
+        <ProgressBar Grid.Row="5"
+                     Minimum="{Binding ProgressMinimum, Mode=OneWay}"
+                     Maximum="{Binding ProgressMaximum, Mode=OneWay}"
+                     Value="{Binding ProgressValue, Mode=OneWay}"
+                     IsIndeterminate="{Binding ProgressIsIndeterminate, Mode=OneWay}"
+                     IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
+        <DataGrid Grid.Row="6"
+                  ItemsSource="{Binding Importers, Mode=OneWay}"
+                  HorizontalScrollBarVisibility="Visible"
+                  IsVisible="{Binding IsImporting, Mode=OneWay}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Filename, Mode=OneWay}"
+                                    Width="Auto"
+                                    IsReadOnly="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{x:Static resources:Localization.ResultFilenameLabel}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding StatusMessage, Mode=OneWay}"
+                                    Width="Auto"
+                                    IsReadOnly="True"
+                                    Foreground="{Binding StatusColor, Mode=OneWay}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{x:Static resources:Localization.ResultStatusLabel}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Width="Auto"
+                                        MinWidth="180"
+                                        Header="{x:Static resources:Localization.ProgressLabel}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:DatImporter">
+                            <ProgressBar Minimum="{Binding Minimum, Mode=OneWay}"
+                                         Maximum="{Binding Maximum, Mode=OneWay}"
+                                         Value="{Binding Progress, Mode=OneWay}"
+                                         IsIndeterminate="{Binding Indeterminate, Mode=OneWay}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="7"
+                    Orientation="Horizontal"
+                    IsVisible="{Binding IsReady, Mode=OneWay}"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding CanClose, Mode=OneWay}"
+                    Command="{Binding CloseCommand, Mode=OneWay}">
+                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
+            </Button>
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding CanStart, Mode=OneWay}"
+                    Command="{Binding StartCommand, Mode=OneWay}">
+                <TextBlock Text="{x:Static resources:Localization.StartLabel}" />
+            </Button>
+        </StackPanel>
+    </Grid>
 </Window>

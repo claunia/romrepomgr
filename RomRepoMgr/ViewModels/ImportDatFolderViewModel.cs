@@ -1,89 +1,71 @@
-﻿/******************************************************************************
-// RomRepoMgr - ROM repository manager
-// ----------------------------------------------------------------------------
-//
-// Author(s)      : Natalia Portillo <claunia@claunia.com>
-//
-// --[ License ] --------------------------------------------------------------
-//
-//     This program is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU General Public License as
-//     published by the Free Software Foundation, either version 3 of the
-//     License, or (at your option) any later version.
-//
-//     This program is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
-//
-//     You should have received a copy of the GNU General Public License
-//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// ----------------------------------------------------------------------------
-// Copyright © 2020-2024 Natalia Portillo
-*******************************************************************************/
-
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
-using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
-using RomRepoMgr.Views;
-using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class ImportDatFolderViewModel : ViewModelBase
+public class ImportDatFolderViewModel : ViewModelBase
 {
-    readonly ImportDatFolder _view;
-    bool                     _allFilesChecked;
-    bool                     _canClose;
-    bool                     _canStart;
-    string                   _category;
-    string[]                 _datFiles;
-    bool                     _isImporting;
-    bool                     _isReady;
-    int                      _listPosition;
-    bool                     _progress2IsIndeterminate;
-    double                   _progress2Maximum;
-    double                   _progress2Minimum;
-    double                   _progress2Value;
-    bool                     _progress2Visible;
-    bool                     _progressIsIndeterminate;
-    double                   _progressMaximum;
-    double                   _progressMinimum;
-    double                   _progressValue;
-    bool                     _progressVisible;
-    bool                     _recursiveChecked;
-    string                   _status2Message;
-    string                   _statusMessage;
+    readonly Stopwatch _stopwatch = new();
+    bool               _allFilesChecked;
+    bool               _canClose;
+    bool               _canStart;
+    string             _category;
+    string[]           _datFiles;
+    string             _folderPath;
+    bool               _isImporting;
+    bool               _isReady;
+    int                _listPosition;
+    bool               _progressIsIndeterminate;
+    double             _progressMaximum;
+    double             _progressMinimum;
+    double             _progressValue;
+    bool               _progressVisible;
+    bool               _recursiveChecked;
+    string             _statusMessage;
+    int                _workers;
 
-    // Mock
     public ImportDatFolderViewModel()
     {
-#pragma warning disable PH2080
-        FolderPath = "C:\\ROMs";
-#pragma warning restore PH2080
+        CanClose            = true;
+        IsReady             = true;
+        SelectFolderCommand = ReactiveCommand.CreateFromTask(SelectFolderAsync);
+        CloseCommand        = ReactiveCommand.Create(Close);
+        StartCommand        = ReactiveCommand.Create(Start);
     }
 
-    public ImportDatFolderViewModel(ImportDatFolder view, string folderPath)
+    public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; }
+    public Window                      View                { get; init; }
+
+    public bool IsReady
     {
-        _view             = view;
-        FolderPath        = folderPath;
-        _allFilesChecked  = false;
-        _recursiveChecked = true;
-        ImportResults     = [];
-        CloseCommand      = ReactiveCommand.Create(ExecuteCloseCommand);
-        StartCommand      = ReactiveCommand.Create(ExecuteStartCommand);
+        get => _isReady;
+        set => this.RaiseAndSetIfChanged(ref _isReady, value);
     }
 
-    public string FolderPath { get; }
+    public string FolderPath
+    {
+        get => _folderPath;
+        set => this.RaiseAndSetIfChanged(ref _folderPath, value);
+    }
+
+    public string Category
+    {
+        get => _category;
+        set => this.RaiseAndSetIfChanged(ref _category, value);
+    }
 
     public bool AllFilesChecked
     {
@@ -105,22 +87,34 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         }
     }
 
-    public bool IsReady
-    {
-        get => _isReady;
-        set => this.RaiseAndSetIfChanged(ref _isReady, value);
-    }
-
     public bool ProgressVisible
     {
         get => _progressVisible;
         set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
     }
 
+    public bool ProgressIsIndeterminate
+    {
+        get => _progressIsIndeterminate;
+        set => this.RaiseAndSetIfChanged(ref _progressIsIndeterminate, value);
+    }
+
     public string StatusMessage
     {
         get => _statusMessage;
         set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
+    }
+
+    public bool CanClose
+    {
+        get => _canClose;
+        set => this.RaiseAndSetIfChanged(ref _canClose, value);
+    }
+
+    public bool CanStart
+    {
+        get => _canStart;
+        set => this.RaiseAndSetIfChanged(ref _canStart, value);
     }
 
     public double ProgressMinimum
@@ -141,78 +135,113 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _progressValue, value);
     }
 
-    public bool ProgressIsIndeterminate
-    {
-        get => _progressIsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progressIsIndeterminate, value);
-    }
-
-    public bool Progress2Visible
-    {
-        get => _progress2Visible;
-        set => this.RaiseAndSetIfChanged(ref _progress2Visible, value);
-    }
-
-    public string Status2Message
-    {
-        get => _status2Message;
-        set => this.RaiseAndSetIfChanged(ref _status2Message, value);
-    }
-
-    public double Progress2Minimum
-    {
-        get => _progress2Minimum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Minimum, value);
-    }
-
-    public double Progress2Maximum
-    {
-        get => _progress2Maximum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Maximum, value);
-    }
-
-    public double Progress2Value
-    {
-        get => _progress2Value;
-        set => this.RaiseAndSetIfChanged(ref _progress2Value, value);
-    }
-
-    public bool Progress2IsIndeterminate
-    {
-        get => _progress2IsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progress2IsIndeterminate, value);
-    }
-
     public bool IsImporting
     {
         get => _isImporting;
         set => this.RaiseAndSetIfChanged(ref _isImporting, value);
     }
 
-    public string Category
+    public ReactiveCommand<Unit, Unit>       CloseCommand { get; }
+    public ReactiveCommand<Unit, Unit>       StartCommand { get; }
+    public ObservableCollection<DatImporter> Importers    { get; } = [];
+
+    void Start()
     {
-        get => _category;
-        set => this.RaiseAndSetIfChanged(ref _category, value);
+        _listPosition           = 0;
+        ProgressMinimum         = 0;
+        ProgressMaximum         = _datFiles.Length;
+        ProgressValue           = 0;
+        ProgressIsIndeterminate = false;
+        ProgressVisible         = true;
+        CanClose                = false;
+        CanStart                = false;
+        IsReady                 = false;
+        IsImporting             = true;
+        _workers                = 0;
+        _stopwatch.Restart();
+
+        Import();
     }
 
-    public ObservableCollection<ImportDatFolderItem> ImportResults { get; }
-
-    public bool CanClose
+    void Import()
     {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
+        Dispatcher.UIThread.Post(() =>
+        {
+            if(_listPosition >= _datFiles.Length)
+            {
+                if(_workers != 0) return;
+
+                ProgressVisible = false;
+                StatusMessage   = Localization.Finished;
+                CanClose        = true;
+                CanStart        = false;
+                IsReady         = true;
+                _stopwatch.Stop();
+
+                return;
+            }
+
+            StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
+            ProgressValue = _listPosition;
+
+            var model = new DatImporter
+            {
+                Filename      = Path.GetFileName(_datFiles[_listPosition]),
+                Minimum       = 0,
+                Maximum       = _datFiles.Length,
+                Progress      = 0,
+                Indeterminate = false
+            };
+
+            var worker = new Core.Workers.DatImporter(_datFiles[_listPosition], Category);
+            worker.ErrorOccurred            += model.OnErrorOccurred;
+            worker.SetIndeterminateProgress += model.OnSetIndeterminateProgress;
+            worker.SetMessage               += model.OnSetMessage;
+            worker.SetProgress              += model.OnSetProgress;
+            worker.SetProgressBounds        += model.OnSetProgressBounds;
+            worker.WorkFinished             += model.OnWorkFinished;
+            worker.RomSetAdded              += RomSetAdded;
+
+            worker.WorkFinished += (_, _) =>
+            {
+                _workers--;
+
+                if(_workers < Environment.ProcessorCount) Import();
+            };
+
+            Importers.Add(model);
+
+            model.Task = Task.Run(worker.Import);
+
+            _workers++;
+            _listPosition++;
+
+            if(_workers < Environment.ProcessorCount) Import();
+        });
     }
 
-    public bool CanStart
+    public event EventHandler<RomSetEventArgs> RomSetAdded;
+
+    void Close()
     {
-        get => _canStart;
-        set => this.RaiseAndSetIfChanged(ref _canStart, value);
+        View.Close();
     }
 
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
-    public ReactiveCommand<Unit, Unit> StartCommand { get; }
+    async Task SelectFolderAsync()
+    {
+        IReadOnlyList<IStorageFolder> result =
+            await View.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ImportDatFolderDialogTitle
+            });
 
-    internal void OnOpened() => RefreshFiles();
+        if(result.Count < 1) return;
+
+        FolderPath       = result[0].TryGetLocalPath() ?? string.Empty;
+        RecursiveChecked = true;
+        AllFilesChecked  = false;
+        RefreshFiles();
+    }
 
     void RefreshFiles()
     {
@@ -222,7 +251,6 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
             {
                 IsReady                 = false;
                 ProgressVisible         = true;
-                Progress2Visible        = false;
                 ProgressIsIndeterminate = true;
                 StatusMessage           = Localization.SearchingForFiles;
             });
@@ -264,99 +292,4 @@ public sealed class ImportDatFolderViewModel : ViewModelBase
             });
         });
     }
-
-    void ExecuteCloseCommand() => _view.Close();
-
-    void ExecuteStartCommand()
-    {
-        _listPosition           = 0;
-        ProgressMinimum         = 0;
-        ProgressMaximum         = _datFiles.Length;
-        ProgressValue           = 0;
-        ProgressIsIndeterminate = false;
-        ProgressVisible         = true;
-        Progress2Visible        = true;
-        CanClose                = false;
-        CanStart                = false;
-        IsReady                 = false;
-        IsImporting             = true;
-
-        Import();
-    }
-
-    void Import()
-    {
-        if(_listPosition >= _datFiles.Length)
-        {
-            Progress2Visible = false;
-            ProgressVisible  = false;
-            StatusMessage    = Localization.Finished;
-            CanClose         = true;
-            CanStart         = false;
-            IsReady          = true;
-
-            return;
-        }
-
-        StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
-        ProgressValue = _listPosition;
-
-        var worker = new DatImporter(_datFiles[_listPosition], Category);
-        worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
-        worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
-        worker.SetMessage               += OnWorkerOnSetMessage;
-        worker.SetProgress              += OnWorkerOnSetProgress;
-        worker.SetProgressBounds        += OnWorkerOnSetProgressBounds;
-        worker.WorkFinished             += OnWorkerOnWorkFinished;
-        worker.RomSetAdded              += RomSetAdded;
-        _                               =  Task.Run(worker.Import);
-    }
-
-    void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
-    {
-        ImportResults.Add(new ImportDatFolderItem
-        {
-            Filename = Path.GetFileName(_datFiles[_listPosition]),
-            Status   = args.Message
-        });
-
-        _listPosition++;
-        Import();
-    });
-
-    void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
-    {
-        Progress2IsIndeterminate = false;
-        Progress2Maximum         = args.Maximum;
-        Progress2Minimum         = args.Minimum;
-    });
-
-    void OnWorkerOnSetProgress(object sender, ProgressEventArgs args) =>
-        Dispatcher.UIThread.Post(() => Progress2Value = args.Value);
-
-    void OnWorkerOnSetMessage(object sender, MessageEventArgs args) =>
-        Dispatcher.UIThread.Post(() => Status2Message = args.Message);
-
-    void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
-        Dispatcher.UIThread.Post(() => Progress2IsIndeterminate = true);
-
-    void OnWorkerOnErrorOccurred(object sender, ErrorEventArgs args) => Dispatcher.UIThread.Post(() =>
-    {
-        ImportResults.Add(new ImportDatFolderItem
-        {
-            Filename = Path.GetFileName(_datFiles[_listPosition]),
-            Status   = args.Message
-        });
-
-        _listPosition++;
-        Import();
-    });
-
-    public event EventHandler<RomSetEventArgs> RomSetAdded;
-}
-
-public sealed class ImportDatFolderItem
-{
-    public string Filename { get; set; }
-    public string Status   { get; set; }
 }

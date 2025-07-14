@@ -156,19 +156,17 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ExecuteImportDatFolderCommandAsync()
     {
-        IReadOnlyList<IStorageFolder> result =
-            await _view.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = Localization.ImportDatFolderDialogTitle
-            });
+        var dialog = new ImportDatFolder();
 
-        if(result.Count < 1) return;
+        var viewModel = new ImportDatFolderViewModel
+        {
+            View = dialog
+        };
 
-        var dialog                   = new ImportDatFolder();
-        var importDatFolderViewModel = new ImportDatFolderViewModel(dialog, result[0].Path.LocalPath);
-        importDatFolderViewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
-        dialog.DataContext                   =  importDatFolderViewModel;
-        _                                    =  dialog.ShowDialog(_view);
+        viewModel.RomSetAdded += ImportDatViewModelOnRomSetAdded;
+
+        dialog.DataContext = viewModel;
+        _                  = dialog.ShowDialog(_view);
     }
 
     async Task ExecuteImportRomFolderCommandAsync()

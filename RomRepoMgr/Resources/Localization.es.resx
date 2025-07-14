@@ -378,4 +378,7 @@ Tardará mucho tiempo...</value>
     <data name="NativeMenuQuitText" xml:space="preserve">
         <value>_Salir</value>
     </data>
+    <data name="ProgressLabel" xml:space="preserve">
+        <value>Progreso</value>
+    </data>
 </root>
