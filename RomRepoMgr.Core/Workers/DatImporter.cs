@@ -30,6 +30,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Aaru.Checksums;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -53,11 +54,11 @@ namespace RomRepoMgr.Core.Workers;
 
 public sealed class DatImporter
 {
-    private static readonly object _dbLock = new();
-    readonly                string _category;
-    readonly                string _datFilesPath;
-    readonly                string _datPath;
-    bool                           _aborted;
+    static readonly Lock   DbLock = new();
+    readonly        string _category;
+    readonly        string _datFilesPath;
+    readonly        string _datPath;
+    bool                   _aborted;
 
     public DatImporter(string datPath, string category)
     {
@@ -133,7 +134,7 @@ public sealed class DatImporter
                 Category    = _category
             };
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.RomSets.Add(romSet);
                 ctx.SaveChanges();
@@ -171,7 +172,7 @@ public sealed class DatImporter
                                           Maximum = machineNames.Count
                                       });
 
-            var position = 0;
+            int position = 0;
             var machines = new Dictionary<string, Machine>();
 
             foreach(string name in machineNames)
@@ -203,7 +204,7 @@ public sealed class DatImporter
 
             SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(machines.Values.ToList(), b => b.SetOutputIdentity = true);
                 ctx.SaveChanges();
@@ -219,29 +220,29 @@ public sealed class DatImporter
             var disks  = new List<Disk>();
             var medias = new List<Media>();
 
-            var tmpRomCrc32Table    = Guid.NewGuid().ToString();
-            var tmpRomMd5Table      = Guid.NewGuid().ToString();
-            var tmpRomSha1Table     = Guid.NewGuid().ToString();
-            var tmpRomSha256Table   = Guid.NewGuid().ToString();
-            var tmpRomSha384Table   = Guid.NewGuid().ToString();
-            var tmpRomSha512Table   = Guid.NewGuid().ToString();
-            var tmpDiskMd5Table     = Guid.NewGuid().ToString();
-            var tmpDiskSha1Table    = Guid.NewGuid().ToString();
-            var tmpMediaMd5Table    = Guid.NewGuid().ToString();
-            var tmpMediaSha1Table   = Guid.NewGuid().ToString();
-            var tmpMediaSha256Table = Guid.NewGuid().ToString();
+            string tmpRomCrc32Table    = Guid.NewGuid().ToString();
+            string tmpRomMd5Table      = Guid.NewGuid().ToString();
+            string tmpRomSha1Table     = Guid.NewGuid().ToString();
+            string tmpRomSha256Table   = Guid.NewGuid().ToString();
+            string tmpRomSha384Table   = Guid.NewGuid().ToString();
+            string tmpRomSha512Table   = Guid.NewGuid().ToString();
+            string tmpDiskMd5Table     = Guid.NewGuid().ToString();
+            string tmpDiskSha1Table    = Guid.NewGuid().ToString();
+            string tmpMediaMd5Table    = Guid.NewGuid().ToString();
+            string tmpMediaSha1Table   = Guid.NewGuid().ToString();
+            string tmpMediaSha256Table = Guid.NewGuid().ToString();
 
-            var romsHaveCrc      = false;
-            var romsHaveMd5      = false;
-            var romsHaveSha1     = false;
-            var romsHaveSha256   = false;
-            var romsHaveSha384   = false;
-            var romsHaveSha512   = false;
-            var disksHaveMd5     = false;
-            var disksHaveSha1    = false;
-            var mediasHaveMd5    = false;
-            var mediasHaveSha1   = false;
-            var mediasHaveSha256 = false;
+            bool romsHaveCrc      = false;
+            bool romsHaveMd5      = false;
+            bool romsHaveSha1     = false;
+            bool romsHaveSha256   = false;
+            bool romsHaveSha384   = false;
+            bool romsHaveSha512   = false;
+            bool disksHaveMd5     = false;
+            bool disksHaveSha1    = false;
+            bool mediasHaveMd5    = false;
+            bool mediasHaveSha1   = false;
+            bool mediasHaveSha256 = false;
 
             DbConnection dbConnection = ctx.Database.GetDbConnection();
             dbConnection.Open();
@@ -267,7 +268,7 @@ public sealed class DatImporter
             Dictionary<string, DbMedia> pendingMediasBySha1;
             Dictionary<string, DbMedia> pendingMediasBySha256;
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 using(DbTransaction dbTransaction = dbConnection.BeginTransaction())
                 {
@@ -587,7 +588,7 @@ public sealed class DatImporter
             pendingFilesBySha384List.Clear();
             pendingFilesBySha512List.Clear();
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomCrc32Table}]");
                 ctx.Database.ExecuteSqlRaw($"DROP TABLE [{tmpRomMd5Table}]");
@@ -622,7 +623,7 @@ public sealed class DatImporter
 
             foreach(Rom rom in roms)
             {
-                var hashCollision = false;
+                bool hashCollision = false;
 
                 SetProgress?.Invoke(this,
                                     new ProgressEventArgs
@@ -644,7 +645,7 @@ public sealed class DatImporter
                     return;
                 }
 
-                var uSize = (ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey);
+                ulong uSize = (ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey);
 
                 DbFile file = null;
 
@@ -904,7 +905,7 @@ public sealed class DatImporter
 
             SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newFiles, b => b.SetOutputIdentity = true);
             }
@@ -915,7 +916,7 @@ public sealed class DatImporter
                 fbm.MachineId = fbm.Machine.Id;
             }
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newFilesByMachine);
 
@@ -1043,7 +1044,7 @@ public sealed class DatImporter
 
             SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newDisks, b => b.SetOutputIdentity = true);
             }
@@ -1054,7 +1055,7 @@ public sealed class DatImporter
                 dbm.MachineId = dbm.Machine.Id;
             }
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newDisksByMachine);
 
@@ -1196,7 +1197,7 @@ public sealed class DatImporter
 
             SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newMedias, b => b.SetOutputIdentity = true);
             }
@@ -1207,7 +1208,7 @@ public sealed class DatImporter
                 mbm.MachineId = mbm.Machine.Id;
             }
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 ctx.BulkInsert(newMediasByMachine);
 
@@ -1221,7 +1222,7 @@ public sealed class DatImporter
             newMediasByMachine.Clear();
             RomSetStat stats;
 
-            lock(_dbLock)
+            lock(DbLock)
             {
                 stats = ctx.RomSets.Where(r => r.Id == romSet.Id)
                            .Select(r => new RomSetStat
