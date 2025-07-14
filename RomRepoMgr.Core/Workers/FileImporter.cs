@@ -18,7 +18,7 @@ using SharpCompress.Compressors.LZMA;
 
 namespace RomRepoMgr.Core.Workers;
 
-public class FileImporter(bool onlyKnown, bool deleteAfterImport)
+public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 {
     const    long                        BUFFER_SIZE = 131072;
     readonly Context                     _ctx = Context.Create(Settings.Settings.Current.DatabasePath);
@@ -267,7 +267,7 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
                     _position++;
                 }
-                catch(Exception)
+                catch
                 {
                     ImportedRom?.Invoke(this,
                                         new ImportedRomItemEventArgs
@@ -278,7 +278,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                                 Status   = Localization.UnhandledException
                                             }
                                         });
+#pragma warning disable ERP022
                 }
+#pragma warning restore ERP022
             }
 
             if(!rootPath) return;
@@ -286,11 +288,13 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
             SaveChanges();
             Finished?.Invoke(this, System.EventArgs.Empty);
         }
-        catch(Exception)
+        catch
         {
             // TODO: Send error back
             if(rootPath) Finished?.Invoke(this, System.EventArgs.Empty);
+#pragma warning disable ERP022
         }
+#pragma warning restore ERP022
     }
 
     bool ImportRom(string path)
@@ -342,20 +346,20 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
                 buffer = new byte[remainder];
                 inFs.EnsureRead(buffer, 0, (int)remainder);
-                checksumWorker.Update(buffer);
             }
             else
             {
                 SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
                 buffer = new byte[inFs.Length];
                 inFs.EnsureRead(buffer, 0, (int)inFs.Length);
-                checksumWorker.Update(buffer);
             }
+
+            checksumWorker.Update(buffer);
 
             Dictionary<ChecksumType, string> checksums = checksumWorker.End();
 
-            var uSize    = (ulong)inFs.Length;
-            var fileInDb = true;
+            ulong uSize    = (ulong)inFs.Length;
+            bool  fileInDb = true;
 
             bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
@@ -395,10 +399,10 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(!knownFile) _pendingFiles[checksums[ChecksumType.Sha512]] = dbFile;
 
-            var    sha384Bytes = new byte[48];
+            byte[] sha384Bytes = new byte[48];
             string sha384      = checksums[ChecksumType.Sha384];
 
-            for(var i = 0; i < 48; i++)
+            for(int i = 0; i < 48; i++)
             {
                 if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                     sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
@@ -482,8 +486,7 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
             inFs.Position = 0;
 
             var    outFs   = new FileStream(repoPath, FileMode.CreateNew, FileAccess.Write);
-            Stream zStream = null;
-            zStream = new LZipStream(outFs, CompressionMode.Compress);
+            Stream zStream = new LZipStream(outFs, CompressionMode.Compress);
 
             SetProgressBounds2?.Invoke(this,
                                        new ProgressBoundsEventArgs
@@ -544,11 +547,13 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             return true;
         }
-        catch(Exception e)
+        catch
         {
             _lastMessage = Localization.UnhandledExceptionWhenImporting;
 
+#pragma warning disable ERP022
             return false;
+#pragma warning restore ERP022
         }
     }
 
@@ -585,9 +590,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.MD5 != null)
             {
-                var chdArray = new char[32];
+                char[] chdArray = new char[32];
 
-                for(var i = 0; i < 16; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     int nibble1 = chd.MD5[i] >> 4;
                     int nibble2 = chd.MD5[i] & 0xF;
@@ -604,9 +609,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.SHA1 != null)
             {
-                var chdArray = new char[40];
+                char[] chdArray = new char[40];
 
-                for(var i = 0; i < 20; i++)
+                for(int i = 0; i < 20; i++)
                 {
                     int nibble1 = chd.SHA1[i] >> 4;
                     int nibble2 = chd.SHA1[i] & 0xF;
@@ -621,11 +626,11 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha1 = new string(chdArray);
             }
 
-            var    uSize              = (ulong)inFs.Length;
-            var    diskInDb           = true;
+            ulong  uSize              = (ulong)inFs.Length;
+            bool   diskInDb           = true;
             DbDisk dbDisk             = null;
-            var    knownDisk          = false;
-            var    knownDiskWasBigger = false;
+            bool   knownDisk          = false;
+            bool   knownDiskWasBigger = false;
 
             if(sha1 != null) knownDisk = _pendingDisksBySha1.TryGetValue(sha1, out dbDisk);
 
@@ -773,7 +778,7 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            var buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -820,11 +825,13 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             return true;
         }
-        catch(Exception e)
+        catch
         {
             _lastMessage = Localization.UnhandledExceptionWhenImporting;
 
+#pragma warning disable ERP022
             return false;
+#pragma warning restore ERP022
         }
     }
 
@@ -862,9 +869,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.MD5 != null)
             {
-                var chdArray = new char[32];
+                char[] chdArray = new char[32];
 
-                for(var i = 0; i < 16; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     int nibble1 = aif.MD5[i] >> 4;
                     int nibble2 = aif.MD5[i] & 0xF;
@@ -881,9 +888,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA1 != null)
             {
-                var chdArray = new char[40];
+                char[] chdArray = new char[40];
 
-                for(var i = 0; i < 20; i++)
+                for(int i = 0; i < 20; i++)
                 {
                     int nibble1 = aif.SHA1[i] >> 4;
                     int nibble2 = aif.SHA1[i] & 0xF;
@@ -900,9 +907,9 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA256 != null)
             {
-                var chdArray = new char[64];
+                char[] chdArray = new char[64];
 
-                for(var i = 0; i < 32; i++)
+                for(int i = 0; i < 32; i++)
                 {
                     int nibble1 = aif.SHA256[i] >> 4;
                     int nibble2 = aif.SHA256[i] & 0xF;
@@ -917,11 +924,11 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha256 = new string(chdArray);
             }
 
-            var     uSize               = (ulong)inFs.Length;
-            var     mediaInDb           = true;
+            ulong   uSize               = (ulong)inFs.Length;
+            bool    mediaInDb           = true;
             DbMedia dbMedia             = null;
-            var     knownMedia          = false;
-            var     knownMediaWasBigger = false;
+            bool    knownMedia          = false;
+            bool    knownMediaWasBigger = false;
 
             if(sha256 != null) knownMedia = _pendingMediasBySha256.TryGetValue(sha256, out dbMedia);
 
@@ -1110,7 +1117,7 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            var buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -1157,11 +1164,13 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             return true;
         }
-        catch(Exception e)
+        catch
         {
             _lastMessage = Localization.UnhandledExceptionWhenImporting;
 
+#pragma warning disable ERP022
             return false;
+#pragma warning restore ERP022
         }
     }
 
@@ -1273,13 +1282,11 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
             {
                 switch(jsReader.TokenType)
                 {
-                    case JsonToken.PropertyName
-                        when jsReader.Value != null && jsReader.Value.ToString() == "XADFileName":
+                    case JsonToken.PropertyName when jsReader.Value?.ToString() == "XADFileName":
                         counter++;
 
                         break;
-                    case JsonToken.PropertyName
-                        when jsReader.Value != null && jsReader.Value.ToString() == "lsarFormatName":
+                    case JsonToken.PropertyName when jsReader.Value?.ToString() == "lsarFormatName":
                         jsReader.Read();
 
                         if(jsReader.TokenType == JsonToken.String && jsReader.Value != null)
@@ -1291,9 +1298,11 @@ public class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             return counter == 0 ? null : format;
         }
-        catch(Exception)
+        catch
         {
+#pragma warning disable ERP022
             return null;
+#pragma warning restore ERP022
         }
     }
 
