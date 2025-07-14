@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RomRepoMgr.Core.Aaru;
@@ -20,20 +21,21 @@ namespace RomRepoMgr.Core.Workers;
 
 public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 {
-    const    long                        BUFFER_SIZE = 131072;
-    readonly Context                     _ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-    readonly List<DbDisk>                _newDisks = [];
-    readonly List<DbFile>                _newFiles = [];
-    readonly List<DbMedia>               _newMedias = [];
-    readonly Dictionary<string, DbDisk>  _pendingDisksByMd5 = [];
-    readonly Dictionary<string, DbDisk>  _pendingDisksBySha1 = [];
-    readonly Dictionary<string, DbFile>  _pendingFiles = [];
-    readonly Dictionary<string, DbMedia> _pendingMediasByMd5 = [];
-    readonly Dictionary<string, DbMedia> _pendingMediasBySha1 = [];
-    readonly Dictionary<string, DbMedia> _pendingMediasBySha256 = [];
-    string                               _lastMessage;
-    long                                 _position;
-    long                                 _totalFiles;
+    const           long                        BUFFER_SIZE = 131072;
+    static readonly Lock                        DbLock = new();
+    readonly        Context                     _ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+    readonly        List<DbDisk>                _newDisks = [];
+    readonly        List<DbFile>                _newFiles = [];
+    readonly        List<DbMedia>               _newMedias = [];
+    readonly        Dictionary<string, DbDisk>  _pendingDisksByMd5 = [];
+    readonly        Dictionary<string, DbDisk>  _pendingDisksBySha1 = [];
+    readonly        Dictionary<string, DbFile>  _pendingFiles = [];
+    readonly        Dictionary<string, DbMedia> _pendingMediasByMd5 = [];
+    readonly        Dictionary<string, DbMedia> _pendingMediasBySha1 = [];
+    readonly        Dictionary<string, DbMedia> _pendingMediasBySha256 = [];
+    string                                      _lastMessage;
+    long                                        _position;
+    long                                        _totalFiles;
 
     public event EventHandler                           SetIndeterminateProgress2;
     public event EventHandler<ProgressBoundsEventArgs>  SetProgressBounds2;
@@ -363,13 +365,16 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
-            dbFile ??= _ctx.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
-                                                       f.Sha384 == checksums[ChecksumType.Sha384] ||
-                                                       f.Sha256 == checksums[ChecksumType.Sha256] ||
-                                                       f.Sha1   == checksums[ChecksumType.Sha1]   ||
-                                                       f.Md5    == checksums[ChecksumType.Md5]    ||
-                                                       f.Crc32  == checksums[ChecksumType.Crc32]) &&
-                                                      f.Size == uSize);
+            lock(DbLock)
+            {
+                dbFile ??= _ctx.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
+                                                           f.Sha384 == checksums[ChecksumType.Sha384] ||
+                                                           f.Sha256 == checksums[ChecksumType.Sha256] ||
+                                                           f.Sha1   == checksums[ChecksumType.Sha1]   ||
+                                                           f.Md5    == checksums[ChecksumType.Md5]    ||
+                                                           f.Crc32  == checksums[ChecksumType.Crc32]) &&
+                                                          f.Size == uSize);
+            }
 
             if(dbFile == null)
             {
@@ -636,8 +641,11 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(!knownDisk && md5 != null) knownDisk = _pendingDisksByMd5.TryGetValue(md5, out dbDisk);
 
-            dbDisk ??=
-                _ctx.Disks.FirstOrDefault(d => d.Sha1 != null && d.Sha1 == sha1 || d.Md5 != null && d.Md5 == sha1);
+            lock(DbLock)
+            {
+                dbDisk ??= _ctx.Disks.FirstOrDefault(d => d.Sha1 != null && d.Sha1 == sha1 ||
+                                                          d.Md5  != null && d.Md5  == sha1);
+            }
 
             if(dbDisk == null)
             {
@@ -936,9 +944,12 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(!knownMedia && md5 != null) knownMedia = _pendingMediasByMd5.TryGetValue(md5, out dbMedia);
 
-            dbMedia ??= _ctx.Medias.FirstOrDefault(d => d.Sha256 != null && d.Sha256 == sha256 ||
-                                                        d.Sha1   != null && d.Sha1   == sha1   ||
-                                                        d.Md5    != null && d.Md5    == sha1);
+            lock(DbLock)
+            {
+                dbMedia ??= _ctx.Medias.FirstOrDefault(d => d.Sha256 != null && d.Sha256 == sha256 ||
+                                                            d.Sha1   != null && d.Sha1   == sha1   ||
+                                                            d.Md5    != null && d.Md5    == sha1);
+            }
 
             if(dbMedia == null)
             {
@@ -1184,58 +1195,61 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                 Message = Localization.SavingChangesToDatabase
                             });
 
-        _ctx.SaveChanges();
+        lock(DbLock)
+        {
+            _ctx.SaveChanges();
 
-        _ctx.Files.AddRange(_newFiles);
-        _ctx.Disks.AddRange(_newDisks);
-        _ctx.Medias.AddRange(_newMedias);
+            _ctx.Files.AddRange(_newFiles);
+            _ctx.Disks.AddRange(_newDisks);
+            _ctx.Medias.AddRange(_newMedias);
 
-        _ctx.SaveChanges();
+            _ctx.SaveChanges();
 
-        _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
+            _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
 
-        _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id)
-                                      .Select(r => new RomSetStat
-                                       {
-                                           RomSetId      = r.Id,
-                                           TotalMachines = r.Machines.Count,
-                                           CompleteMachines =
-                                               r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                     m.Disks.Count == 0 &&
-                                                                     m.Files.All(f => f.File.IsInRepo)) +
-                                               r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                     m.Files.Count == 0 &&
-                                                                     m.Disks.All(f => f.Disk.IsInRepo)) +
-                                               r.Machines.Count(m => m.Files.Count > 0                 &&
-                                                                     m.Disks.Count > 0                 &&
-                                                                     m.Files.All(f => f.File.IsInRepo) &&
-                                                                     m.Disks.All(f => f.Disk.IsInRepo)),
-                                           IncompleteMachines =
-                                               r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                     m.Disks.Count == 0 &&
-                                                                     m.Files.Any(f => !f.File.IsInRepo)) +
-                                               r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                     m.Files.Count == 0 &&
-                                                                     m.Disks.Any(f => !f.Disk.IsInRepo)) +
-                                               r.Machines.Count(m => m.Files.Count > 0 &&
-                                                                     m.Disks.Count > 0 &&
-                                                                     (m.Files.Any(f => !f.File.IsInRepo) ||
-                                                                      m.Disks.Any(f => !f.Disk.IsInRepo))),
-                                           TotalRoms =
-                                               r.Machines.Sum(m => m.Files.Count) +
-                                               r.Machines.Sum(m => m.Disks.Count) +
-                                               r.Machines.Sum(m => m.Medias.Count),
-                                           HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
-                                           MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                                      r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
-                                       }));
+            _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id)
+                                          .Select(r => new RomSetStat
+                                           {
+                                               RomSetId      = r.Id,
+                                               TotalMachines = r.Machines.Count,
+                                               CompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.All(f => f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0                 &&
+                                                                         m.Disks.Count > 0                 &&
+                                                                         m.Files.All(f => f.File.IsInRepo) &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)),
+                                               IncompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.Any(f => !f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0 &&
+                                                                         m.Disks.Count > 0 &&
+                                                                         (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                          m.Disks.Any(f => !f.Disk.IsInRepo))),
+                                               TotalRoms =
+                                                   r.Machines.Sum(m => m.Files.Count) +
+                                                   r.Machines.Sum(m => m.Disks.Count) +
+                                                   r.Machines.Sum(m => m.Medias.Count),
+                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                                           }));
 
-        // TODO: Refresh main view
+            // TODO: Refresh main view
 
-        _ctx.SaveChanges();
+            _ctx.SaveChanges();
+        }
 
         _newFiles.Clear();
         _newDisks.Clear();
