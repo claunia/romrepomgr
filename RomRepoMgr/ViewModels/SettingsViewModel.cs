@@ -145,11 +145,14 @@ public sealed class SettingsViewModel : ViewModelBase
 
     void CheckUnArFailed(object sender, ErrorEventArgs args)
     {
-        UnArVersion = "";
-        UnArPath    = "";
+        Dispatcher.UIThread.Post(() =>
+        {
+            UnArVersion = "";
+            UnArPath    = "";
 
-        _ = MessageBoxManager.GetMessageBoxStandard(Localization.Error, args.Message, ButtonEnum.Ok, Icon.Error)
-                             .ShowWindowDialogAsync(_view);
+            _ = MessageBoxManager.GetMessageBoxStandard(Localization.Error, args.Message, ButtonEnum.Ok, Icon.Error)
+                                 .ShowWindowDialogAsync(_view);
+        });
     }
 
     void CheckUnArFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
