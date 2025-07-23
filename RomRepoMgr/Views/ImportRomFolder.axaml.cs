@@ -2,7 +2,7 @@ using Avalonia.Controls;
 
 namespace RomRepoMgr.Views;
 
-public class ImportRomFolder : Window
+public partial class ImportRomFolder : Window
 {
     public ImportRomFolder()
     {
