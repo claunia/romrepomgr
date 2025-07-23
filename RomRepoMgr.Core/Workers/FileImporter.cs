@@ -461,8 +461,8 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             Dictionary<ChecksumType, string> checksums = checksumWorker.End();
 
-            var uSize    = (ulong)inFs.Length;
-            var fileInDb = true;
+            ulong uSize    = (ulong)inFs.Length;
+            bool  fileInDb = true;
 
             bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
@@ -505,10 +505,10 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(!knownFile) _pendingFiles[checksums[ChecksumType.Sha512]] = dbFile;
 
-            var    sha384Bytes = new byte[48];
+            byte[] sha384Bytes = new byte[48];
             string sha384      = checksums[ChecksumType.Sha384];
 
-            for(var i = 0; i < 48; i++)
+            for(int i = 0; i < 48; i++)
             {
                 if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                     sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
@@ -696,9 +696,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.MD5 != null)
             {
-                var chdArray = new char[32];
+                char[] chdArray = new char[32];
 
-                for(var i = 0; i < 16; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     int nibble1 = chd.MD5[i] >> 4;
                     int nibble2 = chd.MD5[i] & 0xF;
@@ -715,9 +715,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.SHA1 != null)
             {
-                var chdArray = new char[40];
+                char[] chdArray = new char[40];
 
-                for(var i = 0; i < 20; i++)
+                for(int i = 0; i < 20; i++)
                 {
                     int nibble1 = chd.SHA1[i] >> 4;
                     int nibble2 = chd.SHA1[i] & 0xF;
@@ -732,11 +732,11 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha1 = new string(chdArray);
             }
 
-            var    uSize              = (ulong)inFs.Length;
-            var    diskInDb           = true;
+            ulong  uSize              = (ulong)inFs.Length;
+            bool   diskInDb           = true;
             DbDisk dbDisk             = null;
-            var    knownDisk          = false;
-            var    knownDiskWasBigger = false;
+            bool   knownDisk          = false;
+            bool   knownDiskWasBigger = false;
 
             if(sha1 != null) knownDisk = _pendingDisksBySha1.TryGetValue(sha1, out dbDisk);
 
@@ -887,7 +887,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            var buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -978,9 +978,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.MD5 != null)
             {
-                var chdArray = new char[32];
+                char[] chdArray = new char[32];
 
-                for(var i = 0; i < 16; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     int nibble1 = aif.MD5[i] >> 4;
                     int nibble2 = aif.MD5[i] & 0xF;
@@ -997,9 +997,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA1 != null)
             {
-                var chdArray = new char[40];
+                char[] chdArray = new char[40];
 
-                for(var i = 0; i < 20; i++)
+                for(int i = 0; i < 20; i++)
                 {
                     int nibble1 = aif.SHA1[i] >> 4;
                     int nibble2 = aif.SHA1[i] & 0xF;
@@ -1016,9 +1016,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA256 != null)
             {
-                var chdArray = new char[64];
+                char[] chdArray = new char[64];
 
-                for(var i = 0; i < 32; i++)
+                for(int i = 0; i < 32; i++)
                 {
                     int nibble1 = aif.SHA256[i] >> 4;
                     int nibble2 = aif.SHA256[i] & 0xF;
@@ -1033,11 +1033,11 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha256 = new string(chdArray);
             }
 
-            var     uSize               = (ulong)inFs.Length;
-            var     mediaInDb           = true;
+            ulong   uSize               = (ulong)inFs.Length;
+            bool    mediaInDb           = true;
             DbMedia dbMedia             = null;
-            var     knownMedia          = false;
-            var     knownMediaWasBigger = false;
+            bool    knownMedia          = false;
+            bool    knownMediaWasBigger = false;
 
             if(sha256 != null) knownMedia = _pendingMediasBySha256.TryGetValue(sha256, out dbMedia);
 
@@ -1229,7 +1229,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            var buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -1351,28 +1351,19 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
             lsarProcess.Start();
             string lsarOutput = lsarProcess.StandardOutput.ReadToEnd();
             lsarProcess.WaitForExit();
-            string format   = null;
-            var    jsReader = new JsonTextReader(new StringReader(lsarOutput));
 
-            while(jsReader.Read())
+            lsar lsar = JsonConvert.DeserializeObject<lsar>(lsarOutput);
+
+            if(lsar is null)
             {
-                switch(jsReader.TokenType)
-                {
-                    case JsonToken.PropertyName when jsReader.Value?.ToString() == "XADFileName":
-                        counter++;
+                counter = 0;
 
-                        break;
-                    case JsonToken.PropertyName when jsReader.Value?.ToString() == "lsarFormatName":
-                        jsReader.Read();
-
-                        if(jsReader.TokenType == JsonToken.String && jsReader.Value != null)
-                            format = jsReader.Value.ToString();
-
-                        break;
-                }
+                return null;
             }
 
-            return counter == 0 ? null : format;
+            counter = lsar.lsarContents.Length;
+
+            return lsar.lsarFormatName;
         }
         catch
         {
