@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
@@ -12,6 +11,7 @@ public class RomImporter : ReactiveObject
     double        _maximum;
     double        _minimum;
     double        _progress;
+    bool          _progressVisible = true;
     Color         _statusColor;
     string        _statusMessage;
     public string Filename { get; internal init; }
@@ -53,6 +53,12 @@ public class RomImporter : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _statusColor, value);
     }
 
+    public bool ProgressVisible
+    {
+        get => _progressVisible;
+        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
+    }
+
     internal void OnErrorOccurred(object sender, ErrorEventArgs e)
     {
         StatusMessage = e.Message;
@@ -88,21 +94,23 @@ public class RomImporter : ReactiveObject
 
     internal void OnWorkFinished(object sender, MessageEventArgs e)
     {
-        Indeterminate = false;
-        Maximum       = 1;
-        Minimum       = 0;
-        Progress      = 1;
-        StatusMessage = e.Message;
-        Running       = false;
+        Indeterminate   = false;
+        Maximum         = 1;
+        Minimum         = 0;
+        Progress        = 1;
+        StatusMessage   = e.Message;
+        Running         = false;
+        ProgressVisible = false;
     }
 
     public void OnImportedRom(object sender, ImportedRomItemEventArgs e)
     {
-        Indeterminate = false;
-        Maximum       = 1;
-        Minimum       = 0;
-        Progress      = 1;
-        StatusMessage = e.Item.Status;
-        Running       = false;
+        Indeterminate   = false;
+        Maximum         = 1;
+        Minimum         = 0;
+        Progress        = 1;
+        StatusMessage   = e.Item.Status;
+        Running         = false;
+        ProgressVisible = false;
     }
 }

@@ -105,7 +105,8 @@
                             <ProgressBar Minimum="{Binding Minimum, Mode=OneWay}"
                                          Maximum="{Binding Maximum, Mode=OneWay}"
                                          Value="{Binding Progress, Mode=OneWay}"
-                                         IsIndeterminate="{Binding Indeterminate, Mode=OneWay}" />
+                                         IsIndeterminate="{Binding Indeterminate, Mode=OneWay}"
+                                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
