@@ -1,92 +1,68 @@
-﻿/******************************************************************************
-// RomRepoMgr - ROM repository manager
-// ----------------------------------------------------------------------------
-//
-// Author(s)      : Natalia Portillo <claunia@claunia.com>
-//
-// --[ License ] --------------------------------------------------------------
-//
-//     This program is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU General Public License as
-//     published by the Free Software Foundation, either version 3 of the
-//     License, or (at your option) any later version.
-//
-//     This program is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
-//
-//     You should have received a copy of the GNU General Public License
-//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// ----------------------------------------------------------------------------
-// Copyright © 2020-2024 Natalia Portillo
-*******************************************************************************/
-
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reactive;
+using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
-using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
-using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class ImportRomFolderViewModel : ViewModelBase
+public class ImportRomFolderViewModel : ViewModelBase
 {
-    readonly ImportRomFolder _view;
-    bool                     _canClose;
-    bool                     _canStart;
-    bool                     _isImporting;
-    bool                     _isReady;
-    bool                     _knownOnlyChecked;
-    bool                     _progress2IsIndeterminate;
-    double                   _progress2Maximum;
-    double                   _progress2Minimum;
-    double                   _progress2Value;
-    bool                     _progress2Visible;
-    bool                     _progressIsIndeterminate;
-    double                   _progressMaximum;
-    double                   _progressMinimum;
-    double                   _progressValue;
-    bool                     _progressVisible;
-    bool                     _recurseArchivesChecked;
-    bool                     _removeFilesChecked;
-    bool                     _removeFilesEnabled;
-    string                   _status2Message;
-    string                   _statusMessage;
+    bool               _canClose;
+    bool               _canStart;
+    string             _folderPath;
+    bool               _isImporting;
+    bool               _isReady;
+    bool               _knownOnlyChecked;
+    int                _listPosition;
+    bool               _progress2IsIndeterminate;
+    double             _progress2Maximum;
+    double             _progress2Minimum;
+    double             _progress2Value;
+    bool               _progress2Visible;
+    bool               _progressIsIndeterminate;
+    double             _progressMaximum;
+    double             _progressMinimum;
+    double             _progressValue;
+    bool               _progressVisible;
+    bool               _recurseArchivesChecked;
+    bool               _removeFilesChecked;
+    bool               _removeFilesEnabled;
+    FileImporter       _rootImporter;
+    string             _statusMessage;
+    string             _statusMessage2;
+    bool               _statusMessage2Visible;
+    readonly Stopwatch _stopwatch = new();
 
-    // Mock
     public ImportRomFolderViewModel()
     {
-#pragma warning disable PH2080
-        FolderPath = "C:\\ROMs";
-#pragma warning restore PH2080
+        SelectFolderCommand    = ReactiveCommand.CreateFromTask(SelectFolderAsync);
+        CloseCommand           = ReactiveCommand.Create(Close);
+        StartCommand           = ReactiveCommand.Create(Start);
+        CanClose               = true;
+        RemoveFilesChecked     = false;
+        KnownOnlyChecked       = true;
+        RecurseArchivesChecked = Settings.Settings.UnArUsable;
+        RemoveFilesEnabled     = false;
     }
 
-    public ImportRomFolderViewModel(ImportRomFolder view, string folderPath)
-    {
-        _view                   = view;
-        FolderPath              = folderPath;
-        _removeFilesChecked     = false;
-        _knownOnlyChecked       = true;
-        _recurseArchivesChecked = Settings.Settings.UnArUsable;
-        ImportResults           = [];
-        CloseCommand            = ReactiveCommand.Create(ExecuteCloseCommand);
-        StartCommand            = ReactiveCommand.Create(ExecuteStartCommand);
-        IsReady                 = true;
-        CanStart                = true;
-        CanClose                = true;
-        _removeFilesEnabled     = false;
-    }
+    public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; }
+    public ReactiveCommand<Unit, Unit> CloseCommand        { get; }
+    public ReactiveCommand<Unit, Unit> StartCommand        { get; }
+    public Window                      View                { get; init; }
 
-    public string FolderPath             { get; }
-    public bool   RecurseArchivesEnabled => Settings.Settings.UnArUsable;
+    public bool RecurseArchivesEnabled => Settings.Settings.UnArUsable;
 
     public bool RemoveFilesChecked
     {
@@ -166,10 +142,16 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _progress2Visible, value);
     }
 
-    public string Status2Message
+    public bool StatusMessage2Visible
     {
-        get => _status2Message;
-        set => this.RaiseAndSetIfChanged(ref _status2Message, value);
+        get => _statusMessage2Visible;
+        set => this.RaiseAndSetIfChanged(ref _statusMessage2Visible, value);
+    }
+
+    public string StatusMessage2
+    {
+        get => _statusMessage2;
+        set => this.RaiseAndSetIfChanged(ref _statusMessage2, value);
     }
 
     public double Progress2Minimum
@@ -196,13 +178,11 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _progress2IsIndeterminate, value);
     }
 
-    public bool IsImporting
+    public string FolderPath
     {
-        get => _isImporting;
-        set => this.RaiseAndSetIfChanged(ref _isImporting, value);
+        get => _folderPath;
+        set => this.RaiseAndSetIfChanged(ref _folderPath, value);
     }
-
-    public ObservableCollection<ImportRomItem> ImportResults { get; }
 
     public bool CanClose
     {
@@ -216,75 +196,266 @@ public sealed class ImportRomFolderViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _canStart, value);
     }
 
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
-    public ReactiveCommand<Unit, Unit> StartCommand { get; }
-
-    void ExecuteCloseCommand() => _view.Close();
-
-    void ExecuteStartCommand()
+    public bool IsImporting
     {
-        IsReady          = false;
-        ProgressVisible  = true;
-        IsImporting      = true;
-        CanStart         = false;
-        CanClose         = false;
-        Progress2Visible = true;
-
-        var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
-        worker.SetIndeterminateProgress  += OnWorkerOnSetIndeterminateProgress;
-        worker.SetMessage                += OnWorkerOnSetMessage;
-        worker.SetProgress               += OnWorkerOnSetProgress;
-        worker.SetProgressBounds         += OnWorkerOnSetProgressBounds;
-        worker.SetIndeterminateProgress2 += OnWorkerOnSetIndeterminateProgress2;
-        worker.SetMessage2               += OnWorkerOnSetMessage2;
-        worker.SetProgress2              += OnWorkerOnSetProgress2;
-        worker.SetProgressBounds2        += OnWorkerOnSetProgressBounds2;
-        worker.Finished                  += OnWorkerOnFinished;
-        worker.ImportedRom               += OnWorkerOnImportedRom;
-
-        _ = Task.Run(() => worker.ProcessPath(FolderPath, true, RecurseArchivesChecked));
+        get => _isImporting;
+        set => this.RaiseAndSetIfChanged(ref _isImporting, value);
     }
 
-    void OnWorkerOnImportedRom(object sender, ImportedRomItemEventArgs args) =>
-        Dispatcher.UIThread.Post(() => ImportResults.Add(args.Item));
 
-    void OnWorkerOnFinished(object sender, EventArgs args) => Dispatcher.UIThread.Post(() =>
+    public ObservableCollection<RomImporter> Importers { get; } = [];
+
+    void Start()
     {
-        ProgressVisible  = false;
-        StatusMessage    = Localization.Finished;
-        CanClose         = true;
-        Progress2Visible = false;
-    });
+        _rootImporter                          =  new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+        _rootImporter.SetMessage               += SetMessage;
+        _rootImporter.SetIndeterminateProgress += SetIndeterminateProgress;
+        _rootImporter.SetProgress              += SetProgress;
+        _rootImporter.SetProgressBounds        += SetProgressBounds;
+        _rootImporter.Finished                 += EnumeratingFilesFinished;
+        ProgressIsIndeterminate                =  true;
+        ProgressVisible                        =  true;
+        CanClose                               =  false;
+        CanStart                               =  false;
+        IsImporting                            =  true;
 
-    void OnWorkerOnSetProgressBounds(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
+        _ = Task.Run(() => _rootImporter.FindFiles(FolderPath));
+    }
+
+    void SetProgressBounds(object sender, ProgressBoundsEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
         ProgressIsIndeterminate = false;
-        ProgressMaximum         = args.Maximum;
-        ProgressMinimum         = args.Minimum;
+        ProgressMaximum         = e.Maximum;
+        ProgressMinimum         = e.Minimum;
     });
 
-    void OnWorkerOnSetProgress(object sender, ProgressEventArgs args) =>
-        Dispatcher.UIThread.Post(() => ProgressValue = args.Value);
+    void SetProgress(object sender, ProgressEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() => ProgressValue = e.Value);
+    }
 
-    void OnWorkerOnSetMessage(object sender, MessageEventArgs args) =>
-        Dispatcher.UIThread.Post(() => StatusMessage = args.Message);
-
-    void OnWorkerOnSetIndeterminateProgress(object sender, EventArgs args) =>
+    void SetIndeterminateProgress(object sender, EventArgs e)
+    {
         Dispatcher.UIThread.Post(() => ProgressIsIndeterminate = true);
+    }
 
-    void OnWorkerOnSetProgressBounds2(object sender, ProgressBoundsEventArgs args) => Dispatcher.UIThread.Post(() =>
+    void SetProgress2Bounds(object sender, ProgressBoundsEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
         Progress2IsIndeterminate = false;
-        Progress2Maximum         = args.Maximum;
-        Progress2Minimum         = args.Minimum;
+        Progress2Maximum         = e.Maximum;
+        Progress2Minimum         = e.Minimum;
     });
 
-    void OnWorkerOnSetProgress2(object sender, ProgressEventArgs args) =>
-        Dispatcher.UIThread.Post(() => Progress2Value = args.Value);
+    void SetProgress2(object sender, ProgressEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() => Progress2Value = e.Value);
+    }
 
-    void OnWorkerOnSetMessage2(object sender, MessageEventArgs args) =>
-        Dispatcher.UIThread.Post(() => Status2Message = args.Message);
-
-    void OnWorkerOnSetIndeterminateProgress2(object sender, EventArgs args) =>
+    void SetIndeterminateProgress2(object sender, EventArgs e)
+    {
         Dispatcher.UIThread.Post(() => Progress2IsIndeterminate = true);
+    }
+
+    void EnumeratingFilesFinished(object sender, EventArgs e)
+    {
+        _rootImporter.Finished -= EnumeratingFilesFinished;
+
+        if(RecurseArchivesChecked)
+        {
+            Progress2Visible                        =  true;
+            StatusMessage2Visible                   =  true;
+            _rootImporter.SetMessage2               += SetMessage2;
+            _rootImporter.SetIndeterminateProgress2 += SetIndeterminateProgress2;
+            _rootImporter.SetProgress2              += SetProgress2;
+            _rootImporter.SetProgressBounds2        += SetProgress2Bounds;
+
+            _rootImporter.Finished += CheckArchivesFinished;
+
+            _ = Task.Run(() =>
+            {
+                _stopwatch.Restart();
+                _rootImporter.SeparateFilesAndArchives();
+            });
+        }
+        else
+            ProcessFiles();
+    }
+
+    void ProcessFiles()
+    {
+        _listPosition           = 0;
+        ProgressMinimum         = 0;
+        ProgressMaximum         = _rootImporter.Files.Count;
+        ProgressValue           = 0;
+        ProgressIsIndeterminate = false;
+        ProgressVisible         = true;
+        CanClose                = false;
+        CanStart                = false;
+        IsReady                 = false;
+        IsImporting             = true;
+        _stopwatch.Restart();
+
+        Parallel.ForEach(_rootImporter.Files,
+                         file =>
+                         {
+                             Dispatcher.UIThread.Post(() =>
+                             {
+                                 StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(file));
+                                 ProgressValue = _listPosition;
+                             });
+
+                             var model = new RomImporter
+                             {
+                                 Filename      = Path.GetFileName(file),
+                                 Indeterminate = true
+                             };
+
+                             var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                             worker.SetIndeterminateProgress2 += model.OnSetIndeterminateProgress;
+                             worker.SetMessage2               += model.OnSetMessage;
+                             worker.SetProgress2              += model.OnSetProgress;
+                             worker.SetProgressBounds2        += model.OnSetProgressBounds;
+                             worker.ImportedRom               += model.OnImportedRom;
+                             worker.WorkFinished              += model.OnWorkFinished;
+
+                             Dispatcher.UIThread.Post(() => Importers.Add(model));
+
+                             worker.ImportFile(file);
+
+                             worker.SaveChanges();
+                             Interlocked.Increment(ref _listPosition);
+                         });
+
+        _stopwatch.Stop();
+        Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process files.");
+
+        _rootImporter.UpdateRomStats();
+
+        _listPosition           = 0;
+        ProgressMinimum         = 0;
+        ProgressMaximum         = 1;
+        ProgressValue           = 0;
+        ProgressIsIndeterminate = false;
+        ProgressVisible         = false;
+        CanClose                = true;
+        CanStart                = false;
+        IsReady                 = false;
+        IsImporting             = false;
+        StatusMessage           = Localization.Finished;
+    }
+
+    void ProcessArchives()
+    {
+        // For each archive
+        ProgressMaximum         = _rootImporter.Archives.Count;
+        ProgressMinimum         = 0;
+        ProgressValue           = 0;
+        ProgressIsIndeterminate = false;
+        Progress2Visible        = true;
+        StatusMessage2Visible   = true;
+        _listPosition           = 0;
+        _stopwatch.Restart();
+
+        foreach(string archive in _rootImporter.Archives)
+        {
+            StatusMessage = "Processing archive: " + Path.GetFileName(archive);
+            ProgressValue = _listPosition++;
+
+            // Create FileImporter
+            var archiveImporter = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+
+            archiveImporter.SetIndeterminateProgress2 += SetIndeterminateProgress2;
+            archiveImporter.SetMessage2               += SetMessage2;
+            archiveImporter.SetProgress2              += SetProgress2;
+            archiveImporter.SetProgressBounds2        += SetProgress2Bounds;
+
+            // Extract archive
+            bool ret = archiveImporter.ExtractArchive(archive);
+
+            if(!ret) continue;
+
+            // Process files in archive
+            Parallel.ForEach(archiveImporter.Files,
+                             file =>
+                             {
+                                 var model = new RomImporter
+                                 {
+                                     Filename      = Path.GetFileName(file),
+                                     Indeterminate = true
+                                 };
+
+                                 var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                                 worker.SetIndeterminateProgress2 += model.OnSetIndeterminateProgress;
+                                 worker.SetMessage2               += model.OnSetMessage;
+                                 worker.SetProgress2              += model.OnSetProgress;
+                                 worker.SetProgressBounds2        += model.OnSetProgressBounds;
+                                 worker.ImportedRom               += model.OnImportedRom;
+                                 worker.WorkFinished              += model.OnWorkFinished;
+
+                                 Dispatcher.UIThread.Post(() => Importers.Add(model));
+
+                                 worker.ImportFile(file);
+
+                                 worker.SaveChanges();
+
+                                 worker.Files.Clear();
+                             });
+
+            // Remove temporary files
+            archiveImporter.CleanupExtractedArchive();
+
+            // Save database changes
+            archiveImporter.SaveChanges();
+        }
+
+        _stopwatch.Stop();
+        Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process archives.");
+
+        Progress2Visible      = false;
+        StatusMessage2Visible = false;
+
+        ProcessFiles();
+    }
+
+    void CheckArchivesFinished(object sender, EventArgs e)
+    {
+        _stopwatch.Stop();
+        Console.WriteLine("Took {0} seconds to check archives.", _stopwatch.Elapsed.TotalSeconds);
+
+        Progress2Visible      = false;
+        StatusMessage2Visible = false;
+
+        _rootImporter.Finished -= CheckArchivesFinished;
+
+        ProcessArchives();
+    }
+
+    void SetMessage(object sender, MessageEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() => StatusMessage = e.Message);
+    }
+
+    void SetMessage2(object sender, MessageEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() => StatusMessage2 = e.Message);
+    }
+
+    void Close() => View.Close();
+
+    async Task SelectFolderAsync()
+    {
+        IReadOnlyList<IStorageFolder> result =
+            await View.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = Localization.ImportRomsFolderDialogTitle
+            });
+
+        if(result.Count < 1) return;
+
+        FolderPath = result[0].TryGetLocalPath() ?? string.Empty;
+
+        IsReady  = true;
+        CanStart = true;
+        CanClose = true;
+    }
 }

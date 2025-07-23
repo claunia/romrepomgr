@@ -33,9 +33,13 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
     readonly        Dictionary<string, DbMedia> _pendingMediasByMd5 = [];
     readonly        Dictionary<string, DbMedia> _pendingMediasBySha1 = [];
     readonly        Dictionary<string, DbMedia> _pendingMediasBySha256 = [];
+    string                                      _archiveFolder;
     string                                      _lastMessage;
     long                                        _position;
     long                                        _totalFiles;
+
+    public List<string> Files    { get; private set; } = [];
+    public List<string> Archives { get; private set; } = [];
 
     public event EventHandler                           SetIndeterminateProgress2;
     public event EventHandler<ProgressBoundsEventArgs>  SetProgressBounds2;
@@ -47,256 +51,353 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
     public event EventHandler<MessageEventArgs>         SetMessage;
     public event EventHandler                           Finished;
     public event EventHandler<ImportedRomItemEventArgs> ImportedRom;
+    public event EventHandler<MessageEventArgs>         WorkFinished;
 
-    public void ProcessPath(string path, bool rootPath, bool processArchives)
+    public void FindFiles(string path)
     {
-        try
+        SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
+
+        SetMessage?.Invoke(this,
+                           new MessageEventArgs
+                           {
+                               Message = Localization.EnumeratingFiles
+                           });
+
+        Files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Order().ToList();
+
+        SetMessage?.Invoke(this,
+                           new MessageEventArgs
+                           {
+                               Message = "Finished enumerating files. Found " + Files.Count + " files."
+                           });
+
+        Finished?.Invoke(this, System.EventArgs.Empty);
+    }
+
+    public void SeparateFilesAndArchives()
+    {
+        SetProgressBounds?.Invoke(this,
+                                  new ProgressBoundsEventArgs
+                                  {
+                                      Minimum = 0,
+                                      Maximum = Files.Count
+                                  });
+
+        List<string> files = [];
+        Archives = [];
+
+        foreach(string file in Files)
         {
-            SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
-
-            SetMessage?.Invoke(this,
-                               new MessageEventArgs
-                               {
-                                   Message = Localization.EnumeratingFiles
-                               });
-
-            string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Order().ToArray();
-            _totalFiles += files.LongLength;
-
-            SetProgressBounds?.Invoke(this,
-                                      new ProgressBoundsEventArgs
-                                      {
-                                          Minimum = 0,
-                                          Maximum = _totalFiles
-                                      });
-
-            foreach(string file in files)
+            try
             {
-                try
-                {
-                    SetProgress?.Invoke(this,
-                                        new ProgressEventArgs
+                SetProgress?.Invoke(this,
+                                    new ProgressEventArgs
+                                    {
+                                        Value = _position
+                                    });
+
+                SetMessage?.Invoke(this,
+                                   new MessageEventArgs
+                                   {
+                                       Message = "Checking archives. Found " +
+                                                 Archives.Count              +
+                                                 " archives and "            +
+                                                 files.Count                 +
+                                                 " files."
+                                   });
+
+                SetMessage2?.Invoke(this,
+                                    new MessageEventArgs
+                                    {
+                                        Message = string.Format("Checking if file {0} is an archive...",
+                                                                Path.GetFileName(file))
+                                    });
+
+                SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+                string archiveFormat = GetArchiveFormat(file, out _);
+
+                // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
+                if(archiveFormat != null && FAT.Identify(file)) archiveFormat = null;
+
+                if(archiveFormat != null)
+                    Archives.Add(file);
+                else
+                    files.Add(file);
+
+                _position++;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Exception while checking file {0}: {1}", Path.GetFileName(file), ex.Message);
+            }
+        }
+
+        Files = files;
+
+        SetMessage?.Invoke(this,
+                           new MessageEventArgs
+                           {
+                               Message = "Finished checking archives. Found " +
+                                         Archives.Count                       +
+                                         " archives and "                     +
+                                         Files.Count                          +
+                                         " files."
+                           });
+
+        Finished?.Invoke(this, System.EventArgs.Empty);
+    }
+
+    public void ImportFile(string file)
+    {
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = string.Format(Localization.Importing, Path.GetFileName(file))
+                            });
+
+        var fs = new FileStream(file, FileMode.Open, FileAccess.Read);
+
+        var aif = AaruFormat.Create(fs);
+
+        bool ret;
+
+        if(aif != null)
+        {
+            fs.Close();
+
+            ret = ImportMedia(file);
+
+            if(ret)
+            {
+                ImportedRom?.Invoke(this,
+                                    new ImportedRomItemEventArgs
+                                    {
+                                        Item = new ImportRomItem
                                         {
-                                            Value = _position
-                                        });
-
-                    SetMessage?.Invoke(this,
-                                       new MessageEventArgs
-                                       {
-                                           Message = string.Format(Localization.Importing, Path.GetFileName(file))
-                                       });
-
-                    string archiveFormat = null;
-                    long   archiveFiles  = 0;
-
-                    var fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-
-                    var aif = AaruFormat.Create(fs);
-
-                    if(aif != null)
-                    {
-                        fs.Close();
-
-                        bool ret = ImportMedia(file);
-
-                        if(ret)
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status   = Localization.OK
-                                                    }
-                                                });
-                        }
-                        else
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status = string.Format(Localization.ErrorWithMessage,
-                                                                               _lastMessage)
-                                                    }
-                                                });
-                        }
-
-                        _position++;
-
-                        continue;
-                    }
-
-                    fs.Position = 0;
-
-                    var chd = CHDFile.Create(fs);
-
-                    if(chd != null)
-                    {
-                        fs.Close();
-
-                        bool ret = ImportDisk(file);
-
-                        if(ret)
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status   = Localization.OK
-                                                    }
-                                                });
-                        }
-                        else
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status = string.Format(Localization.ErrorWithMessage,
-                                                                               _lastMessage)
-                                                    }
-                                                });
-                        }
-
-                        _position++;
-
-                        continue;
-                    }
-
-                    fs.Close();
-
-                    if(processArchives)
-                    {
-                        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
-
-                        SetMessage2?.Invoke(this,
-                                            new MessageEventArgs
-                                            {
-                                                Message = Localization.CheckingIfFIleIsAnArchive
-                                            });
-
-                        archiveFormat = GetArchiveFormat(file, out archiveFiles);
-
-                        // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
-                        if(archiveFormat != null && FAT.Identify(file)) archiveFormat = null;
-                    }
-
-                    if(archiveFormat == null)
-                    {
-                        bool ret = ImportRom(file);
-
-                        if(ret)
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status   = Localization.OK
-                                                    }
-                                                });
-                        }
-                        else
-                        {
-                            ImportedRom?.Invoke(this,
-                                                new ImportedRomItemEventArgs
-                                                {
-                                                    Item = new ImportRomItem
-                                                    {
-                                                        Filename = Path.GetFileName(file),
-                                                        Status = string.Format(Localization.ErrorWithMessage,
-                                                                               _lastMessage)
-                                                    }
-                                                });
-                        }
-                    }
-                    else
-                    {
-                        if(!Directory.Exists(Settings.Settings.Current.TemporaryFolder))
-                            Directory.CreateDirectory(Settings.Settings.Current.TemporaryFolder);
-
-                        string tmpFolder =
-                            Path.Combine(Settings.Settings.Current.TemporaryFolder, Path.GetRandomFileName());
-
-                        Directory.CreateDirectory(tmpFolder);
-
-                        SetProgressBounds2?.Invoke(this,
-                                                   new ProgressBoundsEventArgs
-                                                   {
-                                                       Minimum = 0,
-                                                       Maximum = archiveFiles
-                                                   });
-
-                        SetMessage?.Invoke(this,
-                                           new MessageEventArgs
-                                           {
-                                               Message = Localization.ExtractingArchive
-                                           });
-
-                        ExtractArchive(file, tmpFolder);
-
-                        ProcessPath(tmpFolder, false, true);
-
-                        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
-
-                        SetMessage2?.Invoke(this,
-                                            new MessageEventArgs
-                                            {
-                                                Message = Localization.RemovingTemporaryPath
-                                            });
-
-                        Directory.Delete(tmpFolder, true);
-
-                        ImportedRom?.Invoke(this,
-                                            new ImportedRomItemEventArgs
-                                            {
-                                                Item = new ImportRomItem
-                                                {
-                                                    Filename = Path.GetFileName(file),
-                                                    Status   = Localization.ExtractedContents
-                                                }
-                                            });
-                    }
-
-                    _position++;
-                }
-                catch
-                {
-                    ImportedRom?.Invoke(this,
-                                        new ImportedRomItemEventArgs
+                                            Filename = Path.GetFileName(file),
+                                            Status   = Localization.OK
+                                        }
+                                    });
+            }
+            else
+            {
+                ImportedRom?.Invoke(this,
+                                    new ImportedRomItemEventArgs
+                                    {
+                                        Item = new ImportRomItem
                                         {
-                                            Item = new ImportRomItem
-                                            {
-                                                Filename = Path.GetFileName(file),
-                                                Status   = Localization.UnhandledException
-                                            }
-                                        });
-#pragma warning disable ERP022
-                }
-#pragma warning restore ERP022
+                                            Filename = Path.GetFileName(file),
+                                            Status   = string.Format(Localization.ErrorWithMessage, _lastMessage)
+                                        }
+                                    });
             }
 
-            if(!rootPath) return;
+            return;
+        }
 
-            SaveChanges();
-            Finished?.Invoke(this, System.EventArgs.Empty);
-        }
-        catch
+        fs.Position = 0;
+
+        var chd = CHDFile.Create(fs);
+
+        if(chd != null)
         {
-            // TODO: Send error back
-            if(rootPath) Finished?.Invoke(this, System.EventArgs.Empty);
-#pragma warning disable ERP022
+            fs.Close();
+
+            ret = ImportDisk(file);
+
+            if(ret)
+            {
+                ImportedRom?.Invoke(this,
+                                    new ImportedRomItemEventArgs
+                                    {
+                                        Item = new ImportRomItem
+                                        {
+                                            Filename = Path.GetFileName(file),
+                                            Status   = Localization.OK
+                                        }
+                                    });
+            }
+            else
+            {
+                ImportedRom?.Invoke(this,
+                                    new ImportedRomItemEventArgs
+                                    {
+                                        Item = new ImportRomItem
+                                        {
+                                            Filename = Path.GetFileName(file),
+                                            Status   = string.Format(Localization.ErrorWithMessage, _lastMessage)
+                                        }
+                                    });
+            }
+
+            return;
         }
-#pragma warning restore ERP022
+
+        fs.Close();
+
+        ret = ImportRom(file);
+
+        if(ret)
+        {
+            ImportedRom?.Invoke(this,
+                                new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = Localization.OK
+                                    }
+                                });
+        }
+        else
+        {
+            ImportedRom?.Invoke(this,
+                                new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = Path.GetFileName(file),
+                                        Status   = string.Format(Localization.ErrorWithMessage, _lastMessage)
+                                    }
+                                });
+        }
+    }
+
+    public bool ExtractArchive(string archive)
+    {
+        string archiveFormat = null;
+        long   archiveFiles  = 0;
+
+        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = Localization.CheckingIfFIleIsAnArchive
+                            });
+
+        archiveFormat = GetArchiveFormat(archive, out archiveFiles);
+
+        // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
+        if(archiveFormat != null && FAT.Identify(archive)) archiveFormat = null;
+
+        if(archiveFormat is null) return false;
+
+        if(!Directory.Exists(Settings.Settings.Current.TemporaryFolder))
+            Directory.CreateDirectory(Settings.Settings.Current.TemporaryFolder);
+
+        _archiveFolder = Path.Combine(Settings.Settings.Current.TemporaryFolder, Path.GetRandomFileName());
+
+        Directory.CreateDirectory(_archiveFolder);
+
+        SetProgressBounds2?.Invoke(this,
+                                   new ProgressBoundsEventArgs
+                                   {
+                                       Minimum = 0,
+                                       Maximum = archiveFiles
+                                   });
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = Localization.ExtractingArchive
+                            });
+
+        ExtractArchive(archive, _archiveFolder);
+
+        Files = Directory.GetFiles(_archiveFolder, "*", SearchOption.AllDirectories).Order().ToList();
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = "Finished extracting files. Extracted " + Files.Count + " files."
+                            });
+
+        return true;
+    }
+
+    public void CleanupExtractedArchive()
+    {
+        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = Localization.RemovingTemporaryPath
+                            });
+
+        try
+        {
+            Directory.Delete(_archiveFolder, true);
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+
+            // Show must go on
+        }
+    }
+
+    public void UpdateRomStats()
+    {
+        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = Localization.SavingChangesToDatabase
+                            });
+
+        lock(DbLock)
+        {
+            _ctx.SaveChanges();
+
+            _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
+
+            _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id)
+                                          .Select(r => new RomSetStat
+                                           {
+                                               RomSetId      = r.Id,
+                                               TotalMachines = r.Machines.Count,
+                                               CompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.All(f => f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0                 &&
+                                                                         m.Disks.Count > 0                 &&
+                                                                         m.Files.All(f => f.File.IsInRepo) &&
+                                                                         m.Disks.All(f => f.Disk.IsInRepo)),
+                                               IncompleteMachines =
+                                                   r.Machines.Count(m => m.Files.Count > 0  &&
+                                                                         m.Disks.Count == 0 &&
+                                                                         m.Files.Any(f => !f.File.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
+                                                                         m.Files.Count == 0 &&
+                                                                         m.Disks.Any(f => !f.Disk.IsInRepo)) +
+                                                   r.Machines.Count(m => m.Files.Count > 0 &&
+                                                                         m.Disks.Count > 0 &&
+                                                                         (m.Files.Any(f => !f.File.IsInRepo) ||
+                                                                          m.Disks.Any(f => !f.Disk.IsInRepo))),
+                                               TotalRoms =
+                                                   r.Machines.Sum(m => m.Files.Count) +
+                                                   r.Machines.Sum(m => m.Disks.Count) +
+                                                   r.Machines.Sum(m => m.Medias.Count),
+                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
+                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
+                                                          r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
+                                           }));
+
+            // TODO: Refresh main view
+
+            _ctx.SaveChanges();
+        }
     }
 
     bool ImportRom(string path)
@@ -360,8 +461,8 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             Dictionary<ChecksumType, string> checksums = checksumWorker.End();
 
-            ulong uSize    = (ulong)inFs.Length;
-            bool  fileInDb = true;
+            var uSize    = (ulong)inFs.Length;
+            var fileInDb = true;
 
             bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
 
@@ -404,10 +505,10 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(!knownFile) _pendingFiles[checksums[ChecksumType.Sha512]] = dbFile;
 
-            byte[] sha384Bytes = new byte[48];
+            var    sha384Bytes = new byte[48];
             string sha384      = checksums[ChecksumType.Sha384];
 
-            for(int i = 0; i < 48; i++)
+            for(var i = 0; i < 48; i++)
             {
                 if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                     sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
@@ -552,7 +653,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             return true;
         }
-        catch
+        catch(Exception ex)
         {
             _lastMessage = Localization.UnhandledExceptionWhenImporting;
 
@@ -595,9 +696,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.MD5 != null)
             {
-                char[] chdArray = new char[32];
+                var chdArray = new char[32];
 
-                for(int i = 0; i < 16; i++)
+                for(var i = 0; i < 16; i++)
                 {
                     int nibble1 = chd.MD5[i] >> 4;
                     int nibble2 = chd.MD5[i] & 0xF;
@@ -614,9 +715,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(chd.SHA1 != null)
             {
-                char[] chdArray = new char[40];
+                var chdArray = new char[40];
 
-                for(int i = 0; i < 20; i++)
+                for(var i = 0; i < 20; i++)
                 {
                     int nibble1 = chd.SHA1[i] >> 4;
                     int nibble2 = chd.SHA1[i] & 0xF;
@@ -631,11 +732,11 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha1 = new string(chdArray);
             }
 
-            ulong  uSize              = (ulong)inFs.Length;
-            bool   diskInDb           = true;
+            var    uSize              = (ulong)inFs.Length;
+            var    diskInDb           = true;
             DbDisk dbDisk             = null;
-            bool   knownDisk          = false;
-            bool   knownDiskWasBigger = false;
+            var    knownDisk          = false;
+            var    knownDiskWasBigger = false;
 
             if(sha1 != null) knownDisk = _pendingDisksBySha1.TryGetValue(sha1, out dbDisk);
 
@@ -786,7 +887,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            byte[] buffer = new byte[BUFFER_SIZE];
+            var buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -877,9 +978,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.MD5 != null)
             {
-                char[] chdArray = new char[32];
+                var chdArray = new char[32];
 
-                for(int i = 0; i < 16; i++)
+                for(var i = 0; i < 16; i++)
                 {
                     int nibble1 = aif.MD5[i] >> 4;
                     int nibble2 = aif.MD5[i] & 0xF;
@@ -896,9 +997,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA1 != null)
             {
-                char[] chdArray = new char[40];
+                var chdArray = new char[40];
 
-                for(int i = 0; i < 20; i++)
+                for(var i = 0; i < 20; i++)
                 {
                     int nibble1 = aif.SHA1[i] >> 4;
                     int nibble2 = aif.SHA1[i] & 0xF;
@@ -915,9 +1016,9 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
             if(aif.SHA256 != null)
             {
-                char[] chdArray = new char[64];
+                var chdArray = new char[64];
 
-                for(int i = 0; i < 32; i++)
+                for(var i = 0; i < 32; i++)
                 {
                     int nibble1 = aif.SHA256[i] >> 4;
                     int nibble2 = aif.SHA256[i] & 0xF;
@@ -932,11 +1033,11 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                 sha256 = new string(chdArray);
             }
 
-            ulong   uSize               = (ulong)inFs.Length;
-            bool    mediaInDb           = true;
+            var     uSize               = (ulong)inFs.Length;
+            var     mediaInDb           = true;
             DbMedia dbMedia             = null;
-            bool    knownMedia          = false;
-            bool    knownMediaWasBigger = false;
+            var     knownMedia          = false;
+            var     knownMediaWasBigger = false;
 
             if(sha256 != null) knownMedia = _pendingMediasBySha256.TryGetValue(sha256, out dbMedia);
 
@@ -1128,7 +1229,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                     Message = Localization.CopyingFile
                                 });
 
-            byte[] buffer = new byte[BUFFER_SIZE];
+            var buffer = new byte[BUFFER_SIZE];
 
             while(inFs.Position + BUFFER_SIZE <= inFs.Length)
             {
@@ -1185,7 +1286,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
         }
     }
 
-    void SaveChanges()
+    public void SaveChanges()
     {
         SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
 
@@ -1204,56 +1305,17 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
             _ctx.Medias.AddRange(_newMedias);
 
             _ctx.SaveChanges();
-
-            _ctx.Database.ExecuteSqlRaw("DELETE FROM \"RomSetStats\"");
-
-            _ctx.RomSetStats.AddRange(_ctx.RomSets.OrderBy(r => r.Id)
-                                          .Select(r => new RomSetStat
-                                           {
-                                               RomSetId      = r.Id,
-                                               TotalMachines = r.Machines.Count,
-                                               CompleteMachines =
-                                                   r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                         m.Disks.Count == 0 &&
-                                                                         m.Files.All(f => f.File.IsInRepo)) +
-                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                         m.Files.Count == 0 &&
-                                                                         m.Disks.All(f => f.Disk.IsInRepo)) +
-                                                   r.Machines.Count(m => m.Files.Count > 0                 &&
-                                                                         m.Disks.Count > 0                 &&
-                                                                         m.Files.All(f => f.File.IsInRepo) &&
-                                                                         m.Disks.All(f => f.Disk.IsInRepo)),
-                                               IncompleteMachines =
-                                                   r.Machines.Count(m => m.Files.Count > 0  &&
-                                                                         m.Disks.Count == 0 &&
-                                                                         m.Files.Any(f => !f.File.IsInRepo)) +
-                                                   r.Machines.Count(m => m.Disks.Count > 0  &&
-                                                                         m.Files.Count == 0 &&
-                                                                         m.Disks.Any(f => !f.Disk.IsInRepo)) +
-                                                   r.Machines.Count(m => m.Files.Count > 0 &&
-                                                                         m.Disks.Count > 0 &&
-                                                                         (m.Files.Any(f => !f.File.IsInRepo) ||
-                                                                          m.Disks.Any(f => !f.Disk.IsInRepo))),
-                                               TotalRoms =
-                                                   r.Machines.Sum(m => m.Files.Count) +
-                                                   r.Machines.Sum(m => m.Disks.Count) +
-                                                   r.Machines.Sum(m => m.Medias.Count),
-                                               HaveRoms = r.Machines.Sum(m => m.Files.Count(f => f.File.IsInRepo)) +
-                                                          r.Machines.Sum(m => m.Disks.Count(f => f.Disk.IsInRepo)) +
-                                                          r.Machines.Sum(m => m.Medias.Count(f => f.Media.IsInRepo)),
-                                               MissRoms = r.Machines.Sum(m => m.Files.Count(f => !f.File.IsInRepo)) +
-                                                          r.Machines.Sum(m => m.Disks.Count(f => !f.Disk.IsInRepo)) +
-                                                          r.Machines.Sum(m => m.Medias.Count(f => !f.Media.IsInRepo))
-                                           }));
-
-            // TODO: Refresh main view
-
-            _ctx.SaveChanges();
         }
 
         _newFiles.Clear();
         _newDisks.Clear();
         _newMedias.Clear();
+
+        WorkFinished?.Invoke(this,
+                             new MessageEventArgs
+                             {
+                                 Message = Localization.Finished
+                             });
     }
 
     string GetArchiveFormat(string path, out long counter)
