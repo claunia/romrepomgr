@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RomRepoMgr.Core.Aaru;
@@ -83,57 +85,61 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                       Maximum = Files.Count
                                   });
 
-        List<string> files = [];
-        Archives = [];
+        ConcurrentBag<string> files = [];
+        ConcurrentBag<string> archives = [];
 
-        foreach(string file in Files)
-        {
-            try
-            {
-                SetProgress?.Invoke(this,
-                                    new ProgressEventArgs
-                                    {
-                                        Value = _position
-                                    });
+        Parallel.ForEach(Files,
+                         file =>
+                         {
+                             try
+                             {
+                                 SetProgress?.Invoke(this,
+                                                     new ProgressEventArgs
+                                                     {
+                                                         Value = _position
+                                                     });
 
-                SetMessage?.Invoke(this,
-                                   new MessageEventArgs
-                                   {
-                                       Message = "Checking archives. Found " +
-                                                 Archives.Count              +
-                                                 " archives and "            +
-                                                 files.Count                 +
-                                                 " files."
-                                   });
+                                 SetMessage?.Invoke(this,
+                                                    new MessageEventArgs
+                                                    {
+                                                        Message = "Checking archives. Found " +
+                                                                  archives.Count              +
+                                                                  " archives and "            +
+                                                                  files.Count                 +
+                                                                  " files."
+                                                    });
 
-                SetMessage2?.Invoke(this,
-                                    new MessageEventArgs
-                                    {
-                                        Message = string.Format("Checking if file {0} is an archive...",
-                                                                Path.GetFileName(file))
-                                    });
+                                 SetMessage2?.Invoke(this,
+                                                     new MessageEventArgs
+                                                     {
+                                                         Message =
+                                                             $"Checking if file {Path.GetFileName(file)} is an archive..."
+                                                     });
 
-                SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+                                 SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
 
-                string archiveFormat = GetArchiveFormat(file, out _);
+                                 string archiveFormat = GetArchiveFormat(file, out _);
 
-                // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
-                if(archiveFormat != null && FAT.Identify(file)) archiveFormat = null;
+                                 // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
+                                 if(archiveFormat != null && FAT.Identify(file)) archiveFormat = null;
 
-                if(archiveFormat != null)
-                    Archives.Add(file);
-                else
-                    files.Add(file);
+                                 if(archiveFormat != null)
+                                     archives.Add(file);
+                                 else
+                                     files.Add(file);
 
-                _position++;
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Exception while checking file {0}: {1}", Path.GetFileName(file), ex.Message);
-            }
-        }
+                                 Interlocked.Increment(ref _position);
+                             }
+                             catch(Exception ex)
+                             {
+                                 Console.WriteLine("Exception while checking file {0}: {1}",
+                                                   Path.GetFileName(file),
+                                                   ex.Message);
+                             }
+                         });
 
-        Files = files;
+        Files = files.ToList();
+        Archives = archives.ToList();
 
         SetMessage?.Invoke(this,
                            new MessageEventArgs
