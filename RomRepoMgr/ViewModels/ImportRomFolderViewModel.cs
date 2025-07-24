@@ -12,6 +12,8 @@ using Avalonia.Threading;
 using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
+using RomRepoMgr.Database;
+using RomRepoMgr.Database.Models;
 using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
 
@@ -19,31 +21,36 @@ namespace RomRepoMgr.ViewModels;
 
 public class ImportRomFolderViewModel : ViewModelBase
 {
-    bool               _canClose;
-    bool               _canStart;
-    string             _folderPath;
-    bool               _isImporting;
-    bool               _isReady;
-    bool               _knownOnlyChecked;
-    int                _listPosition;
-    bool               _progress2IsIndeterminate;
-    double             _progress2Maximum;
-    double             _progress2Minimum;
-    double             _progress2Value;
-    bool               _progress2Visible;
-    bool               _progressIsIndeterminate;
-    double             _progressMaximum;
-    double             _progressMinimum;
-    double             _progressValue;
-    bool               _progressVisible;
-    bool               _recurseArchivesChecked;
-    bool               _removeFilesChecked;
-    bool               _removeFilesEnabled;
-    FileImporter       _rootImporter;
-    string             _statusMessage;
-    string             _statusMessage2;
-    bool               _statusMessage2Visible;
-    readonly Stopwatch _stopwatch = new();
+    readonly Context                _ctx       = Context.Create(Settings.Settings.Current.DatabasePath);
+    readonly ConcurrentBag<DbDisk>  _newDisks  = [];
+    readonly ConcurrentBag<DbFile>  _newFiles  = [];
+    readonly ConcurrentBag<DbMedia> _newMedias = [];
+    readonly Stopwatch              _stopwatch = new();
+    bool                            _canClose;
+    bool                            _canStart;
+    string                          _folderPath;
+    bool                            _isImporting;
+    bool                            _isReady;
+    bool                            _knownOnlyChecked;
+    int                             _listPosition;
+    bool                            _progress2IsIndeterminate;
+    double                          _progress2Maximum;
+    double                          _progress2Minimum;
+    double                          _progress2Value;
+    bool                            _progress2Visible;
+    bool                            _progressIsIndeterminate;
+    double                          _progressMaximum;
+    double                          _progressMinimum;
+    double                          _progressValue;
+    bool                            _progressVisible;
+    bool                            _recurseArchivesChecked;
+    bool                            _removeFilesChecked;
+    bool                            _removeFilesEnabled;
+    FileImporter                    _rootImporter;
+    string                          _statusMessage;
+    string                          _statusMessage2;
+    bool                            _statusMessage2Visible;
+
 
     public ImportRomFolderViewModel()
     {
@@ -207,17 +214,17 @@ public class ImportRomFolderViewModel : ViewModelBase
 
     void Start()
     {
-        _rootImporter                          =  new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
-        _rootImporter.SetMessage               += SetMessage;
+        _rootImporter = new FileImporter(_ctx, _newFiles, _newDisks, _newMedias, KnownOnlyChecked, RemoveFilesChecked);
+        _rootImporter.SetMessage += SetMessage;
         _rootImporter.SetIndeterminateProgress += SetIndeterminateProgress;
-        _rootImporter.SetProgress              += SetProgress;
-        _rootImporter.SetProgressBounds        += SetProgressBounds;
-        _rootImporter.Finished                 += EnumeratingFilesFinished;
-        ProgressIsIndeterminate                =  true;
-        ProgressVisible                        =  true;
-        CanClose                               =  false;
-        CanStart                               =  false;
-        IsImporting                            =  true;
+        _rootImporter.SetProgress += SetProgress;
+        _rootImporter.SetProgressBounds += SetProgressBounds;
+        _rootImporter.Finished += EnumeratingFilesFinished;
+        ProgressIsIndeterminate = true;
+        ProgressVisible = true;
+        CanClose = false;
+        CanStart = false;
+        IsImporting = true;
 
         _ = Task.Run(() => _rootImporter.FindFiles(FolderPath));
     }
@@ -310,7 +317,13 @@ public class ImportRomFolderViewModel : ViewModelBase
                                  Indeterminate = true
                              };
 
-                             var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                             var worker = new FileImporter(_ctx,
+                                                           _newFiles,
+                                                           _newDisks,
+                                                           _newMedias,
+                                                           KnownOnlyChecked,
+                                                           RemoveFilesChecked);
+
                              worker.SetIndeterminateProgress2 += model.OnSetIndeterminateProgress;
                              worker.SetMessage2               += model.OnSetMessage;
                              worker.SetProgress2              += model.OnSetProgress;
@@ -322,12 +335,13 @@ public class ImportRomFolderViewModel : ViewModelBase
 
                              worker.ImportFile(file);
 
-                             worker.SaveChanges();
                              Interlocked.Increment(ref _listPosition);
                          });
 
         _stopwatch.Stop();
         Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process files.");
+
+        _rootImporter.SaveChanges();
 
         _rootImporter.UpdateRomStats();
 
@@ -351,8 +365,8 @@ public class ImportRomFolderViewModel : ViewModelBase
         ProgressMinimum         = 0;
         ProgressValue           = 0;
         ProgressIsIndeterminate = false;
-        Progress2Visible        = true;
-        StatusMessage2Visible   = true;
+        Progress2Visible        = false;
+        StatusMessage2Visible   = false;
         _listPosition           = 0;
         _stopwatch.Restart();
 
@@ -365,16 +379,16 @@ public class ImportRomFolderViewModel : ViewModelBase
                                  ProgressValue = _listPosition;
                              });
 
-            // Create FileImporter
-            var archiveImporter = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                             // Create FileImporter
+                             var archiveImporter = new FileImporter(_ctx,
+                                                                    _newFiles,
+                                                                    _newDisks,
+                                                                    _newMedias,
+                                                                    KnownOnlyChecked,
+                                                                    RemoveFilesChecked);
 
-            archiveImporter.SetIndeterminateProgress2 += SetIndeterminateProgress2;
-            archiveImporter.SetMessage2               += SetMessage2;
-            archiveImporter.SetProgress2              += SetProgress2;
-            archiveImporter.SetProgressBounds2        += SetProgress2Bounds;
-
-            // Extract archive
-            bool ret = archiveImporter.ExtractArchive(archive);
+                             // Extract archive
+                             bool ret = archiveImporter.ExtractArchive(archive);
 
                              if(!ret) return;
 
@@ -387,7 +401,13 @@ public class ImportRomFolderViewModel : ViewModelBase
                                      Indeterminate = true
                                  };
 
-                                 var worker = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
+                                 var worker = new FileImporter(_ctx,
+                                                               _newFiles,
+                                                               _newDisks,
+                                                               _newMedias,
+                                                               KnownOnlyChecked,
+                                                               RemoveFilesChecked);
+
                                  worker.SetIndeterminateProgress2 += model.OnSetIndeterminateProgress;
                                  worker.SetMessage2               += model.OnSetMessage;
                                  worker.SetProgress2              += model.OnSetProgress;
@@ -402,8 +422,8 @@ public class ImportRomFolderViewModel : ViewModelBase
                                  worker.Files.Clear();
                              }
 
-            // Remove temporary files
-            archiveImporter.CleanupExtractedArchive();
+                             // Remove temporary files
+                             archiveImporter.CleanupExtractedArchive();
 
                              Interlocked.Increment(ref _listPosition);
                          });

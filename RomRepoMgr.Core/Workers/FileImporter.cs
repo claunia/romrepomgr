@@ -22,19 +22,23 @@ using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
 
-public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
+public sealed class FileImporter
+(
+    Context                _ctx,
+    ConcurrentBag<DbFile>  _newFiles,
+    ConcurrentBag<DbDisk>  _newDisks,
+    ConcurrentBag<DbMedia> _newMedias,
+    bool                   onlyKnown,
+    bool                   deleteAfterImport
+)
 {
-    const           long                        BUFFER_SIZE = 131072;
-    static readonly Lock                        DbLock = new();
-    readonly        Context                     _ctx = Context.Create(Settings.Settings.Current.DatabasePath);
-    readonly        List<DbDisk>                _newDisks = [];
-    readonly        List<DbFile>                _newFiles = [];
-    readonly        List<DbMedia>               _newMedias = [];
-    readonly        Dictionary<string, DbDisk>  _pendingDisksByMd5 = [];
-    readonly        Dictionary<string, DbDisk>  _pendingDisksBySha1 = [];
-    readonly        Dictionary<string, DbFile>  _pendingFiles = [];
-    readonly        Dictionary<string, DbMedia> _pendingMediasByMd5 = [];
-    readonly        Dictionary<string, DbMedia> _pendingMediasBySha1 = [];
+    const           long                        BUFFER_SIZE            = 131072;
+    static readonly Lock                        DbLock                 = new();
+    readonly        Dictionary<string, DbDisk>  _pendingDisksByMd5     = [];
+    readonly        Dictionary<string, DbDisk>  _pendingDisksBySha1    = [];
+    readonly        Dictionary<string, DbFile>  _pendingFiles          = [];
+    readonly        Dictionary<string, DbMedia> _pendingMediasByMd5    = [];
+    readonly        Dictionary<string, DbMedia> _pendingMediasBySha1   = [];
     readonly        Dictionary<string, DbMedia> _pendingMediasBySha256 = [];
     string                                      _archiveFolder;
     string                                      _lastMessage;
@@ -1298,13 +1302,13 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
 
     public void SaveChanges()
     {
-        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+        SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 
-        SetMessage2?.Invoke(this,
-                            new MessageEventArgs
-                            {
-                                Message = Localization.SavingChangesToDatabase
-                            });
+        SetMessage?.Invoke(this,
+                           new MessageEventArgs
+                           {
+                               Message = Localization.SavingChangesToDatabase
+                           });
 
         lock(DbLock)
         {
