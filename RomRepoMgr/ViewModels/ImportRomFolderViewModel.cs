@@ -356,10 +356,14 @@ public class ImportRomFolderViewModel : ViewModelBase
         _listPosition           = 0;
         _stopwatch.Restart();
 
-        foreach(string archive in _rootImporter.Archives)
-        {
-            StatusMessage = "Processing archive: " + Path.GetFileName(archive);
-            ProgressValue = _listPosition++;
+        Parallel.ForEach(_rootImporter.Archives,
+                         archive =>
+                         {
+                             Dispatcher.UIThread.Post(() =>
+                             {
+                                 StatusMessage = "Processing archive: " + Path.GetFileName(archive);
+                                 ProgressValue = _listPosition;
+                             });
 
             // Create FileImporter
             var archiveImporter = new FileImporter(KnownOnlyChecked, RemoveFilesChecked);
@@ -372,11 +376,10 @@ public class ImportRomFolderViewModel : ViewModelBase
             // Extract archive
             bool ret = archiveImporter.ExtractArchive(archive);
 
-            if(!ret) continue;
+                             if(!ret) return;
 
-            // Process files in archive
-            Parallel.ForEach(archiveImporter.Files,
-                             file =>
+                             // Process files in archive
+                             foreach(string file in archiveImporter.Files)
                              {
                                  var model = new RomImporter
                                  {
@@ -396,17 +399,14 @@ public class ImportRomFolderViewModel : ViewModelBase
 
                                  worker.ImportFile(file);
 
-                                 worker.SaveChanges();
-
                                  worker.Files.Clear();
-                             });
+                             }
 
             // Remove temporary files
             archiveImporter.CleanupExtractedArchive();
 
-            // Save database changes
-            archiveImporter.SaveChanges();
-        }
+                             Interlocked.Increment(ref _listPosition);
+                         });
 
         _stopwatch.Stop();
         Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process archives.");
