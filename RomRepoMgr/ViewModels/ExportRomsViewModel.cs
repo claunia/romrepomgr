@@ -32,6 +32,8 @@ using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -154,7 +156,7 @@ public sealed partial class ExportRomsViewModel : ViewModelBase
 
     public void OnOpened()
     {
-        var worker = new FileExporter(_romSetId, FolderPath);
+        var worker = new FileExporter(_romSetId, FolderPath, new SerilogLoggerFactory(Log.Logger));
         worker.SetMessage         += OnWorkerOnSetMessage;
         worker.SetProgress        += OnWorkerOnSetProgress;
         worker.SetProgressBounds  += OnWorkerOnSetProgressBounds;

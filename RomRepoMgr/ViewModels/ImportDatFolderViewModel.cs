@@ -14,6 +14,8 @@ using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -134,7 +136,9 @@ public sealed partial class ImportDatFolderViewModel : ViewModelBase
                 Indeterminate = false
             };
 
-            var worker = new Core.Workers.DatImporter(_datFiles[_listPosition], Category);
+            var worker =
+                new Core.Workers.DatImporter(_datFiles[_listPosition], Category, new SerilogLoggerFactory(Log.Logger));
+
             worker.ErrorOccurred            += model.OnErrorOccurred;
             worker.SetIndeterminateProgress += model.OnSetIndeterminateProgress;
             worker.SetMessage               += model.OnSetMessage;

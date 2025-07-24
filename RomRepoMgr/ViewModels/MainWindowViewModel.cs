@@ -45,6 +45,7 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -267,7 +268,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            Vfs          =  new Vfs();
+            Vfs          =  new Vfs(new SerilogLoggerFactory(Log.Logger));
             Vfs.Umounted += VfsOnUmounted;
             Vfs.MountTo(result[0].Path.LocalPath);
         }

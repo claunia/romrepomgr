@@ -19,12 +19,14 @@ using RomRepoMgr.Database.Models;
 using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
 public sealed partial class ImportRomFolderViewModel : ViewModelBase
 {
-    readonly Context                _ctx       = Context.Create(Settings.Settings.Current.DatabasePath);
+    readonly Context _ctx =
+        Context.Create(Settings.Settings.Current.DatabasePath, new SerilogLoggerFactory(Log.Logger));
     readonly ConcurrentBag<DbDisk>  _newDisks  = [];
     readonly ConcurrentBag<DbFile>  _newFiles  = [];
     readonly ConcurrentBag<DbMedia> _newMedias = [];

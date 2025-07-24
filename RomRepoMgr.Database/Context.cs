@@ -41,13 +41,13 @@ public sealed class Context(DbContextOptions options) : DbContext(options)
     public DbSet<MediaByMachine> MediasByMachines { get; set; }
     public DbSet<RomSetStat>     RomSetStats      { get; set; }
 
-    public static Context Create(string dbPath)
+    public static Context Create(string dbPath, ILoggerFactory loggerFactory)
     {
         var optionsBuilder = new DbContextOptionsBuilder();
 
         optionsBuilder.UseLazyLoadingProxies()
 #if DEBUG
-                      .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
+                      .UseLoggerFactory(loggerFactory)
 #endif
                       .UseSqlite($"Data Source={dbPath}");
 

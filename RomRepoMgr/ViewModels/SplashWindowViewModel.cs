@@ -39,6 +39,7 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -175,7 +176,8 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
 
                 if(!Directory.Exists(dbPathFolder)) Directory.CreateDirectory(dbPathFolder);
 
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath,
+                                               new SerilogLoggerFactory(Log.Logger));
 
                 Dispatcher.UIThread.Post(MigrateDatabase);
             }
@@ -203,7 +205,8 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
         {
             try
             {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath,
+                                               new SerilogLoggerFactory(Log.Logger));
 
                 ctx.Database.Migrate();
 
@@ -233,7 +236,8 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
         {
             try
             {
-                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+                using var ctx = Context.Create(Settings.Settings.Current.DatabasePath,
+                                               new SerilogLoggerFactory(Log.Logger));
 
                 GotRomSets?.Invoke(this,
                                    new RomSetsEventArgs

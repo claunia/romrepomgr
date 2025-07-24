@@ -33,6 +33,7 @@ using System.Linq;
 using System.Threading;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RomRepoMgr.Core.Checksums;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
@@ -54,16 +55,18 @@ namespace RomRepoMgr.Core.Workers;
 
 public sealed class DatImporter
 {
-    static readonly Lock   DbLock = new();
-    readonly        string _category;
-    readonly        string _datFilesPath;
-    readonly        string _datPath;
-    bool                   _aborted;
+    static readonly Lock           DbLock = new();
+    readonly        string         _category;
+    readonly        string         _datFilesPath;
+    readonly        string         _datPath;
+    readonly        ILoggerFactory _loggerFactory;
+    bool                           _aborted;
 
-    public DatImporter(string datPath, string category)
+    public DatImporter(string datPath, string category, ILoggerFactory loggerFactory)
     {
-        _datPath      = datPath;
-        _datFilesPath = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
+        _datPath       = datPath;
+        _datFilesPath  = Path.Combine(Settings.Settings.Current.RepositoryPath, "datfiles");
+        _loggerFactory = loggerFactory;
 
         if(!string.IsNullOrWhiteSpace(category)) _category = category;
     }
@@ -72,7 +75,7 @@ public sealed class DatImporter
     {
         try
         {
-            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, _loggerFactory);
 
             SetIndeterminateProgress?.Invoke(this, System.EventArgs.Empty);
 

@@ -32,6 +32,8 @@ using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -68,7 +70,7 @@ public sealed partial class ImportDatViewModel : ViewModelBase
         IndeterminateProgress            =  true;
         ProgressVisible                  =  false;
         ErrorVisible                     =  false;
-        _worker                          =  new DatImporter(datPath, null);
+        _worker                          =  new DatImporter(datPath, null, new SerilogLoggerFactory(Log.Logger));
         _worker.ErrorOccurred            += OnWorkerOnErrorOccurred;
         _worker.SetIndeterminateProgress += OnWorkerOnSetIndeterminateProgress;
         _worker.SetMessage               += OnWorkerOnSetMessage;

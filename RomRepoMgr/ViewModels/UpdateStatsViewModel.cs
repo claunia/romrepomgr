@@ -36,6 +36,8 @@ using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -79,7 +81,8 @@ public sealed partial class UpdateStatsViewModel : ViewModelBase
     {
         _ = Task.Run(() =>
         {
-            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+            using var ctx = Context.Create(Settings.Settings.Current.DatabasePath,
+                                           new SerilogLoggerFactory(Log.Logger));
 
             Dispatcher.UIThread.Post(() =>
             {

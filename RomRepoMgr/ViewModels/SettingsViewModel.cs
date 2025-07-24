@@ -40,6 +40,8 @@ using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
+using Serilog;
+using Serilog.Extensions.Logging;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.ViewModels;
@@ -227,7 +229,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             {
                 try
                 {
-                    var ctx = Context.Create(result);
+                    var ctx = Context.Create(result, new SerilogLoggerFactory(Log.Logger));
                     await ctx.Database.MigrateAsync();
                 }
                 catch
@@ -295,7 +297,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         try
         {
-            var ctx = Context.Create(result);
+            var ctx = Context.Create(result, new SerilogLoggerFactory(Log.Logger));
             await ctx.Database.MigrateAsync();
         }
         catch

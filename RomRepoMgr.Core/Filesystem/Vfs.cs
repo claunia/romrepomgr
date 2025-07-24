@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors;
@@ -18,7 +19,7 @@ namespace RomRepoMgr.Core.Filesystem;
 // TODO: Invalidate caches
 // TODO: Mount options
 // TODO: Do not show machines or romsets with no ROMs in repo
-public class Vfs : IDisposable
+public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 {
     readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedDisk>>   _machineDisksCache  = [];
     readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, CachedFile>>   _machineFilesCache  = [];
@@ -98,7 +99,7 @@ public class Vfs : IDisposable
 
     internal void GetInfo(out ulong files, out ulong totalSize)
     {
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         totalSize = (ulong)(ctx.Files.Where(f => f.IsInRepo).Sum(f => (double)f.Size) +
                             ctx.Disks.Where(f => f.IsInRepo).Sum(f => (double)f.Size) +
@@ -114,7 +115,7 @@ public class Vfs : IDisposable
 
     void FillRootDirectoryCache()
     {
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         var rootCache = new ConcurrentDictionary<string, long>();
 
@@ -180,7 +181,7 @@ public class Vfs : IDisposable
     {
         if(_romSetsCache.TryGetValue(id, out RomSet romSet)) return romSet;
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         romSet = ctx.RomSets.Find(id);
 
@@ -199,7 +200,7 @@ public class Vfs : IDisposable
 
         cachedMachines = [];
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         foreach(Machine mach in ctx.Machines.Where(m => m.RomSet.Id == id))
         {
@@ -231,7 +232,7 @@ public class Vfs : IDisposable
 
         if(cachedMachineFiles != null) return cachedMachineFiles;
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         cachedMachineFiles = [];
 
@@ -267,7 +268,7 @@ public class Vfs : IDisposable
 
         if(cachedMachineDisks != null) return cachedMachineDisks;
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         cachedMachineDisks = [];
 
@@ -301,7 +302,7 @@ public class Vfs : IDisposable
 
         if(cachedMachineMedias != null) return cachedMachineMedias;
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         cachedMachineMedias = [];
 

@@ -33,6 +33,8 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using RomRepoMgr.Views;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -207,7 +209,8 @@ public partial class EditDatViewModel : ViewModelBase
 
     async Task ExecuteSaveCommandAsync()
     {
-        await using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        await using var ctx =
+            Context.Create(Settings.Settings.Current.DatabasePath, new SerilogLoggerFactory(Log.Logger));
 
         RomSet romSetDb = await ctx.RomSets.FindAsync(_romSet.Id);
 

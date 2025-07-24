@@ -24,10 +24,12 @@
 *******************************************************************************/
 
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Logging;
 
 namespace RomRepoMgr.Database;
 
 public class ContextFactory : IDesignTimeDbContextFactory<Context>
 {
-    public Context CreateDbContext(string[] args) => Context.Create("romrepo.db");
+    public Context CreateDbContext(string[] args) =>
+        Context.Create("romrepo.db", LoggerFactory.Create(builder => builder.AddConsole()));
 }

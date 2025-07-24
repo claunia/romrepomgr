@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ionic.Zip;
 using Ionic.Zlib;
+using Microsoft.Extensions.Logging;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
@@ -15,7 +16,7 @@ using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
 
-public class FileExporter(long romSetId, string outPath)
+public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFactory)
 {
     const long                        BUFFER_SIZE = 131072;
     long                              _filePosition;
@@ -43,7 +44,7 @@ public class FileExporter(long romSetId, string outPath)
                                Message = Localization.RetrievingRomSetFromDatabase
                            });
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         RomSet romSet = ctx.RomSets.Find(romSetId);
 
@@ -108,7 +109,7 @@ public class FileExporter(long romSetId, string outPath)
                                 Message = machine.Name
                             });
 
-        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath);
+        using var ctx = Context.Create(Settings.Settings.Current.DatabasePath, loggerFactory);
 
         string machineName = machine.Name;
 
