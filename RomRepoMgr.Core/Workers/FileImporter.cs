@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +17,8 @@ using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SabreTools.FileTypes.Aaru;
 using SabreTools.FileTypes.CHD;
-using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
+using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
 
@@ -310,7 +311,10 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                 Message = Localization.ExtractingArchive
                             });
 
-        ExtractArchive(archive, _archiveFolder);
+        if(archiveFormat is "Zip")
+            ZipFile.ExtractToDirectory(archive, _archiveFolder);
+        else
+            ExtractArchive(archive, _archiveFolder);
 
         Files = Directory.GetFiles(_archiveFolder, "*", SearchOption.AllDirectories).Order().ToList();
 
