@@ -31,7 +31,6 @@
     <PackageReference Include="Roslynator.Analyzers"/>
     <PackageReference Include="Roslynator.CodeAnalysis.Analyzers"/>
     <PackageReference Include="Roslynator.Formatting.Analyzers"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux"/>
     <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer"/>
     <PackageReference Include="Text.Analyzers"/>
   </ItemGroup>
