@@ -38,6 +38,7 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
+using Serilog;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -119,7 +120,7 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             }
             catch(Exception e)
             {
-                // TODO: Log error
+                Log.Error(e, "Error loading settings");
                 Dispatcher.UIThread.Post(FailedLoadingSettings);
             }
         });
@@ -148,7 +149,7 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             }
             catch(Exception e)
             {
-                // TODO: Log error
+                Log.Error(e, "Error checking unar");
                 Dispatcher.UIThread.Post(FailedCheckUnAr);
             }
         });
@@ -180,7 +181,7 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             }
             catch(Exception e)
             {
-                // TODO: Log error
+                Log.Error(e, "Error loading database");
                 Dispatcher.UIThread.Post(FailedLoadingDatabase);
             }
         });
@@ -210,7 +211,7 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             }
             catch(Exception e)
             {
-                // TODO: Log error
+                Log.Error(e, "Error migrating database");
                 Dispatcher.UIThread.Post(FailedMigratingDatabase);
             }
         });
@@ -270,7 +271,7 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             }
             catch(Exception e)
             {
-                // TODO: Log error
+                Log.Error(e, "Error loading ROM sets");
                 Dispatcher.UIThread.Post(FailedLoadingRomSets);
             }
         });

@@ -23,7 +23,6 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -187,10 +186,12 @@ public sealed partial class UpdateStatsViewModel : ViewModelBase
                         });
                     });
                 }
-                catch(Exception)
+                catch
+#pragma warning disable PH2098
                 {
                     // Ignored
                 }
+#pragma warning restore PH2098
 
                 pos++;
             }

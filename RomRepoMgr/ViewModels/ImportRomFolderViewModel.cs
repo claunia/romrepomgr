@@ -18,6 +18,7 @@ using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
+using Serilog;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -235,7 +236,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                          });
 
         _stopwatch.Stop();
-        Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process files.");
+        Log.Debug("Took {TotalSeconds} seconds to process files", _stopwatch.Elapsed.TotalSeconds);
 
         _rootImporter.SaveChanges();
 
@@ -325,7 +326,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                          });
 
         _stopwatch.Stop();
-        Console.WriteLine("Took " + _stopwatch.Elapsed.TotalSeconds + " seconds to process archives.");
+        Log.Debug("Took {TotalSeconds} seconds to process archives", _stopwatch.Elapsed.TotalSeconds);
 
         Progress2Visible      = false;
         StatusMessage2Visible = false;
@@ -336,7 +337,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
     void CheckArchivesFinished(object sender, EventArgs e)
     {
         _stopwatch.Stop();
-        Console.WriteLine("Took {0} seconds to check archives.", _stopwatch.Elapsed.TotalSeconds);
+        Log.Debug("Took {TotalSeconds} seconds to check archives", _stopwatch.Elapsed.TotalSeconds);
 
         Progress2Visible      = false;
         StatusMessage2Visible = false;

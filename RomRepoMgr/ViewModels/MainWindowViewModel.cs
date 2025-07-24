@@ -44,6 +44,7 @@ using RomRepoMgr.Core.Filesystem;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Resources;
 using RomRepoMgr.Views;
+using Serilog;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -270,8 +271,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             Vfs.Umounted += VfsOnUmounted;
             Vfs.MountTo(result[0].Path.LocalPath);
         }
-        catch(Exception)
+        catch(Exception ex)
         {
+            Log.Error(ex, "Error mounting VFS");
+
             if(Debugger.IsAttached) throw;
 
             Vfs = null;

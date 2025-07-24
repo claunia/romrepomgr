@@ -23,8 +23,10 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
+using System;
 using Avalonia;
 using Avalonia.Logging;
+using Serilog;
 
 namespace RomRepoMgr;
 
@@ -33,10 +35,40 @@ internal static class Program
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
-    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        Log.Logger = new LoggerConfiguration()
+#if DEBUG
+                    .MinimumLevel.Debug()
+#else
+                    .MinimumLevel.Information()
+#endif
+                    .WriteTo.Console()
+                    .CreateLogger();
+
+        try
+        {
+            Log.Information("Starting up");
+            Log.Debug("Testing debug logging");
+
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch(Exception ex)
+        {
+            Log.Fatal(ex, "Application start-up failed");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
                                                              .UsePlatformDetect()
-                                                             .LogToTrace(LogEventLevel.Debug);
+#if DEBUG
+                                                             .LogToSerilog(LogEventLevel.Debug);
+#else
+                                                             .LogToSerilog(LogEventLevel.Information);
+#endif
 }

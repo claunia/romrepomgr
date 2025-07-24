@@ -230,7 +230,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
                     var ctx = Context.Create(result);
                     await ctx.Database.MigrateAsync();
                 }
-                catch(Exception)
+                catch
                 {
                     btnResult = await MessageBoxManager
                                      .GetMessageBoxStandard(Localization.DatabaseFileUnusableMsgBoxTitle,
@@ -245,7 +245,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
                     {
                         File.Delete(result);
                     }
-                    catch(Exception)
+                    catch
                     {
                         await MessageBoxManager
                              .GetMessageBoxStandard(Localization.DatabaseFileCannotDeleteTitle,
@@ -254,9 +254,13 @@ public sealed partial class SettingsViewModel : ViewModelBase
                                                     Icon.Error)
                              .ShowWindowDialogAsync(_view);
 
+#pragma warning disable ERP022
                         return;
+#pragma warning restore ERP022
                     }
+#pragma warning disable ERP022
                 }
+#pragma warning restore ERP022
             }
             else
             {
@@ -273,7 +277,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
                 {
                     File.Delete(result);
                 }
-                catch(Exception)
+                catch
                 {
                     await MessageBoxManager
                          .GetMessageBoxStandard(Localization.DatabaseFileCannotDeleteTitle,
@@ -282,7 +286,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
                                                 Icon.Error)
                          .ShowWindowDialogAsync(_view);
 
+#pragma warning disable ERP022
                     return;
+#pragma warning restore ERP022
                 }
             }
         }
@@ -292,7 +298,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             var ctx = Context.Create(result);
             await ctx.Database.MigrateAsync();
         }
-        catch(Exception)
+        catch
         {
             await MessageBoxManager
                  .GetMessageBoxStandard(Localization.DatabaseFileUnusableMsgBoxTitle,
@@ -301,7 +307,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
                                         Icon.Error)
                  .ShowWindowDialogAsync(_view);
 
+#pragma warning disable ERP022
             return;
+#pragma warning restore ERP022
         }
 
         DatabasePath = result;
