@@ -26,7 +26,8 @@
             <Button Content="{x:Static resources:Localization.ChooseLabel}"
                     Command="{Binding SelectFolderCommand, Mode=OneWay}"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Center" />
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding CanChoose}" />
             <TextBlock Text="{x:Static resources:Localization.PathLabel}"
                        FontWeight="Bold"
                        VerticalAlignment="Center" />

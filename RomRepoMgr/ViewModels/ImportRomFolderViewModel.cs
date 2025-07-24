@@ -30,6 +30,8 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
     readonly ConcurrentBag<DbMedia> _newMedias = [];
     readonly Stopwatch              _stopwatch = new();
     [ObservableProperty]
+    bool _canChoose;
+    [ObservableProperty]
     bool _canClose;
     [ObservableProperty]
     bool _canStart;
@@ -75,7 +77,6 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
     [ObservableProperty]
     bool _statusMessage2Visible;
 
-
     public ImportRomFolderViewModel()
     {
         SelectFolderCommand    = new AsyncRelayCommand(SelectFolderAsync);
@@ -86,6 +87,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         KnownOnlyChecked       = true;
         RecurseArchivesChecked = Settings.Settings.UnArUsable;
         RemoveFilesEnabled     = false;
+        CanChoose              = true;
     }
 
     public ICommand SelectFolderCommand { get; }
@@ -122,6 +124,8 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         CanClose = false;
         CanStart = false;
         IsImporting = true;
+        IsReady = false;
+        CanChoose = false;
 
         _ = Task.Run(() => _rootImporter.FindFiles(FolderPath));
     }
