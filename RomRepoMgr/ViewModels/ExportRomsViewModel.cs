@@ -24,39 +24,59 @@
 *******************************************************************************/
 
 using System;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class ExportRomsViewModel : ViewModelBase
+public sealed partial class ExportRomsViewModel : ViewModelBase
 {
     readonly long       _romSetId;
     readonly ExportRoms _view;
-    bool                _canClose;
-    bool                _progress2IsIndeterminate;
-    double              _progress2Maximum;
-    double              _progress2Minimum;
-    double              _progress2Value;
-    bool                _progress2Visible;
-    bool                _progress3IsIndeterminate;
-    double              _progress3Maximum;
-    double              _progress3Minimum;
-    double              _progress3Value;
-    bool                _progress3Visible;
-    bool                _progressIsIndeterminate;
-    double              _progressMaximum;
-    double              _progressMinimum;
-    double              _progressValue;
-    bool                _progressVisible;
-    string              _status2Message;
-    string              _status3Message;
-    string              _statusMessage;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    bool _progress2IsIndeterminate;
+    [ObservableProperty]
+    double _progress2Maximum;
+    [ObservableProperty]
+    double _progress2Minimum;
+    [ObservableProperty]
+    double _progress2Value;
+    [ObservableProperty]
+    bool _progress2Visible;
+    [ObservableProperty]
+    bool _progress3IsIndeterminate;
+    [ObservableProperty]
+    double _progress3Maximum;
+    [ObservableProperty]
+    double _progress3Minimum;
+    [ObservableProperty]
+    double _progress3Value;
+    [ObservableProperty]
+    bool _progress3Visible;
+    [ObservableProperty]
+    bool _progressIsIndeterminate;
+    [ObservableProperty]
+    double _progressMaximum;
+    [ObservableProperty]
+    double _progressMinimum;
+    [ObservableProperty]
+    double _progressValue;
+    [ObservableProperty]
+    bool _progressVisible;
+    [ObservableProperty]
+    string _status2Message;
+    [ObservableProperty]
+    string _status3Message;
+    [ObservableProperty]
+    string _statusMessage;
 
     // Mock
     public ExportRomsViewModel()
@@ -71,127 +91,12 @@ public sealed class ExportRomsViewModel : ViewModelBase
         _view        = view;
         _romSetId    = romSetId;
         FolderPath   = folderPath;
-        CloseCommand = ReactiveCommand.Create(ExecuteCloseCommand);
+        CloseCommand = new RelayCommand(ExecuteCloseCommand);
         CanClose     = false;
     }
 
-    public string FolderPath { get; }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public double ProgressMinimum
-    {
-        get => _progressMinimum;
-        set => this.RaiseAndSetIfChanged(ref _progressMinimum, value);
-    }
-
-    public double ProgressMaximum
-    {
-        get => _progressMaximum;
-        set => this.RaiseAndSetIfChanged(ref _progressMaximum, value);
-    }
-
-    public double ProgressValue
-    {
-        get => _progressValue;
-        set => this.RaiseAndSetIfChanged(ref _progressValue, value);
-    }
-
-    public bool ProgressIsIndeterminate
-    {
-        get => _progressIsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progressIsIndeterminate, value);
-    }
-
-    public bool Progress2Visible
-    {
-        get => _progress2Visible;
-        set => this.RaiseAndSetIfChanged(ref _progress2Visible, value);
-    }
-
-    public string Status2Message
-    {
-        get => _status2Message;
-        set => this.RaiseAndSetIfChanged(ref _status2Message, value);
-    }
-
-    public double Progress2Minimum
-    {
-        get => _progress2Minimum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Minimum, value);
-    }
-
-    public double Progress2Maximum
-    {
-        get => _progress2Maximum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Maximum, value);
-    }
-
-    public double Progress2Value
-    {
-        get => _progress2Value;
-        set => this.RaiseAndSetIfChanged(ref _progress2Value, value);
-    }
-
-    public bool Progress2IsIndeterminate
-    {
-        get => _progress2IsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progress2IsIndeterminate, value);
-    }
-
-    public bool Progress3Visible
-    {
-        get => _progress3Visible;
-        set => this.RaiseAndSetIfChanged(ref _progress3Visible, value);
-    }
-
-    public string Status3Message
-    {
-        get => _status3Message;
-        set => this.RaiseAndSetIfChanged(ref _status3Message, value);
-    }
-
-    public double Progress3Minimum
-    {
-        get => _progress3Minimum;
-        set => this.RaiseAndSetIfChanged(ref _progress3Minimum, value);
-    }
-
-    public double Progress3Maximum
-    {
-        get => _progress3Maximum;
-        set => this.RaiseAndSetIfChanged(ref _progress3Maximum, value);
-    }
-
-    public double Progress3Value
-    {
-        get => _progress3Value;
-        set => this.RaiseAndSetIfChanged(ref _progress3Value, value);
-    }
-
-    public bool Progress3IsIndeterminate
-    {
-        get => _progress3IsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progress3IsIndeterminate, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
+    public string   FolderPath   { get; }
+    public ICommand CloseCommand { get; }
 
     void ExecuteCloseCommand() => _view.Close();
 

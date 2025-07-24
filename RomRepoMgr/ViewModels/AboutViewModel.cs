@@ -26,20 +26,22 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class AboutViewModel : ViewModelBase
+public sealed partial class AboutViewModel : ViewModelBase
 {
     readonly About _view;
-    string         _versionText;
+    [ObservableProperty]
+    string _versionText;
 
     public AboutViewModel()
     {
@@ -57,16 +59,10 @@ public sealed class AboutViewModel : ViewModelBase
     public string                              SuiteName      => "ROM Repository Manager";
     public string                              Copyright      => "© 2020-2024 Natalia Portillo";
     public string                              Website        => "https://www.claunia.com";
-    public ReactiveCommand<Unit, Unit>         WebsiteCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit>         LicenseCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit>         CloseCommand   { get; private set; }
+    public ICommand                            WebsiteCommand { get; private set; }
+    public ICommand                            LicenseCommand { get; private set; }
+    public ICommand                            CloseCommand   { get; private set; }
     public ObservableCollection<AssemblyModel> Assemblies     { get; private set; }
-
-    public string VersionText
-    {
-        get => _versionText;
-        private set => this.RaiseAndSetIfChanged(ref _versionText, value);
-    }
 
     void LoadData()
     {
@@ -74,9 +70,9 @@ public sealed class AboutViewModel : ViewModelBase
             (Attribute.GetCustomAttribute(typeof(App).Assembly, typeof(AssemblyInformationalVersionAttribute)) as
                  AssemblyInformationalVersionAttribute)?.InformationalVersion;
 
-        WebsiteCommand = ReactiveCommand.Create(ExecuteWebsiteCommand);
-        LicenseCommand = ReactiveCommand.Create(ExecuteLicenseCommand);
-        CloseCommand   = ReactiveCommand.Create(ExecuteCloseCommand);
+        WebsiteCommand = new RelayCommand(ExecuteWebsiteCommand);
+        LicenseCommand = new RelayCommand(ExecuteLicenseCommand);
+        CloseCommand   = new RelayCommand(ExecuteCloseCommand);
 
         Assemblies = [];
 

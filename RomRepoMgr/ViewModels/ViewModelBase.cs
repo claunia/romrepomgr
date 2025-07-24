@@ -23,8 +23,8 @@
 // Copyright © 2020-2024 Natalia Portillo
 *******************************************************************************/
 
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RomRepoMgr.ViewModels;
 
-public class ViewModelBase : ReactiveObject {}
+public class ViewModelBase : ObservableObject;

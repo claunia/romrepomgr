@@ -1,74 +1,28 @@
 using System;
 using Avalonia.Media;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 using RomRepoMgr.Core.EventArgs;
 
 namespace RomRepoMgr.Models;
 
-public class RomImporter : ReactiveObject
+public partial class RomImporter : ObservableObject
 {
-    bool          _indeterminate;
-    double        _maximum;
-    double        _minimum;
-    double        _progress;
-    bool          _progressVisible = true;
-    Color         _statusColor;
-    string        _statusMessage;
+    [ObservableProperty]
+    bool _indeterminate;
+    [ObservableProperty]
+    double _maximum;
+    [ObservableProperty]
+    double _minimum;
+    [ObservableProperty]
+    double _progress;
+    [ObservableProperty]
+    bool _progressVisible = true;
+    [ObservableProperty]
+    Color _statusColor;
+    [ObservableProperty]
+    string _statusMessage;
     public string Filename { get; internal init; }
     public bool   Running  { get; private set; } = true;
-
-    public bool Indeterminate
-    {
-        get => _indeterminate;
-        set => this.RaiseAndSetIfChanged(ref _indeterminate, value);
-    }
-
-    public double Progress
-    {
-        get => _progress;
-        set => this.RaiseAndSetIfChanged(ref _progress, value);
-    }
-
-    public double Maximum
-    {
-        get => _maximum;
-        set => this.RaiseAndSetIfChanged(ref _maximum, value);
-    }
-
-    public double Minimum
-    {
-        get => _minimum;
-        set => this.RaiseAndSetIfChanged(ref _minimum, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public Color StatusColor
-    {
-        get => _statusColor;
-        set => this.RaiseAndSetIfChanged(ref _statusColor, value);
-    }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    internal void OnErrorOccurred(object sender, ErrorEventArgs e)
-    {
-        StatusMessage = e.Message;
-        StatusColor   = Colors.Red;
-
-        if(!Indeterminate) return;
-
-        Indeterminate = false;
-        Progress      = 0;
-    }
 
     internal void OnSetIndeterminateProgress(object sender, EventArgs e)
     {

@@ -24,29 +24,39 @@
 *******************************************************************************/
 
 using System;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class ImportDatViewModel : ViewModelBase
+public sealed partial class ImportDatViewModel : ViewModelBase
 {
     readonly ImportDat   _view;
     readonly DatImporter _worker;
-    bool                 _canClose;
-    double               _currentValue;
-    string               _errorMessage;
-    bool                 _errorVisible;
-    bool                 _indeterminateProgress;
-    double               _maximumValue;
-    double               _minimumValue;
-    bool                 _progressVisible;
-    string               _statusMessage;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    double _currentValue;
+    [ObservableProperty]
+    string _errorMessage;
+    [ObservableProperty]
+    bool _errorVisible;
+    [ObservableProperty]
+    bool _indeterminateProgress;
+    [ObservableProperty]
+    double _maximumValue;
+    [ObservableProperty]
+    double _minimumValue;
+    [ObservableProperty]
+    bool _progressVisible;
+    [ObservableProperty]
+    string _statusMessage;
 
     // Mock
     public ImportDatViewModel() {}
@@ -54,7 +64,7 @@ public sealed class ImportDatViewModel : ViewModelBase
     public ImportDatViewModel(ImportDat view, string datPath)
     {
         _view                            =  view;
-        CloseCommand                     =  ReactiveCommand.Create(ExecuteCloseCommand);
+        CloseCommand                     =  new RelayCommand(ExecuteCloseCommand);
         IndeterminateProgress            =  true;
         ProgressVisible                  =  false;
         ErrorVisible                     =  false;
@@ -67,61 +77,7 @@ public sealed class ImportDatViewModel : ViewModelBase
         _worker.WorkFinished             += OnWorkerOnWorkFinished;
     }
 
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public bool IndeterminateProgress
-    {
-        get => _indeterminateProgress;
-        set => this.RaiseAndSetIfChanged(ref _indeterminateProgress, value);
-    }
-
-    public double MaximumValue
-    {
-        get => _maximumValue;
-        set => this.RaiseAndSetIfChanged(ref _maximumValue, value);
-    }
-
-    public double MinimumValue
-    {
-        get => _minimumValue;
-        set => this.RaiseAndSetIfChanged(ref _minimumValue, value);
-    }
-
-    public double CurrentValue
-    {
-        get => _currentValue;
-        set => this.RaiseAndSetIfChanged(ref _currentValue, value);
-    }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public bool ErrorVisible
-    {
-        get => _errorVisible;
-        set => this.RaiseAndSetIfChanged(ref _errorVisible, value);
-    }
-
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
+    public ICommand CloseCommand { get; }
 
     void OnWorkerOnWorkFinished(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
     {

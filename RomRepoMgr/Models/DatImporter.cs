@@ -1,58 +1,28 @@
 using System;
 using System.Threading.Tasks;
 using Avalonia.Media;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 using RomRepoMgr.Core.EventArgs;
 
 namespace RomRepoMgr.Models;
 
-public class DatImporter : ReactiveObject
+public partial class DatImporter : ObservableObject
 {
-    bool          _indeterminate;
-    double        _maximum;
-    double        _minimum;
-    double        _progress;
-    Color         _statusColor;
-    string        _statusMessage;
+    [ObservableProperty]
+    bool _indeterminate;
+    [ObservableProperty]
+    double _maximum;
+    [ObservableProperty]
+    double _minimum;
+    [ObservableProperty]
+    double _progress;
+    [ObservableProperty]
+    Color _statusColor;
+    [ObservableProperty]
+    string _statusMessage;
     public string Filename { get; internal init; }
     public Task   Task     { get; set; }
     public bool   Running  { get; private set; } = true;
-
-    public bool Indeterminate
-    {
-        get => _indeterminate;
-        set => this.RaiseAndSetIfChanged(ref _indeterminate, value);
-    }
-
-    public double Progress
-    {
-        get => _progress;
-        set => this.RaiseAndSetIfChanged(ref _progress, value);
-    }
-
-    public double Maximum
-    {
-        get => _maximum;
-        set => this.RaiseAndSetIfChanged(ref _maximum, value);
-    }
-
-    public double Minimum
-    {
-        get => _minimum;
-        set => this.RaiseAndSetIfChanged(ref _minimum, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public Color StatusColor
-    {
-        get => _statusColor;
-        set => this.RaiseAndSetIfChanged(ref _statusColor, value);
-    }
 
     internal void OnErrorOccurred(object sender, ErrorEventArgs e)
     {

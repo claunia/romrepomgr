@@ -1,15 +1,17 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
@@ -19,44 +21,65 @@ using RomRepoMgr.Resources;
 
 namespace RomRepoMgr.ViewModels;
 
-public class ImportRomFolderViewModel : ViewModelBase
+public sealed partial class ImportRomFolderViewModel : ViewModelBase
 {
     readonly Context                _ctx       = Context.Create(Settings.Settings.Current.DatabasePath);
     readonly ConcurrentBag<DbDisk>  _newDisks  = [];
     readonly ConcurrentBag<DbFile>  _newFiles  = [];
     readonly ConcurrentBag<DbMedia> _newMedias = [];
     readonly Stopwatch              _stopwatch = new();
-    bool                            _canClose;
-    bool                            _canStart;
-    string                          _folderPath;
-    bool                            _isImporting;
-    bool                            _isReady;
-    bool                            _knownOnlyChecked;
-    int                             _listPosition;
-    bool                            _progress2IsIndeterminate;
-    double                          _progress2Maximum;
-    double                          _progress2Minimum;
-    double                          _progress2Value;
-    bool                            _progress2Visible;
-    bool                            _progressIsIndeterminate;
-    double                          _progressMaximum;
-    double                          _progressMinimum;
-    double                          _progressValue;
-    bool                            _progressVisible;
-    bool                            _recurseArchivesChecked;
-    bool                            _removeFilesChecked;
-    bool                            _removeFilesEnabled;
-    FileImporter                    _rootImporter;
-    string                          _statusMessage;
-    string                          _statusMessage2;
-    bool                            _statusMessage2Visible;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    bool _canStart;
+    [ObservableProperty]
+    string _folderPath;
+    [ObservableProperty]
+    bool _isImporting;
+    [ObservableProperty]
+    bool _isReady;
+    [ObservableProperty]
+    bool _knownOnlyChecked;
+    int _listPosition;
+    [ObservableProperty]
+    bool _progress2IsIndeterminate;
+    [ObservableProperty]
+    double _progress2Maximum;
+    [ObservableProperty]
+    double _progress2Minimum;
+    [ObservableProperty]
+    double _progress2Value;
+    [ObservableProperty]
+    bool _progress2Visible;
+    [ObservableProperty]
+    bool _progressIsIndeterminate;
+    [ObservableProperty]
+    double _progressMaximum;
+    [ObservableProperty]
+    double _progressMinimum;
+    [ObservableProperty]
+    double _progressValue;
+    [ObservableProperty]
+    bool _progressVisible;
+    bool _recurseArchivesChecked;
+    [ObservableProperty]
+    bool _removeFilesChecked;
+    [ObservableProperty]
+    bool _removeFilesEnabled;
+    FileImporter _rootImporter;
+    [ObservableProperty]
+    string _statusMessage;
+    [ObservableProperty]
+    string _statusMessage2;
+    [ObservableProperty]
+    bool _statusMessage2Visible;
 
 
     public ImportRomFolderViewModel()
     {
-        SelectFolderCommand    = ReactiveCommand.CreateFromTask(SelectFolderAsync);
-        CloseCommand           = ReactiveCommand.Create(Close);
-        StartCommand           = ReactiveCommand.Create(Start);
+        SelectFolderCommand    = new AsyncRelayCommand(SelectFolderAsync);
+        CloseCommand           = new RelayCommand(Close);
+        StartCommand           = new RelayCommand(Start);
         CanClose               = true;
         RemoveFilesChecked     = false;
         KnownOnlyChecked       = true;
@@ -64,30 +87,12 @@ public class ImportRomFolderViewModel : ViewModelBase
         RemoveFilesEnabled     = false;
     }
 
-    public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> CloseCommand        { get; }
-    public ReactiveCommand<Unit, Unit> StartCommand        { get; }
-    public Window                      View                { get; init; }
+    public ICommand SelectFolderCommand { get; }
+    public ICommand CloseCommand        { get; }
+    public ICommand StartCommand        { get; }
+    public Window   View                { get; init; }
 
     public bool RecurseArchivesEnabled => Settings.Settings.UnArUsable;
-
-    public bool RemoveFilesChecked
-    {
-        get => _removeFilesChecked;
-        set => this.RaiseAndSetIfChanged(ref _removeFilesChecked, value);
-    }
-
-    public bool KnownOnlyChecked
-    {
-        get => _knownOnlyChecked;
-        set => this.RaiseAndSetIfChanged(ref _knownOnlyChecked, value);
-    }
-
-    public bool RemoveFilesEnabled
-    {
-        get => _removeFilesEnabled;
-        set => this.RaiseAndSetIfChanged(ref _removeFilesEnabled, value);
-    }
 
     public bool RecurseArchivesChecked
     {
@@ -97,118 +102,9 @@ public class ImportRomFolderViewModel : ViewModelBase
             if(value) RemoveFilesChecked = false;
 
             RemoveFilesEnabled = !value;
-            this.RaiseAndSetIfChanged(ref _recurseArchivesChecked, value);
+            SetProperty(ref _recurseArchivesChecked, value);
         }
     }
-
-    public bool IsReady
-    {
-        get => _isReady;
-        set => this.RaiseAndSetIfChanged(ref _isReady, value);
-    }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public double ProgressMinimum
-    {
-        get => _progressMinimum;
-        set => this.RaiseAndSetIfChanged(ref _progressMinimum, value);
-    }
-
-    public double ProgressMaximum
-    {
-        get => _progressMaximum;
-        set => this.RaiseAndSetIfChanged(ref _progressMaximum, value);
-    }
-
-    public double ProgressValue
-    {
-        get => _progressValue;
-        set => this.RaiseAndSetIfChanged(ref _progressValue, value);
-    }
-
-    public bool ProgressIsIndeterminate
-    {
-        get => _progressIsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progressIsIndeterminate, value);
-    }
-
-    public bool Progress2Visible
-    {
-        get => _progress2Visible;
-        set => this.RaiseAndSetIfChanged(ref _progress2Visible, value);
-    }
-
-    public bool StatusMessage2Visible
-    {
-        get => _statusMessage2Visible;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage2Visible, value);
-    }
-
-    public string StatusMessage2
-    {
-        get => _statusMessage2;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage2, value);
-    }
-
-    public double Progress2Minimum
-    {
-        get => _progress2Minimum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Minimum, value);
-    }
-
-    public double Progress2Maximum
-    {
-        get => _progress2Maximum;
-        set => this.RaiseAndSetIfChanged(ref _progress2Maximum, value);
-    }
-
-    public double Progress2Value
-    {
-        get => _progress2Value;
-        set => this.RaiseAndSetIfChanged(ref _progress2Value, value);
-    }
-
-    public bool Progress2IsIndeterminate
-    {
-        get => _progress2IsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progress2IsIndeterminate, value);
-    }
-
-    public string FolderPath
-    {
-        get => _folderPath;
-        set => this.RaiseAndSetIfChanged(ref _folderPath, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
-    public bool CanStart
-    {
-        get => _canStart;
-        set => this.RaiseAndSetIfChanged(ref _canStart, value);
-    }
-
-    public bool IsImporting
-    {
-        get => _isImporting;
-        set => this.RaiseAndSetIfChanged(ref _isImporting, value);
-    }
-
 
     public ObservableCollection<RomImporter> Importers { get; } = [];
 

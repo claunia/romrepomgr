@@ -4,10 +4,10 @@
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.3.2"/>
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.2"/>
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.2"/>
-    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.3.2"/>
     <PackageVersion Include="Avalonia.Svg.Skia" Version="11.3.0"/>
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.2"/>
     <PackageVersion Include="Avalonia" Version="11.3.2"/>
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
     <PackageVersion Include="DotNetZip" Version="1.16.0"/>
     <PackageVersion Include="EFCore.BulkExtensions" Version="9.0.1"/>
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2"/>
@@ -33,17 +33,14 @@
     <PackageVersion Include="System.Security.Principal.Windows" Version="5.0.0"/>
     <PackageVersion Include="Text.Analyzers" Version="4.14.0"/>
     <PackageVersion Include="winfsp.net" Version="2.1.25156"/>
-
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3"/>
     <PackageVersion Include="SabreTools.Hashing" Version="1.2.3"/>
     <PackageVersion Include="SabreTools.IO" Version="1.4.13"/>
     <PackageVersion Include="SabreTools.Matching" Version="1.3.4"/>
     <PackageVersion Include="SabreTools.Skippers" Version="1.1.3"/>
-
     <PackageVersion Include="System.IO.Compression" Version="4.3.0"/>
     <PackageVersion Include="SharpCompress" Version="0.38.0"/>
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0"/>
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.1"/>
-
   </ItemGroup>
 </Project>

@@ -26,13 +26,14 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
-using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Workers;
@@ -40,28 +41,44 @@ using RomRepoMgr.Database;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class SplashWindowViewModel : ViewModelBase
+public sealed partial class SplashWindowViewModel : ViewModelBase
 {
+    [ObservableProperty]
     bool _checkingUnArError;
+    [ObservableProperty]
     bool _checkingUnArOk;
+    [ObservableProperty]
     bool _checkingUnArUnknown;
+    [ObservableProperty]
     bool _exitVisible;
+    [ObservableProperty]
     bool _loadingDatabaseError;
+    [ObservableProperty]
     bool _loadingDatabaseOk;
+    [ObservableProperty]
     bool _loadingDatabaseUnknown;
+    [ObservableProperty]
     bool _loadingRomSetsError;
+    [ObservableProperty]
     bool _loadingRomSetsOk;
+    [ObservableProperty]
     bool _loadingRomSetsUnknown;
+    [ObservableProperty]
     bool _loadingSettingsError;
+    [ObservableProperty]
     bool _loadingSettingsOk;
+    [ObservableProperty]
     bool _loadingSettingsUnknown;
+    [ObservableProperty]
     bool _migratingDatabaseError;
+    [ObservableProperty]
     bool _migratingDatabaseOk;
+    [ObservableProperty]
     bool _migratingDatabaseUnknown;
 
     public SplashWindowViewModel()
     {
-        ExitCommand = ReactiveCommand.Create(ExecuteExitCommand);
+        ExitCommand = new RelayCommand(ExecuteExitCommand);
 
         LoadingSettingsOk        = false;
         LoadingSettingsError     = false;
@@ -81,103 +98,7 @@ public sealed class SplashWindowViewModel : ViewModelBase
         ExitVisible              = false;
     }
 
-    public ReactiveCommand<Unit, Unit> ExitCommand { get; }
-
-    public bool LoadingSettingsOk
-    {
-        get => _loadingSettingsOk;
-        set => this.RaiseAndSetIfChanged(ref _loadingSettingsOk, value);
-    }
-
-    public bool LoadingSettingsError
-    {
-        get => _loadingSettingsError;
-        set => this.RaiseAndSetIfChanged(ref _loadingSettingsError, value);
-    }
-
-    public bool LoadingSettingsUnknown
-    {
-        get => _loadingSettingsUnknown;
-        set => this.RaiseAndSetIfChanged(ref _loadingSettingsUnknown, value);
-    }
-
-    public bool CheckingUnArOk
-    {
-        get => _checkingUnArOk;
-        set => this.RaiseAndSetIfChanged(ref _checkingUnArOk, value);
-    }
-
-    public bool CheckingUnArError
-    {
-        get => _checkingUnArError;
-        set => this.RaiseAndSetIfChanged(ref _checkingUnArError, value);
-    }
-
-    public bool CheckingUnArUnknown
-    {
-        get => _checkingUnArUnknown;
-        set => this.RaiseAndSetIfChanged(ref _checkingUnArUnknown, value);
-    }
-
-    public bool LoadingDatabaseOk
-    {
-        get => _loadingDatabaseOk;
-        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseOk, value);
-    }
-
-    public bool LoadingDatabaseError
-    {
-        get => _loadingDatabaseError;
-        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseError, value);
-    }
-
-    public bool LoadingDatabaseUnknown
-    {
-        get => _loadingDatabaseUnknown;
-        set => this.RaiseAndSetIfChanged(ref _loadingDatabaseUnknown, value);
-    }
-
-    public bool MigratingDatabaseOk
-    {
-        get => _migratingDatabaseOk;
-        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseOk, value);
-    }
-
-    public bool MigratingDatabaseError
-    {
-        get => _migratingDatabaseError;
-        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseError, value);
-    }
-
-    public bool MigratingDatabaseUnknown
-    {
-        get => _migratingDatabaseUnknown;
-        set => this.RaiseAndSetIfChanged(ref _migratingDatabaseUnknown, value);
-    }
-
-    public bool ExitVisible
-    {
-        get => _exitVisible;
-        set => this.RaiseAndSetIfChanged(ref _exitVisible, value);
-    }
-
-    public bool LoadingRomSetsOk
-    {
-        get => _loadingRomSetsOk;
-        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsOk, value);
-    }
-
-    public bool LoadingRomSetsError
-    {
-        get => _loadingRomSetsError;
-        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsError, value);
-    }
-
-    public bool LoadingRomSetsUnknown
-    {
-        get => _loadingRomSetsUnknown;
-        set => this.RaiseAndSetIfChanged(ref _loadingRomSetsUnknown, value);
-    }
+    public ICommand ExitCommand { get; }
 
     public string LoadingText => "ROM Repository Manager";
 

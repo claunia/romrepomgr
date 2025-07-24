@@ -26,7 +26,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 using RomRepoMgr.Core;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
@@ -35,11 +35,12 @@ using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class RemoveDatViewModel : ViewModelBase
+public sealed partial class RemoveDatViewModel : ViewModelBase
 {
     readonly long      _romSetId;
     readonly RemoveDat _view;
-    string             _statusMessage;
+    [ObservableProperty]
+    string _statusMessage;
 
     // Mock
     public RemoveDatViewModel() {}
@@ -48,12 +49,6 @@ public sealed class RemoveDatViewModel : ViewModelBase
     {
         _view     = view;
         _romSetId = romSetId;
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
     }
 
     internal void OnOpened()

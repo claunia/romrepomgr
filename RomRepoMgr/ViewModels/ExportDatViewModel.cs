@@ -24,10 +24,11 @@
 *******************************************************************************/
 
 using System.IO;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
@@ -37,17 +38,22 @@ using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class ExportDatViewModel : ViewModelBase
+public sealed partial class ExportDatViewModel : ViewModelBase
 {
     readonly string      _datHash;
     readonly string      _outPath;
     readonly ExportDat   _view;
     readonly Compression _worker;
-    bool                 _canClose;
-    string               _errorMessage;
-    bool                 _errorVisible;
-    bool                 _progressVisible;
-    string               _statusMessage;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    string _errorMessage;
+    [ObservableProperty]
+    bool _errorVisible;
+    [ObservableProperty]
+    bool _progressVisible;
+    [ObservableProperty]
+    string _statusMessage;
 
     // Mock
     public ExportDatViewModel() {}
@@ -57,7 +63,7 @@ public sealed class ExportDatViewModel : ViewModelBase
         _view                    =  view;
         _datHash                 =  datHash;
         _outPath                 =  outPath;
-        CloseCommand             =  ReactiveCommand.Create(ExecuteCloseCommand);
+        CloseCommand             =  new RelayCommand(ExecuteCloseCommand);
         ProgressVisible          =  false;
         ErrorVisible             =  false;
         _worker                  =  new Compression();
@@ -65,37 +71,7 @@ public sealed class ExportDatViewModel : ViewModelBase
         _worker.FailedWithText   += OnWorkerOnFailedWithText;
     }
 
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public bool ErrorVisible
-    {
-        get => _errorVisible;
-        set => this.RaiseAndSetIfChanged(ref _errorVisible, value);
-    }
-
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
+    public ICommand CloseCommand { get; }
 
     void OnWorkerOnFinishedWithText(object sender, MessageEventArgs args) => Dispatcher.UIThread.Post(() =>
     {

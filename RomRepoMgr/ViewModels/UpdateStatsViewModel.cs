@@ -26,11 +26,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
-using ReactiveUI;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
@@ -39,17 +40,25 @@ using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class UpdateStatsViewModel : ViewModelBase
+public sealed partial class UpdateStatsViewModel : ViewModelBase
 {
     readonly UpdateStats _view;
-    bool                 _canClose;
-    double               _currentValue;
-    bool                 _indeterminateProgress;
-    double               _maximumValue;
-    double               _minimumValue;
-    bool                 _progressVisible;
-    RomSetModel          _selectedRomSet;
-    string               _statusMessage;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    double _currentValue;
+    [ObservableProperty]
+    bool _indeterminateProgress;
+    [ObservableProperty]
+    double _maximumValue;
+    [ObservableProperty]
+    double _minimumValue;
+    [ObservableProperty]
+    bool _progressVisible;
+    [ObservableProperty]
+    RomSetModel _selectedRomSet;
+    [ObservableProperty]
+    string _statusMessage;
 
     // Mock
     public UpdateStatsViewModel() {}
@@ -57,63 +66,15 @@ public sealed class UpdateStatsViewModel : ViewModelBase
     public UpdateStatsViewModel(UpdateStats view)
     {
         _view                 = view;
-        CloseCommand          = ReactiveCommand.Create(ExecuteCloseCommand);
+        CloseCommand          = new RelayCommand(ExecuteCloseCommand);
         IndeterminateProgress = true;
         ProgressVisible       = false;
         RomSets               = [];
     }
 
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public bool IndeterminateProgress
-    {
-        get => _indeterminateProgress;
-        set => this.RaiseAndSetIfChanged(ref _indeterminateProgress, value);
-    }
-
-    public double MaximumValue
-    {
-        get => _maximumValue;
-        set => this.RaiseAndSetIfChanged(ref _maximumValue, value);
-    }
-
-    public double MinimumValue
-    {
-        get => _minimumValue;
-        set => this.RaiseAndSetIfChanged(ref _minimumValue, value);
-    }
-
-    public double CurrentValue
-    {
-        get => _currentValue;
-        set => this.RaiseAndSetIfChanged(ref _currentValue, value);
-    }
-
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public RomSetModel SelectedRomSet
-    {
-        get => _selectedRomSet;
-        set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
     public ObservableCollection<RomSetModel> RomSets { get; }
 
-    public ReactiveCommand<Unit, Unit> CloseCommand { get; }
+    public ICommand CloseCommand { get; }
 
     internal void OnOpened()
     {

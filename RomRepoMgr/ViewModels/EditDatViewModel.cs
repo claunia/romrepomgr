@@ -24,9 +24,10 @@
 *******************************************************************************/
 
 using System;
-using System.Reactive;
 using System.Threading.Tasks;
-using ReactiveUI;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Database;
@@ -35,7 +36,7 @@ using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public class EditDatViewModel : ViewModelBase
+public partial class EditDatViewModel : ViewModelBase
 {
     readonly RomSetModel _romSet;
     readonly EditDat     _view;
@@ -45,9 +46,10 @@ public class EditDatViewModel : ViewModelBase
     string               _date;
     string               _description;
     string               _homepage;
-    bool                 _modified;
-    string               _name;
-    string               _version;
+    [ObservableProperty]
+    bool _modified;
+    string _name;
+    string _version;
 
     // Mock
     public EditDatViewModel()
@@ -96,26 +98,20 @@ public class EditDatViewModel : ViewModelBase
         _date         = romSet.Date;
         _description  = romSet.Description;
         _homepage     = romSet.Homepage;
-        SaveCommand   = ReactiveCommand.CreateFromTask(ExecuteSaveCommandAsync);
-        CancelCommand = ReactiveCommand.Create(ExecuteCloseCommand);
-        CloseCommand  = ReactiveCommand.Create(ExecuteCloseCommand);
+        SaveCommand   = new AsyncRelayCommand(ExecuteSaveCommandAsync);
+        CancelCommand = new RelayCommand(ExecuteCloseCommand);
+        CloseCommand  = new RelayCommand(ExecuteCloseCommand);
     }
 
-    public ReactiveCommand<Unit, Unit> SaveCommand        { get; }
-    public ReactiveCommand<Unit, Unit> CancelCommand      { get; }
-    public ReactiveCommand<Unit, Unit> CloseCommand       { get; }
-    public long                        TotalMachines      => _romSet.TotalMachines;
-    public long                        CompleteMachines   => _romSet.CompleteMachines;
-    public long                        IncompleteMachines => _romSet.IncompleteMachines;
-    public long                        TotalRoms          => _romSet.TotalRoms;
-    public long                        HaveRoms           => _romSet.HaveRoms;
-    public long                        MissRoms           => _romSet.MissRoms;
-
-    public bool Modified
-    {
-        get => _modified;
-        set => this.RaiseAndSetIfChanged(ref _modified, value);
-    }
+    public ICommand SaveCommand        { get; }
+    public ICommand CancelCommand      { get; }
+    public ICommand CloseCommand       { get; }
+    public long     TotalMachines      => _romSet.TotalMachines;
+    public long     CompleteMachines   => _romSet.CompleteMachines;
+    public long     IncompleteMachines => _romSet.IncompleteMachines;
+    public long     TotalRoms          => _romSet.TotalRoms;
+    public long     HaveRoms           => _romSet.HaveRoms;
+    public long     MissRoms           => _romSet.MissRoms;
 
     public string Name
     {
@@ -124,7 +120,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _name) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _name, value);
+            SetProperty(ref _name, value);
         }
     }
 
@@ -135,7 +131,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _version) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _version, value);
+            SetProperty(ref _version, value);
         }
     }
 
@@ -146,7 +142,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _author) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _author, value);
+            SetProperty(ref _author, value);
         }
     }
 
@@ -157,7 +153,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _comment) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _comment, value);
+            SetProperty(ref _comment, value);
         }
     }
 
@@ -168,7 +164,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _category) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _category, value);
+            SetProperty(ref _category, value);
         }
     }
 
@@ -179,7 +175,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _date) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _date, value);
+            SetProperty(ref _date, value);
         }
     }
 
@@ -190,7 +186,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _description) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _description, value);
+            SetProperty(ref _description, value);
         }
     }
 
@@ -201,7 +197,7 @@ public class EditDatViewModel : ViewModelBase
         {
             if(value != _homepage) Modified = true;
 
-            this.RaiseAndSetIfChanged(ref _homepage, value);
+            SetProperty(ref _homepage, value);
         }
     }
 

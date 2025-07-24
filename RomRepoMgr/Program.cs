@@ -25,7 +25,6 @@
 
 using Avalonia;
 using Avalonia.Logging;
-using Avalonia.ReactiveUI;
 
 namespace RomRepoMgr;
 
@@ -39,6 +38,5 @@ internal static class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
                                                              .UsePlatformDetect()
-                                                             .LogToTrace(LogEventLevel.Debug)
-                                                             .UseReactiveUI();
+                                                             .LogToTrace(LogEventLevel.Debug);
 }

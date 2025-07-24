@@ -28,16 +28,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Filesystem;
 using RomRepoMgr.Core.Models;
@@ -46,11 +47,13 @@ using RomRepoMgr.Views;
 
 namespace RomRepoMgr.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public sealed partial class MainWindowViewModel : ViewModelBase
 {
     readonly MainWindow _view;
-    RomSetModel         _selectedRomSet;
-    Vfs                 _vfs;
+    [ObservableProperty]
+    RomSetModel _selectedRomSet;
+    [ObservableProperty]
+    Vfs _vfs;
 
     // Mock
     public MainWindowViewModel() {}
@@ -58,19 +61,19 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(MainWindow view, List<RomSetModel> romSets)
     {
         _view                  = view;
-        ExitCommand            = ReactiveCommand.Create(ExecuteExitCommand);
-        SettingsCommand        = ReactiveCommand.CreateFromTask(ExecuteSettingsCommandAsync);
-        AboutCommand           = ReactiveCommand.Create(ExecuteAboutCommand);
-        ImportDatCommand       = ReactiveCommand.CreateFromTask(ExecuteImportDatCommandAsync);
-        ImportDatFolderCommand = ReactiveCommand.CreateFromTask(ExecuteImportDatFolderCommandAsync);
-        ImportRomFolderCommand = ReactiveCommand.CreateFromTask(ExecuteImportRomFolderCommandAsync);
-        DeleteRomSetCommand    = ReactiveCommand.CreateFromTask(ExecuteDeleteRomSetCommandAsync);
-        EditRomSetCommand      = ReactiveCommand.Create(ExecuteEditRomSetCommand);
-        ExportDatCommand       = ReactiveCommand.CreateFromTask(ExecuteExportDatCommandAsync);
-        ExportRomsCommand      = ReactiveCommand.CreateFromTask(ExecuteExportRomsCommandAsync);
-        MountCommand           = ReactiveCommand.CreateFromTask(ExecuteMountCommandAsync);
-        UmountCommand          = ReactiveCommand.Create(ExecuteUmountCommand);
-        UpdateStatsCommand     = ReactiveCommand.CreateFromTask(ExecuteUpdateStatsCommandAsync);
+        ExitCommand            = new RelayCommand(ExecuteExitCommand);
+        SettingsCommand        = new AsyncRelayCommand(ExecuteSettingsCommandAsync);
+        AboutCommand           = new RelayCommand(ExecuteAboutCommand);
+        ImportDatCommand       = new AsyncRelayCommand(ExecuteImportDatCommandAsync);
+        ImportDatFolderCommand = new AsyncRelayCommand(ExecuteImportDatFolderCommandAsync);
+        ImportRomFolderCommand = new AsyncRelayCommand(ExecuteImportRomFolderCommandAsync);
+        DeleteRomSetCommand    = new AsyncRelayCommand(ExecuteDeleteRomSetCommandAsync);
+        EditRomSetCommand      = new RelayCommand(ExecuteEditRomSetCommand);
+        ExportDatCommand       = new AsyncRelayCommand(ExecuteExportDatCommandAsync);
+        ExportRomsCommand      = new AsyncRelayCommand(ExecuteExportRomsCommandAsync);
+        MountCommand           = new AsyncRelayCommand(ExecuteMountCommandAsync);
+        UmountCommand          = new RelayCommand(ExecuteUmountCommand);
+        UpdateStatsCommand     = new AsyncRelayCommand(ExecuteUpdateStatsCommandAsync);
         RomSets                = new ObservableCollection<RomSetModel>(romSets);
     }
 
@@ -81,31 +84,19 @@ public class MainWindowViewModel : ViewModelBase
         NativeMenu.GetIsNativeMenuExported((Application.Current.ApplicationLifetime as
                                                 IClassicDesktopStyleApplicationLifetime)?.MainWindow);
 
-    public ReactiveCommand<Unit, Unit> AboutCommand           { get; }
-    public ReactiveCommand<Unit, Unit> ExitCommand            { get; }
-    public ReactiveCommand<Unit, Unit> SettingsCommand        { get; }
-    public ReactiveCommand<Unit, Unit> ImportDatCommand       { get; }
-    public ReactiveCommand<Unit, Unit> ImportDatFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> ImportRomFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> DeleteRomSetCommand    { get; }
-    public ReactiveCommand<Unit, Unit> EditRomSetCommand      { get; }
-    public ReactiveCommand<Unit, Unit> ExportDatCommand       { get; }
-    public ReactiveCommand<Unit, Unit> ExportRomsCommand      { get; }
-    public ReactiveCommand<Unit, Unit> MountCommand           { get; }
-    public ReactiveCommand<Unit, Unit> UmountCommand          { get; }
-    public ReactiveCommand<Unit, Unit> UpdateStatsCommand     { get; }
-
-    public Vfs Vfs
-    {
-        get => _vfs;
-        set => this.RaiseAndSetIfChanged(ref _vfs, value);
-    }
-
-    public RomSetModel SelectedRomSet
-    {
-        get => _selectedRomSet;
-        set => this.RaiseAndSetIfChanged(ref _selectedRomSet, value);
-    }
+    public ICommand AboutCommand           { get; }
+    public ICommand ExitCommand            { get; }
+    public ICommand SettingsCommand        { get; }
+    public ICommand ImportDatCommand       { get; }
+    public ICommand ImportDatFolderCommand { get; }
+    public ICommand ImportRomFolderCommand { get; }
+    public ICommand DeleteRomSetCommand    { get; }
+    public ICommand EditRomSetCommand      { get; }
+    public ICommand ExportDatCommand       { get; }
+    public ICommand ExportRomsCommand      { get; }
+    public ICommand MountCommand           { get; }
+    public ICommand UmountCommand          { get; }
+    public ICommand UpdateStatsCommand     { get; }
 
     internal Task ExecuteSettingsCommandAsync()
     {

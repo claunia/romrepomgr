@@ -4,75 +4,70 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
 
 namespace RomRepoMgr.ViewModels;
 
-public class ImportDatFolderViewModel : ViewModelBase
+public sealed partial class ImportDatFolderViewModel : ViewModelBase
 {
     readonly Stopwatch _stopwatch = new();
     bool               _allFilesChecked;
-    bool               _canClose;
-    bool               _canStart;
-    string             _category;
-    string[]           _datFiles;
-    string             _folderPath;
-    bool               _isImporting;
-    bool               _isReady;
-    int                _listPosition;
-    bool               _progressIsIndeterminate;
-    double             _progressMaximum;
-    double             _progressMinimum;
-    double             _progressValue;
-    bool               _progressVisible;
-    bool               _recursiveChecked;
-    string             _statusMessage;
-    int                _workers;
+    [ObservableProperty]
+    bool _canClose;
+    [ObservableProperty]
+    bool _canStart;
+    [ObservableProperty]
+    string _category;
+    string[] _datFiles;
+    [ObservableProperty]
+    string _folderPath;
+    [ObservableProperty]
+    bool _isImporting;
+    [ObservableProperty]
+    bool _isReady;
+    int _listPosition;
+    [ObservableProperty]
+    bool _progressIsIndeterminate;
+    [ObservableProperty]
+    double _progressMaximum;
+    [ObservableProperty]
+    double _progressMinimum;
+    [ObservableProperty]
+    double _progressValue;
+    [ObservableProperty]
+    bool _progressVisible;
+    bool _recursiveChecked;
+    [ObservableProperty]
+    string _statusMessage;
+    int _workers;
 
     public ImportDatFolderViewModel()
     {
         CanClose            = true;
         IsReady             = true;
-        SelectFolderCommand = ReactiveCommand.CreateFromTask(SelectFolderAsync);
-        CloseCommand        = ReactiveCommand.Create(Close);
-        StartCommand        = ReactiveCommand.Create(Start);
+        SelectFolderCommand = new AsyncRelayCommand(SelectFolderAsync);
+        CloseCommand        = new RelayCommand(Close);
+        StartCommand        = new RelayCommand(Start);
     }
 
-    public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; }
-    public Window                      View                { get; init; }
-
-    public bool IsReady
-    {
-        get => _isReady;
-        set => this.RaiseAndSetIfChanged(ref _isReady, value);
-    }
-
-    public string FolderPath
-    {
-        get => _folderPath;
-        set => this.RaiseAndSetIfChanged(ref _folderPath, value);
-    }
-
-    public string Category
-    {
-        get => _category;
-        set => this.RaiseAndSetIfChanged(ref _category, value);
-    }
+    public ICommand SelectFolderCommand { get; }
+    public Window   View                { get; init; }
 
     public bool AllFilesChecked
     {
         get => _allFilesChecked;
         set
         {
-            this.RaiseAndSetIfChanged(ref _allFilesChecked, value);
+            SetProperty(ref _allFilesChecked, value);
             RefreshFiles();
         }
     }
@@ -82,67 +77,13 @@ public class ImportDatFolderViewModel : ViewModelBase
         get => _recursiveChecked;
         set
         {
-            this.RaiseAndSetIfChanged(ref _recursiveChecked, value);
+            SetProperty(ref _recursiveChecked, value);
             RefreshFiles();
         }
     }
 
-    public bool ProgressVisible
-    {
-        get => _progressVisible;
-        set => this.RaiseAndSetIfChanged(ref _progressVisible, value);
-    }
-
-    public bool ProgressIsIndeterminate
-    {
-        get => _progressIsIndeterminate;
-        set => this.RaiseAndSetIfChanged(ref _progressIsIndeterminate, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
-    }
-
-    public bool CanClose
-    {
-        get => _canClose;
-        set => this.RaiseAndSetIfChanged(ref _canClose, value);
-    }
-
-    public bool CanStart
-    {
-        get => _canStart;
-        set => this.RaiseAndSetIfChanged(ref _canStart, value);
-    }
-
-    public double ProgressMinimum
-    {
-        get => _progressMinimum;
-        set => this.RaiseAndSetIfChanged(ref _progressMinimum, value);
-    }
-
-    public double ProgressMaximum
-    {
-        get => _progressMaximum;
-        set => this.RaiseAndSetIfChanged(ref _progressMaximum, value);
-    }
-
-    public double ProgressValue
-    {
-        get => _progressValue;
-        set => this.RaiseAndSetIfChanged(ref _progressValue, value);
-    }
-
-    public bool IsImporting
-    {
-        get => _isImporting;
-        set => this.RaiseAndSetIfChanged(ref _isImporting, value);
-    }
-
-    public ReactiveCommand<Unit, Unit>       CloseCommand { get; }
-    public ReactiveCommand<Unit, Unit>       StartCommand { get; }
+    public ICommand                          CloseCommand { get; }
+    public ICommand                          StartCommand { get; }
     public ObservableCollection<DatImporter> Importers    { get; } = [];
 
     void Start()

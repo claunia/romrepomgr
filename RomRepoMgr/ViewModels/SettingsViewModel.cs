@@ -26,14 +26,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using ReactiveUI;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
@@ -43,7 +44,7 @@ using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.ViewModels;
 
-public sealed class SettingsViewModel : ViewModelBase
+public sealed partial class SettingsViewModel : ViewModelBase
 {
     readonly SettingsDialog _view;
     bool                    _databaseChanged;
@@ -53,8 +54,10 @@ public sealed class SettingsViewModel : ViewModelBase
     bool                    _temporaryChanged;
     string                  _temporaryPath;
     bool                    _unArChanged;
-    string                  _unArPath;
-    string                  _unArVersion;
+    [ObservableProperty]
+    string _unArPath;
+    [ObservableProperty]
+    string _unArVersion;
 
     // Mock
     public SettingsViewModel() {}
@@ -67,12 +70,12 @@ public sealed class SettingsViewModel : ViewModelBase
         _temporaryChanged  = false;
         _unArChanged       = false;
 
-        CloseCommand      = ReactiveCommand.Create(ExecuteCloseCommand);
-        UnArCommand       = ReactiveCommand.CreateFromTask(ExecuteUnArCommandAsync);
-        TemporaryCommand  = ReactiveCommand.CreateFromTask(ExecuteTemporaryCommandAsync);
-        RepositoryCommand = ReactiveCommand.CreateFromTask(ExecuteRepositoryCommandAsync);
-        DatabaseCommand   = ReactiveCommand.CreateFromTask(ExecuteDatabaseCommandAsync);
-        SaveCommand       = ReactiveCommand.Create(ExecuteSaveCommand);
+        CloseCommand      = new RelayCommand(ExecuteCloseCommand);
+        UnArCommand       = new AsyncRelayCommand(ExecuteUnArCommandAsync);
+        TemporaryCommand  = new AsyncRelayCommand(ExecuteTemporaryCommandAsync);
+        RepositoryCommand = new AsyncRelayCommand(ExecuteRepositoryCommandAsync);
+        DatabaseCommand   = new AsyncRelayCommand(ExecuteDatabaseCommandAsync);
+        SaveCommand       = new RelayCommand(ExecuteSaveCommand);
 
         DatabasePath   = Settings.Settings.Current.DatabasePath;
         RepositoryPath = Settings.Settings.Current.RepositoryPath;
@@ -82,19 +85,19 @@ public sealed class SettingsViewModel : ViewModelBase
         if(!string.IsNullOrWhiteSpace(UnArPath)) CheckUnAr();
     }
 
-    public ReactiveCommand<Unit, Unit> UnArCommand       { get; }
-    public ReactiveCommand<Unit, Unit> TemporaryCommand  { get; }
-    public ReactiveCommand<Unit, Unit> RepositoryCommand { get; }
-    public ReactiveCommand<Unit, Unit> DatabaseCommand   { get; }
-    public ReactiveCommand<Unit, Unit> CloseCommand      { get; }
-    public ReactiveCommand<Unit, Unit> SaveCommand       { get; }
+    public ICommand UnArCommand       { get; }
+    public ICommand TemporaryCommand  { get; }
+    public ICommand RepositoryCommand { get; }
+    public ICommand DatabaseCommand   { get; }
+    public ICommand CloseCommand      { get; }
+    public ICommand SaveCommand       { get; }
 
     public string DatabasePath
     {
         get => _databasePath;
         set
         {
-            this.RaiseAndSetIfChanged(ref _databasePath, value);
+            SetProperty(ref _databasePath, value);
             _databaseChanged = true;
         }
     }
@@ -104,7 +107,7 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _repositoryPath;
         set
         {
-            this.RaiseAndSetIfChanged(ref _repositoryPath, value);
+            SetProperty(ref _repositoryPath, value);
 
             // TODO: Refresh repository existing files
             _repositoryChanged = true;
@@ -116,21 +119,9 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _temporaryPath;
         set
         {
-            this.RaiseAndSetIfChanged(ref _temporaryPath, value);
+            SetProperty(ref _temporaryPath, value);
             _temporaryChanged = true;
         }
-    }
-
-    public string UnArPath
-    {
-        get => _unArPath;
-        set => this.RaiseAndSetIfChanged(ref _unArPath, value);
-    }
-
-    public string UnArVersion
-    {
-        get => _unArVersion;
-        set => this.RaiseAndSetIfChanged(ref _unArVersion, value);
     }
 
     void CheckUnAr()
