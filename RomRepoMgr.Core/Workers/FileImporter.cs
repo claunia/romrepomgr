@@ -86,7 +86,7 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                                       Maximum = Files.Count
                                   });
 
-        ConcurrentBag<string> files = [];
+        ConcurrentBag<string> files    = [];
         ConcurrentBag<string> archives = [];
 
         Parallel.ForEach(Files,
@@ -139,8 +139,8 @@ public sealed class FileImporter(bool onlyKnown, bool deleteAfterImport)
                              }
                          });
 
-        Files = files.ToList();
-        Archives = archives.ToList();
+        Files    = files.Order().ToList();
+        Archives = archives.Order().ToList();
 
         SetMessage?.Invoke(this,
                            new MessageEventArgs
