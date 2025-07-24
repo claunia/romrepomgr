@@ -27,16 +27,17 @@
 //     License along with this library; if not, see <http://www.gnu.org/licenses/>.
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2011-2024 Natalia Portillo
+// Copyright © 2011-2025 Natalia Portillo
 // ****************************************************************************/
 
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Aaru.CommonTypes.Interfaces;
 
-namespace Aaru.Checksums;
+namespace RomRepoMgr.Core.Checksums;
 
+/// <inheritdoc />
 /// <summary>Wraps up .NET MD5 implementation to a Init(), Update(), Final() context.</summary>
 public sealed class Md5Context : IChecksum
 {
@@ -45,44 +46,12 @@ public sealed class Md5Context : IChecksum
     /// <summary>Initializes the MD5 hash provider</summary>
     public Md5Context() => _provider = MD5.Create();
 
-    /// <inheritdoc />
-    /// <summary>Updates the hash with data.</summary>
-    /// <param name="data">Data buffer.</param>
-    /// <param name="len">Length of buffer to hash.</param>
-    public void Update(byte[] data, uint len) => _provider.TransformBlock(data, 0, (int)len, data, 0);
-
-    /// <inheritdoc />
-    /// <summary>Updates the hash with data.</summary>
-    /// <param name="data">Data buffer.</param>
-    public void Update(byte[] data) => Update(data, (uint)data.Length);
-
-    /// <inheritdoc />
-    /// <summary>Returns a byte array of the hash value.</summary>
-    public byte[] Final()
-    {
-        _provider.TransformFinalBlock([], 0, 0);
-
-        return _provider.Hash;
-    }
-
-    /// <inheritdoc />
-    /// <summary>Returns a hexadecimal representation of the hash value.</summary>
-    public string End()
-    {
-        _provider.TransformFinalBlock([], 0, 0);
-        var md5Output = new StringBuilder();
-
-        foreach(byte h in _provider.Hash) md5Output.Append(h.ToString("x2"));
-
-        return md5Output.ToString();
-    }
-
     /// <summary>Gets the hash of a file</summary>
     /// <param name="filename">File path.</param>
     public static byte[] File(string filename)
     {
         var    localMd5Provider = MD5.Create();
-        var    fileStream       = new FileStream(filename, FileMode.Open, FileAccess.Read);
+        var    fileStream       = new FileStream(filename, FileMode.Open);
         byte[] result           = localMd5Provider.ComputeHash(fileStream);
         fileStream.Close();
 
@@ -95,7 +64,7 @@ public sealed class Md5Context : IChecksum
     public static string File(string filename, out byte[] hash)
     {
         var localMd5Provider = MD5.Create();
-        var fileStream       = new FileStream(filename, FileMode.Open, FileAccess.Read);
+        var fileStream       = new FileStream(filename, FileMode.Open);
         hash = localMd5Provider.ComputeHash(fileStream);
         var md5Output = new StringBuilder();
 
@@ -125,4 +94,51 @@ public sealed class Md5Context : IChecksum
     /// <param name="data">Data buffer.</param>
     /// <param name="hash">Byte array of the hash value.</param>
     public static string Data(byte[] data, out byte[] hash) => Data(data, (uint)data.Length, out hash);
+
+#region IChecksum Members
+
+    /// <inheritdoc />
+    public string Name => Localization.Localization.MD5_Name;
+
+    /// <inheritdoc />
+    public Guid Id => new("C78674C4-F699-4FAB-A618-1661AF659A7C");
+
+    /// <inheritdoc />
+    public string Author => Authors.NataliaPortillo;
+
+    /// <inheritdoc />
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    /// <param name="len">Length of buffer to hash.</param>
+    public void Update(byte[] data, uint len) => _provider.TransformBlock(data, 0, (int)len, data, 0);
+
+    /// <inheritdoc />
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    public void Update(byte[] data) => Update(data, (uint)data.Length);
+
+    /// <inheritdoc />
+    /// <summary>Returns a byte array of the hash value.</summary>
+    public byte[] Final()
+    {
+        _provider.TransformFinalBlock([], 0, 0);
+
+        return _provider.Hash;
+    }
+
+    /// <inheritdoc />
+    /// <summary>Returns a hexadecimal representation of the hash value.</summary>
+    public string End()
+    {
+        _provider.TransformFinalBlock([], 0, 0);
+        var md5Output = new StringBuilder();
+
+        if(_provider.Hash is null) return null;
+
+        foreach(byte h in _provider.Hash) md5Output.Append(h.ToString("x2"));
+
+        return md5Output.ToString();
+    }
+
+#endregion
 }

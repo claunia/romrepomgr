@@ -36,7 +36,7 @@
 // Copyright © 2011-2024 Natalia Portillo
 // ****************************************************************************/
 
-namespace Aaru.CommonTypes.Interfaces;
+namespace RomRepoMgr.Core.Checksums;
 
 public interface IChecksum
 {

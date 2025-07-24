@@ -27,7 +27,7 @@
 //     License along with this library; if not, see <http://www.gnu.org/licenses/>.
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2011-2024 Natalia Portillo
+// Copyright © 2011-2025 Natalia Portillo
 // ****************************************************************************/
 
 //  Based on ssdeep
@@ -40,14 +40,19 @@
 //      http://ssdeep.sf.net/
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Aaru.CommonTypes.Interfaces;
-using RomRepoMgr.Core.Resources;
 
-namespace Aaru.Checksums;
+namespace RomRepoMgr.Core.Checksums;
 
+/// <inheritdoc />
 /// <summary>Implements the SpamSum fuzzy hashing algorithm.</summary>
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+[SuppressMessage("ReSharper", "UnusedParameter.Global")]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+[SuppressMessage("ReSharper", "MemberCanBeInternal")]
+[SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public sealed class SpamSumContext : IChecksum
 {
     const uint ROLLING_WINDOW   = 7;
@@ -59,15 +64,8 @@ public sealed class SpamSumContext : IChecksum
     const uint FUZZY_MAX_RESULT = 2 * SPAMSUM_LENGTH + 20;
 
     //"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    readonly byte[] _b64 =
-    [
-        0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x52,
-        0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A,
-        0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x30, 0x31,
-        0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x2B, 0x2F
-    ];
-
-    FuzzyState _self;
+    readonly byte[] _b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"u8.ToArray();
+    FuzzyState      _self;
 
     /// <summary>Initializes the SpamSum structures</summary>
     public SpamSumContext()
@@ -88,35 +86,6 @@ public sealed class SpamSumContext : IChecksum
         _self.Bh[0].Dlen       = 0;
         _self.TotalSize        = 0;
         roll_init();
-    }
-
-    /// <inheritdoc />
-    /// <summary>Updates the hash with data.</summary>
-    /// <param name="data">Data buffer.</param>
-    /// <param name="len">Length of buffer to hash.</param>
-    public void Update(byte[] data, uint len)
-    {
-        _self.TotalSize += len;
-
-        for(var i = 0; i < len; i++) fuzzy_engine_step(data[i]);
-    }
-
-    /// <inheritdoc />
-    /// <summary>Updates the hash with data.</summary>
-    /// <param name="data">Data buffer.</param>
-    public void Update(byte[] data) => Update(data, (uint)data.Length);
-
-    /// <inheritdoc />
-    /// <summary>Returns a byte array of the hash value.</summary>
-    public byte[] Final() => throw new NotImplementedException(Localization.Spamsum_no_binary);
-
-    /// <inheritdoc />
-    /// <summary>Returns a base64 representation of the hash value.</summary>
-    public string End()
-    {
-        FuzzyDigest(out byte[] result);
-
-        return CToString(result);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -167,10 +136,15 @@ public sealed class SpamSumContext : IChecksum
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void fuzzy_try_fork_blockhash()
     {
-        if(_self.Bhend >= NUM_BLOCKHASHES) return;
+        switch(_self.Bhend)
+        {
+            case >= NUM_BLOCKHASHES:
+                return;
 
-        if(_self.Bhend == 0) // assert
-            throw new Exception(Localization.Assertion_failed);
+            // assert
+            case 0:
+                throw new Exception(Localization.Localization.Assertion_failed);
+        }
 
         uint obh = _self.Bhend - 1;
         uint nbh = _self.Bhend;
@@ -185,7 +159,7 @@ public sealed class SpamSumContext : IChecksum
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void fuzzy_try_reduce_blockhash()
     {
-        if(_self.Bhstart >= _self.Bhend) throw new Exception(Localization.Assertion_failed);
+        if(_self.Bhstart >= _self.Bhend) throw new Exception(Localization.Localization.Assertion_failed);
 
         if(_self.Bhend - _self.Bhstart < 2)
             /* Need at least two working hashes. */
@@ -271,16 +245,15 @@ public sealed class SpamSumContext : IChecksum
 
         /* Verify that our elimination was not overeager. */
         if(!(bi == 0 || (ulong)SSDEEP_BS(bi) / 2 * SPAMSUM_LENGTH < _self.TotalSize))
-            throw new Exception(Localization.Assertion_failed);
-
-        var resultOff = 0;
+            throw new Exception(Localization.Localization.Assertion_failed);
 
         /* Initial blocksize guess. */
         while((ulong)SSDEEP_BS(bi) * SPAMSUM_LENGTH < _self.TotalSize)
         {
             ++bi;
 
-            if(bi >= NUM_BLOCKHASHES) throw new OverflowException(Localization.Spamsum_Input_exceeds_data);
+            if(bi >= NUM_BLOCKHASHES)
+                throw new OverflowException(Localization.Localization.The_input_exceeds_data_types);
         }
 
         /* Adapt blocksize guess to actual digest length. */
@@ -288,26 +261,27 @@ public sealed class SpamSumContext : IChecksum
 
         while(bi > _self.Bhstart && _self.Bh[bi].Dlen < SPAMSUM_LENGTH / 2) --bi;
 
-        if(bi > 0 && _self.Bh[bi].Dlen < SPAMSUM_LENGTH / 2) throw new Exception(Localization.Assertion_failed);
+        if(bi > 0 && _self.Bh[bi].Dlen < SPAMSUM_LENGTH / 2)
+            throw new Exception(Localization.Localization.Assertion_failed);
 
-        sb.AppendFormat("{0}:", SSDEEP_BS(bi));
+        sb.Append($"{SSDEEP_BS(bi)}:");
         int i = Encoding.ASCII.GetBytes(sb.ToString()).Length;
 
         if(i <= 0)
             /* Maybe snprintf has set errno here? */
-            throw new OverflowException(Localization.Spamsum_Input_exceeds_data);
+            throw new OverflowException(Localization.Localization.The_input_exceeds_data_types);
 
-        if(i >= remain) throw new Exception(Localization.Assertion_failed);
+        if(i >= remain) throw new Exception(Localization.Localization.Assertion_failed);
 
         remain -= i;
 
         Array.Copy(Encoding.ASCII.GetBytes(sb.ToString()), 0, result, 0, i);
 
-        resultOff = i;
+        int resultOff = i;
 
         i = (int)_self.Bh[bi].Dlen;
 
-        if(i > remain) throw new Exception(Localization.Assertion_failed);
+        if(i > remain) throw new Exception(Localization.Localization.Assertion_failed);
 
         Array.Copy(_self.Bh[bi].Digest, 0, result, resultOff, i);
         resultOff += i;
@@ -315,7 +289,7 @@ public sealed class SpamSumContext : IChecksum
 
         if(h != 0)
         {
-            if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+            if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
             result[resultOff] = _b64[_self.Bh[bi].H % 64];
 
@@ -330,7 +304,7 @@ public sealed class SpamSumContext : IChecksum
         }
         else if(_self.Bh[bi].Digest[i] != 0)
         {
-            if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+            if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
             result[resultOff] = _self.Bh[bi].Digest[i];
 
@@ -344,7 +318,7 @@ public sealed class SpamSumContext : IChecksum
             }
         }
 
-        if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+        if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
         result[resultOff++] = 0x3A; // ':'
         --remain;
@@ -354,7 +328,7 @@ public sealed class SpamSumContext : IChecksum
             ++bi;
             i = (int)_self.Bh[bi].Dlen;
 
-            if(i > remain) throw new Exception(Localization.Assertion_failed);
+            if(i > remain) throw new Exception(Localization.Localization.Assertion_failed);
 
             Array.Copy(_self.Bh[bi].Digest, 0, result, resultOff, i);
             resultOff += i;
@@ -362,7 +336,7 @@ public sealed class SpamSumContext : IChecksum
 
             if(h != 0)
             {
-                if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+                if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
                 h                 = _self.Bh[bi].Halfh;
                 result[resultOff] = _b64[h % 64];
@@ -382,7 +356,7 @@ public sealed class SpamSumContext : IChecksum
 
                 if(i != 0)
                 {
-                    if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+                    if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
                     result[resultOff] = (byte)i;
 
@@ -399,9 +373,9 @@ public sealed class SpamSumContext : IChecksum
         }
         else if(h != 0)
         {
-            if(_self.Bh[bi].Dlen != 0) throw new Exception(Localization.Assertion_failed);
+            if(_self.Bh[bi].Dlen != 0) throw new Exception(Localization.Localization.Assertion_failed);
 
-            if(remain <= 0) throw new Exception(Localization.Assertion_failed);
+            if(remain <= 0) throw new Exception(Localization.Localization.Assertion_failed);
 
             result[resultOff++] = _b64[_self.Bh[bi].H % 64];
             /* No need to bother with FUZZY_FLAG_ELIMSEQ, because this
@@ -414,13 +388,14 @@ public sealed class SpamSumContext : IChecksum
 
     /// <summary>Gets the hash of a file</summary>
     /// <param name="filename">File path.</param>
-    public static byte[] File(string filename) => throw new NotImplementedException(Localization.Spamsum_no_binary);
+    public static byte[] File(string filename) =>
+        throw new NotImplementedException(Localization.Localization.SpamSum_does_not_have_a_binary_representation);
 
     /// <summary>Gets the hash of a file in hexadecimal and as a byte array.</summary>
     /// <param name="filename">File path.</param>
     /// <param name="hash">Byte array of the hash value.</param>
     public static string File(string filename, out byte[] hash) =>
-        throw new NotImplementedException(Localization.Not_yet_implemented);
+        throw new NotImplementedException(Localization.Localization.Not_yet_implemented);
 
     /// <summary>Gets the hash of the specified data buffer.</summary>
     /// <param name="data">Data buffer.</param>
@@ -462,16 +437,7 @@ public sealed class SpamSumContext : IChecksum
         return Encoding.ASCII.GetString(cString, 0, count);
     }
 
-    struct RollState
-    {
-        public byte[] Window;
-
-        // ROLLING_WINDOW
-        public uint H1;
-        public uint H2;
-        public uint H3;
-        public uint N;
-    }
+#region Nested type: BlockhashContext
 
     /* A blockhash contains a signature state for a specific (implicit) blocksize.
      * The blocksize is given by SSDEEP_BS(index). The h and halfh members are the
@@ -489,6 +455,10 @@ public sealed class SpamSumContext : IChecksum
         public uint Dlen;
     }
 
+#endregion
+
+#region Nested type: FuzzyState
+
     struct FuzzyState
     {
         public uint               Bhstart;
@@ -499,4 +469,64 @@ public sealed class SpamSumContext : IChecksum
         public ulong     TotalSize;
         public RollState Roll;
     }
+
+#endregion
+
+#region Nested type: RollState
+
+    struct RollState
+    {
+        public byte[] Window;
+
+        // ROLLING_WINDOW
+        public uint H1;
+        public uint H2;
+        public uint H3;
+        public uint N;
+    }
+
+#endregion
+
+#region IChecksum Members
+
+    /// <inheritdoc />
+    public string Name => Localization.Localization.SpamSum_Name;
+
+    /// <inheritdoc />
+    public Guid Id => new("DA692981-3291-47D8-B8B9-A87F0605F6E9");
+
+    /// <inheritdoc />
+    public string Author => Authors.NataliaPortillo;
+
+    /// <inheritdoc />
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    /// <param name="len">Length of buffer to hash.</param>
+    public void Update(byte[] data, uint len)
+    {
+        _self.TotalSize += len;
+
+        for(var i = 0; i < len; i++) fuzzy_engine_step(data[i]);
+    }
+
+    /// <inheritdoc />
+    /// <summary>Updates the hash with data.</summary>
+    /// <param name="data">Data buffer.</param>
+    public void Update(byte[] data) => Update(data, (uint)data.Length);
+
+    /// <inheritdoc />
+    /// <summary>Returns a byte array of the hash value.</summary>
+    public byte[] Final() =>
+        throw new NotImplementedException(Localization.Localization.SpamSum_does_not_have_a_binary_representation);
+
+    /// <inheritdoc />
+    /// <summary>Returns a base64 representation of the hash value.</summary>
+    public string End()
+    {
+        FuzzyDigest(out byte[] result);
+
+        return CToString(result);
+    }
+
+#endregion
 }

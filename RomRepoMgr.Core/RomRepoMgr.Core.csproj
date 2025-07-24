@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Aaru.Checksums.Native" />
     <PackageReference Include="DotNetZip"/>
     <PackageReference Include="EFCore.BulkExtensions"/>
     <PackageReference Include="Mono.Fuse.NETStandard"/>

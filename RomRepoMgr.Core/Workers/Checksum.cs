@@ -32,7 +32,8 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using Aaru.Checksums;
+using RomRepoMgr.Core.Checksums;
+using Crc32Context = RomRepoMgr.Core.Checksums.Crc32Context;
 
 namespace RomRepoMgr.Core.Workers;
 

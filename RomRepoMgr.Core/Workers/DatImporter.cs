@@ -31,9 +31,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Aaru.Checksums;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using RomRepoMgr.Core.Checksums;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
@@ -172,7 +172,7 @@ public sealed class DatImporter
                                           Maximum = machineNames.Count
                                       });
 
-            int position = 0;
+            var position = 0;
             var machines = new Dictionary<string, Machine>();
 
             foreach(string name in machineNames)
@@ -220,29 +220,29 @@ public sealed class DatImporter
             var disks  = new List<Disk>();
             var medias = new List<Media>();
 
-            string tmpRomCrc32Table    = Guid.NewGuid().ToString();
-            string tmpRomMd5Table      = Guid.NewGuid().ToString();
-            string tmpRomSha1Table     = Guid.NewGuid().ToString();
-            string tmpRomSha256Table   = Guid.NewGuid().ToString();
-            string tmpRomSha384Table   = Guid.NewGuid().ToString();
-            string tmpRomSha512Table   = Guid.NewGuid().ToString();
-            string tmpDiskMd5Table     = Guid.NewGuid().ToString();
-            string tmpDiskSha1Table    = Guid.NewGuid().ToString();
-            string tmpMediaMd5Table    = Guid.NewGuid().ToString();
-            string tmpMediaSha1Table   = Guid.NewGuid().ToString();
-            string tmpMediaSha256Table = Guid.NewGuid().ToString();
+            var tmpRomCrc32Table    = Guid.NewGuid().ToString();
+            var tmpRomMd5Table      = Guid.NewGuid().ToString();
+            var tmpRomSha1Table     = Guid.NewGuid().ToString();
+            var tmpRomSha256Table   = Guid.NewGuid().ToString();
+            var tmpRomSha384Table   = Guid.NewGuid().ToString();
+            var tmpRomSha512Table   = Guid.NewGuid().ToString();
+            var tmpDiskMd5Table     = Guid.NewGuid().ToString();
+            var tmpDiskSha1Table    = Guid.NewGuid().ToString();
+            var tmpMediaMd5Table    = Guid.NewGuid().ToString();
+            var tmpMediaSha1Table   = Guid.NewGuid().ToString();
+            var tmpMediaSha256Table = Guid.NewGuid().ToString();
 
-            bool romsHaveCrc      = false;
-            bool romsHaveMd5      = false;
-            bool romsHaveSha1     = false;
-            bool romsHaveSha256   = false;
-            bool romsHaveSha384   = false;
-            bool romsHaveSha512   = false;
-            bool disksHaveMd5     = false;
-            bool disksHaveSha1    = false;
-            bool mediasHaveMd5    = false;
-            bool mediasHaveSha1   = false;
-            bool mediasHaveSha256 = false;
+            var romsHaveCrc      = false;
+            var romsHaveMd5      = false;
+            var romsHaveSha1     = false;
+            var romsHaveSha256   = false;
+            var romsHaveSha384   = false;
+            var romsHaveSha512   = false;
+            var disksHaveMd5     = false;
+            var disksHaveSha1    = false;
+            var mediasHaveMd5    = false;
+            var mediasHaveSha1   = false;
+            var mediasHaveSha256 = false;
 
             DbConnection dbConnection = ctx.Database.GetDbConnection();
             dbConnection.Open();
@@ -623,7 +623,7 @@ public sealed class DatImporter
 
             foreach(Rom rom in roms)
             {
-                bool hashCollision = false;
+                var hashCollision = false;
 
                 SetProgress?.Invoke(this,
                                     new ProgressEventArgs
@@ -645,7 +645,7 @@ public sealed class DatImporter
                     return;
                 }
 
-                ulong uSize = (ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey);
+                var uSize = (ulong)rom.GetInt64FieldValue(SabreTools.Models.Metadata.Rom.SizeKey);
 
                 DbFile file = null;
 
