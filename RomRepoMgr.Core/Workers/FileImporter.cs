@@ -554,9 +554,12 @@ public sealed class FileImporter
 
             if(!Directory.Exists(repoPath)) Directory.CreateDirectory(repoPath);
 
-            repoPath = Settings.Settings.Current.Compression == CompressionType.Zstd
-                           ? Path.Combine(repoPath, sha384B32 + ".zst")
-                           : Path.Combine(repoPath, sha384B32 + ".lz");
+            repoPath = Settings.Settings.Current.Compression switch
+                       {
+                           CompressionType.Zstd => Path.Combine(repoPath, sha384B32 + ".zst"),
+                           CompressionType.None => Path.Combine(repoPath, sha384B32),
+                           _                    => Path.Combine(repoPath, sha384B32 + ".lz")
+                       };
 
             if(dbFile.Crc32 == null)
             {
@@ -614,14 +617,25 @@ public sealed class FileImporter
 
             Stream zStream;
 
-            if(Settings.Settings.Current.Compression == CompressionType.Zstd)
+            switch(Settings.Settings.Current.Compression)
             {
-                var zstdStream = new CompressionStream(outFs, 15);
-                zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
-                zStream = zstdStream;
+                case CompressionType.Zstd:
+                {
+                    var zstdStream = new CompressionStream(outFs, 15);
+                    zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+                    zStream = zstdStream;
+
+                    break;
+                }
+                case CompressionType.None:
+                    zStream = outFs;
+
+                    break;
+                default:
+                    zStream = new LZipStream(outFs, CompressionMode.Compress);
+
+                    break;
             }
-            else
-                zStream = new LZipStream(outFs, CompressionMode.Compress);
 
             SetProgressBounds2?.Invoke(this,
                                        new ProgressBoundsEventArgs

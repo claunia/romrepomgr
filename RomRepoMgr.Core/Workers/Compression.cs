@@ -53,14 +53,25 @@ public sealed class Compression
 
         Stream zStream;
 
-        if(Settings.Settings.Current.Compression == CompressionType.Zstd)
+        switch(Settings.Settings.Current.Compression)
         {
-            var zstdStream = new CompressionStream(outFs, 15);
-            zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
-            zStream = zstdStream;
+            case CompressionType.Zstd:
+            {
+                var zstdStream = new CompressionStream(outFs, 15);
+                zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+                zStream = zstdStream;
+
+                break;
+            }
+            case CompressionType.None:
+                zStream = outFs;
+
+                break;
+            default:
+                zStream = new LZipStream(outFs, CompressionMode.Compress);
+
+                break;
         }
-        else
-            zStream = new LZipStream(outFs, CompressionMode.Compress);
 
         byte[] buffer = new byte[BUFFER_SIZE];
 
@@ -110,6 +121,8 @@ public sealed class Compression
             zStream = new DecompressionStream(inFs);
         else if(Path.GetExtension(source) == ".lz")
             zStream = new LZipStream(inFs, CompressionMode.Decompress);
+        else if(string.IsNullOrWhiteSpace(Path.GetExtension(source)))
+            zStream = inFs;
         else
             throw new ArgumentException($"Invalid compression extension {Path.GetExtension(source)}");
 

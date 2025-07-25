@@ -605,7 +605,21 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                     sha384B32 + ".zst");
 
             if(!File.Exists(repoPath))
-                throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository, file.Sha256));
+            {
+                repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                        "files",
+                                        sha384B32[0].ToString(),
+                                        sha384B32[1].ToString(),
+                                        sha384B32[2].ToString(),
+                                        sha384B32[3].ToString(),
+                                        sha384B32[4].ToString(),
+                                        sha384B32);
+
+                return !File.Exists(repoPath)
+                           ? throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository,
+                                                                       file.Sha256))
+                           : new FileStream(repoPath, FileMode.Open, FileAccess.Read);
+            }
 
             inFs = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
 

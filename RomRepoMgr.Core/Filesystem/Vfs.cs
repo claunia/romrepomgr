@@ -412,7 +412,26 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
                                     sha384B32[4].ToString(),
                                     sha384B32 + ".zst");
 
-            if(!File.Exists(repoPath)) return -1;
+            if(!File.Exists(repoPath))
+            {
+                repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                        "files",
+                                        sha384B32[0].ToString(),
+                                        sha384B32[1].ToString(),
+                                        sha384B32[2].ToString(),
+                                        sha384B32[3].ToString(),
+                                        sha384B32[4].ToString(),
+                                        sha384B32);
+
+                if(!File.Exists(repoPath)) return -1;
+
+                _lastHandle++;
+                handle = _lastHandle;
+
+                _streamsCache[handle] = Stream.Synchronized(new FileStream(repoPath, FileMode.Open, FileAccess.Read));
+
+                return handle;
+            }
 
             _lastHandle++;
             handle = _lastHandle;

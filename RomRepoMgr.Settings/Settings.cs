@@ -36,7 +36,8 @@ namespace RomRepoMgr.Settings;
 public enum CompressionType
 {
     Lzip = 0,
-    Zstd
+    Zstd,
+    None
 }
 
 public sealed class SetSettings
