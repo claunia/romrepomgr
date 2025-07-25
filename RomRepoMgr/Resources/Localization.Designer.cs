@@ -770,5 +770,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("ProgressLabel", resourceCulture);
             }
         }
+        
+        public static string CompressionType {
+            get {
+                return ResourceManager.GetString("CompressionType", resourceCulture);
+            }
+        }
     }
 }

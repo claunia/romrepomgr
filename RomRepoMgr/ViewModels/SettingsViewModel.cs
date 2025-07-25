@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Platform.Storage;
@@ -39,6 +40,7 @@ using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database;
 using RomRepoMgr.Resources;
+using RomRepoMgr.Settings;
 using RomRepoMgr.Views;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -49,13 +51,16 @@ namespace RomRepoMgr.ViewModels;
 public sealed partial class SettingsViewModel : ViewModelBase
 {
     readonly SettingsDialog _view;
-    bool                    _databaseChanged;
-    string                  _databasePath;
-    bool                    _repositoryChanged;
-    string                  _repositoryPath;
-    bool                    _temporaryChanged;
-    string                  _temporaryPath;
-    bool                    _unArChanged;
+
+    CompressionType _compression;
+    bool            _compressionChanged;
+    bool            _databaseChanged;
+    string          _databasePath;
+    bool            _repositoryChanged;
+    string          _repositoryPath;
+    bool            _temporaryChanged;
+    string          _temporaryPath;
+    bool            _unArChanged;
     [ObservableProperty]
     string _unArPath;
     [ObservableProperty]
@@ -83,9 +88,13 @@ public sealed partial class SettingsViewModel : ViewModelBase
         RepositoryPath = Settings.Settings.Current.RepositoryPath;
         TemporaryPath  = Settings.Settings.Current.TemporaryFolder;
         UnArPath       = Settings.Settings.Current.UnArchiverPath;
+        Compression    = Settings.Settings.Current.Compression;
 
         if(!string.IsNullOrWhiteSpace(UnArPath)) CheckUnAr();
     }
+
+    public List<CompressionType> CompressionTypes { get; } =
+        Enum.GetValues(typeof(CompressionType)).Cast<CompressionType>().ToList();
 
     public ICommand UnArCommand       { get; }
     public ICommand TemporaryCommand  { get; }
@@ -123,6 +132,16 @@ public sealed partial class SettingsViewModel : ViewModelBase
         {
             SetProperty(ref _temporaryPath, value);
             _temporaryChanged = true;
+        }
+    }
+
+    public CompressionType Compression
+    {
+        get => _compression;
+        set
+        {
+            SetProperty(ref _compression, value);
+            _compressionChanged = true;
         }
     }
 
@@ -331,7 +350,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
             Settings.Settings.UnArUsable             = true;
         }
 
-        if(_databaseChanged || _repositoryChanged || _temporaryChanged || _unArChanged)
+        if(_compressionChanged) Settings.Settings.Current.Compression = Compression;
+
+        if(_databaseChanged || _repositoryChanged || _temporaryChanged || _unArChanged || _compressionChanged)
             Settings.Settings.SaveSettings();
 
         _view.Close();

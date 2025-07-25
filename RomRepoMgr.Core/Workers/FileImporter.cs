@@ -15,9 +15,12 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
+using RomRepoMgr.Settings;
 using SabreTools.FileTypes.Aaru;
 using SabreTools.FileTypes.CHD;
 using SharpCompress.Compressors.LZMA;
+using ZstdSharp;
+using ZstdSharp.Unsafe;
 using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
@@ -551,7 +554,9 @@ public sealed class FileImporter
 
             if(!Directory.Exists(repoPath)) Directory.CreateDirectory(repoPath);
 
-            repoPath = Path.Combine(repoPath, sha384B32 + ".lz");
+            repoPath = Settings.Settings.Current.Compression == CompressionType.Zstd
+                           ? Path.Combine(repoPath, sha384B32 + ".zst")
+                           : Path.Combine(repoPath, sha384B32 + ".lz");
 
             if(dbFile.Crc32 == null)
             {
@@ -605,8 +610,18 @@ public sealed class FileImporter
 
             inFs.Position = 0;
 
-            var    outFs   = new FileStream(repoPath, FileMode.CreateNew, FileAccess.Write);
-            Stream zStream = new LZipStream(outFs, CompressionMode.Compress);
+            var outFs = new FileStream(repoPath, FileMode.CreateNew, FileAccess.Write);
+
+            Stream zStream;
+
+            if(Settings.Settings.Current.Compression == CompressionType.Zstd)
+            {
+                var zstdStream = new CompressionStream(outFs, 15);
+                zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+                zStream = zstdStream;
+            }
+            else
+                zStream = new LZipStream(outFs, CompressionMode.Compress);
 
             SetProgressBounds2?.Invoke(this,
                                        new ProgressBoundsEventArgs

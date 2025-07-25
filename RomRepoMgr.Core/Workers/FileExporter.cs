@@ -12,6 +12,7 @@ using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors.LZMA;
+using ZstdSharp;
 using CompressionMode = SharpCompress.Compressors.CompressionMode;
 
 namespace RomRepoMgr.Core.Workers;
@@ -155,10 +156,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
 
                 if(media.Sha256 != null)
                 {
-                    var    sha256Bytes = new byte[32];
+                    byte[] sha256Bytes = new byte[32];
                     string sha256      = media.Sha256;
 
-                    for(var i = 0; i < 32; i++)
+                    for(int i = 0; i < 32; i++)
                     {
                         if(sha256[i * 2] >= 0x30 && sha256[i * 2] <= 0x39)
                             sha256Bytes[i] = (byte)((sha256[i * 2] - 0x30) * 0x10);
@@ -190,10 +191,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
 
                 if(media.Sha1 != null)
                 {
-                    var    sha1Bytes = new byte[20];
+                    byte[] sha1Bytes = new byte[20];
                     string sha1      = media.Sha1;
 
-                    for(var i = 0; i < 20; i++)
+                    for(int i = 0; i < 20; i++)
                     {
                         if(sha1[i * 2] >= 0x30 && sha1[i * 2] <= 0x39)
                             sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
@@ -225,10 +226,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
 
                 if(media.Md5 != null)
                 {
-                    var    md5Bytes = new byte[16];
+                    byte[] md5Bytes = new byte[16];
                     string md5      = media.Md5;
 
-                    for(var i = 0; i < 16; i++)
+                    for(int i = 0; i < 16; i++)
                     {
                         if(md5[i * 2] >= 0x30 && md5[i * 2] <= 0x39)
                             md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
@@ -286,7 +287,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                                Maximum = inFs.Length
                                            });
 
-                var buffer = new byte[BUFFER_SIZE];
+                byte[] buffer = new byte[BUFFER_SIZE];
 
                 while(inFs.Position + BUFFER_SIZE <= inFs.Length)
                 {
@@ -359,10 +360,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
 
                 if(disk.Sha1 != null)
                 {
-                    var    sha1Bytes = new byte[20];
+                    byte[] sha1Bytes = new byte[20];
                     string sha1      = disk.Sha1;
 
-                    for(var i = 0; i < 20; i++)
+                    for(int i = 0; i < 20; i++)
                     {
                         if(sha1[i * 2] >= 0x30 && sha1[i * 2] <= 0x39)
                             sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
@@ -394,10 +395,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
 
                 if(disk.Md5 != null)
                 {
-                    var    md5Bytes = new byte[16];
+                    byte[] md5Bytes = new byte[16];
                     string md5      = disk.Md5;
 
-                    for(var i = 0; i < 16; i++)
+                    for(int i = 0; i < 16; i++)
                     {
                         if(md5[i * 2] >= 0x30 && md5[i * 2] <= 0x39)
                             md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
@@ -453,7 +454,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                                Maximum = inFs.Length
                                            });
 
-                var buffer = new byte[BUFFER_SIZE];
+                byte[] buffer = new byte[BUFFER_SIZE];
 
                 while(inFs.Position + BUFFER_SIZE <= inFs.Length)
                 {
@@ -558,10 +559,10 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
         // Special case for empty file, as it seems to crash when SharpCompress tries to unLZMA it.
         if(file.Size == 0) return new MemoryStream();
 
-        var    sha384Bytes = new byte[48];
+        byte[] sha384Bytes = new byte[48];
         string sha384      = file.Sha384;
 
-        for(var i = 0; i < 48; i++)
+        for(int i = 0; i < 48; i++)
         {
             if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                 sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
@@ -589,10 +590,29 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                        sha384B32[4].ToString(),
                                        sha384B32 + ".lz");
 
-        if(!File.Exists(repoPath))
-            throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository, file.Sha256));
+        FileStream inFs;
 
-        var inFs = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
+        // Try ZSTD
+        if(!File.Exists(repoPath))
+        {
+            repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                    "files",
+                                    sha384B32[0].ToString(),
+                                    sha384B32[1].ToString(),
+                                    sha384B32[2].ToString(),
+                                    sha384B32[3].ToString(),
+                                    sha384B32[4].ToString(),
+                                    sha384B32 + ".zst");
+
+            if(!File.Exists(repoPath))
+                throw new ArgumentException(string.Format(Localization.CannotFindHashInRepository, file.Sha256));
+
+            inFs = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
+
+            return new StreamWithLength(new DecompressionStream(inFs), (long)file.Size);
+        }
+
+        inFs = new FileStream(repoPath, FileMode.Open, FileAccess.Read);
 
         return new StreamWithLength(new LZipStream(inFs, CompressionMode.Decompress), (long)file.Size);
     }
@@ -612,11 +632,9 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                      Value = _filePosition
                                  });
 
-            if(!_filesByMachine.TryGetValue(e.CurrentEntry.FileName, out FileByMachine fileByMachine))
-            {
-                if(!_filesByMachine.TryGetValue(e.CurrentEntry.FileName.Replace('/', '\\'), out fileByMachine))
-                    throw new ArgumentException(Localization.CannotFindZipEntryInDictionary);
-            }
+            if(!_filesByMachine.TryGetValue(e.CurrentEntry.FileName, out FileByMachine fileByMachine) &&
+               !_filesByMachine.TryGetValue(e.CurrentEntry.FileName.Replace('/', '\\'), out fileByMachine))
+                throw new ArgumentException(Localization.CannotFindZipEntryInDictionary);
 
             DbFile currentFile = fileByMachine.File;
 

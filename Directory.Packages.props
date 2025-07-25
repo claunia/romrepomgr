@@ -45,6 +45,6 @@
     <PackageVersion Include="System.IO.Compression" Version="4.3.0"/>
     <PackageVersion Include="SharpCompress" Version="0.38.0"/>
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0"/>
-    <PackageVersion Include="ZstdSharp.Port" Version="0.8.1"/>
+    <PackageVersion Include="ZstdSharp.Port" Version="0.8.6"/>
   </ItemGroup>
 </Project>

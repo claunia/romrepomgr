@@ -28,8 +28,11 @@ using System.Diagnostics;
 using System.IO;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Resources;
+using RomRepoMgr.Settings;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
+using ZstdSharp;
+using ZstdSharp.Unsafe;
 using ErrorEventArgs = RomRepoMgr.Core.EventArgs.ErrorEventArgs;
 
 namespace RomRepoMgr.Core.Workers;
@@ -45,11 +48,21 @@ public sealed class Compression
 
     public void CompressFile(string source, string destination)
     {
-        var    inFs    = new FileStream(source,      FileMode.Open,      FileAccess.Read);
-        var    outFs   = new FileStream(destination, FileMode.CreateNew, FileAccess.Write);
-        Stream zStream = new LZipStream(outFs, CompressionMode.Compress);
+        var inFs  = new FileStream(source,      FileMode.Open,      FileAccess.Read);
+        var outFs = new FileStream(destination, FileMode.CreateNew, FileAccess.Write);
 
-        var buffer = new byte[BUFFER_SIZE];
+        Stream zStream;
+
+        if(Settings.Settings.Current.Compression == CompressionType.Zstd)
+        {
+            var zstdStream = new CompressionStream(outFs, 15);
+            zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+            zStream = zstdStream;
+        }
+        else
+            zStream = new LZipStream(outFs, CompressionMode.Compress);
+
+        byte[] buffer = new byte[BUFFER_SIZE];
 
         SetProgressBounds?.Invoke(this,
                                   new ProgressBoundsEventArgs
@@ -89,9 +102,17 @@ public sealed class Compression
 
     public void DecompressFile(string source, string destination)
     {
-        var    inFs    = new FileStream(source,      FileMode.Open,   FileAccess.Read);
-        var    outFs   = new FileStream(destination, FileMode.Create, FileAccess.Write);
-        Stream zStream = new LZipStream(inFs, CompressionMode.Decompress);
+        var    inFs  = new FileStream(source,      FileMode.Open,   FileAccess.Read);
+        var    outFs = new FileStream(destination, FileMode.Create, FileAccess.Write);
+        Stream zStream;
+
+        if(Path.GetExtension(source) == ".zst")
+            zStream = new DecompressionStream(inFs);
+        else if(Path.GetExtension(source) == ".lz")
+            zStream = new LZipStream(inFs, CompressionMode.Decompress);
+        else
+            throw new ArgumentException($"Invalid compression extension {Path.GetExtension(source)}");
+
 
         zStream.CopyTo(outFs);
 

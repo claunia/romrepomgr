@@ -389,4 +389,7 @@ This will take a long time...</value>
     <data name="ProgressLabel" xml:space="preserve">
         <value>Progress</value>
     </data>
+    <data name="CompressionType" xml:space="preserve">
+        <value>Compression</value>
+    </data>
 </root>

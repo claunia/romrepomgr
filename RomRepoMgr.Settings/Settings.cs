@@ -33,12 +33,19 @@ using PlatformID = Aaru.CommonTypes.Interop.PlatformID;
 
 namespace RomRepoMgr.Settings;
 
+public enum CompressionType
+{
+    Lzip = 0,
+    Zstd
+}
+
 public sealed class SetSettings
 {
-    public string DatabasePath    { get; set; }
-    public string RepositoryPath  { get; set; }
-    public string TemporaryFolder { get; set; }
-    public string UnArchiverPath  { get; set; }
+    public string          DatabasePath    { get; set; }
+    public string          RepositoryPath  { get; set; }
+    public string          TemporaryFolder { get; set; }
+    public string          UnArchiverPath  { get; set; }
+    public CompressionType Compression     { get; set; }
 }
 
 /// <summary>Manages statistics</summary>
@@ -105,6 +112,11 @@ public static class Settings
                                                      ? ((NSString)obj).ToString()
                                                      : null;
 
+                        Current.Compression = parsedPreferences.TryGetValue("Compression", out obj)
+                                                  ? (CompressionType)Enum.Parse(typeof(CompressionType),
+                                                                                    ((NSNumber)obj).ToString())
+                                                  : CompressionType.Lzip;
+
                         prefsFs.Close();
                     }
                     else
@@ -150,6 +162,11 @@ public static class Settings
                     Current.RepositoryPath  = key.GetValue("RepositoryPath") as string;
                     Current.TemporaryFolder = key.GetValue("TemporaryFolder") as string;
                     Current.UnArchiverPath  = key.GetValue("UnArchiverPath") as string;
+
+                    if(key.GetValue("Compression") is int compression)
+                        Current.Compression = (CompressionType)compression;
+                    else
+                        Current.Compression = CompressionType.Lzip;
                 }
 
                     break;
@@ -222,6 +239,9 @@ public static class Settings
                         },
                         {
                             "UnArchiverPath", Current.UnArchiverPath
+                        },
+                        {
+                            "Compression", (NSNumber)(int)Current.Compression
                         }
                     };
 
@@ -256,6 +276,7 @@ public static class Settings
                     key?.SetValue("RepositoryPath",  Current.RepositoryPath);
                     key?.SetValue("TemporaryFolder", Current.TemporaryFolder);
                     key?.SetValue("UnArchiverPath",  Current.UnArchiverPath);
+                    key?.SetValue("Compression",     (int)Current.Compression);
                 }
 
                     break;
@@ -309,7 +330,8 @@ public static class Settings
         {
             DatabasePath    = Path.Combine(dataPath, "romrepo.db"),
             RepositoryPath  = Path.Combine(dataPath, "repo"),
-            TemporaryFolder = Path.GetTempPath()
+            TemporaryFolder = Path.GetTempPath(),
+            Compression     = CompressionType.Lzip
         };
     }
 }

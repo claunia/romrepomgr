@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Aaru.Checksums.Native" />
+    <PackageReference Include="Aaru.Checksums.Native"/>
     <PackageReference Include="DotNetZip"/>
     <PackageReference Include="EFCore.BulkExtensions"/>
     <PackageReference Include="Mono.Fuse.NETStandard"/>
@@ -19,6 +19,7 @@
     <PackageReference Include="Roslynator.Formatting.Analyzers"/>
     <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer"/>
     <PackageReference Include="Text.Analyzers"/>
+    <PackageReference Include="ZstdSharp.Port"/>
   </ItemGroup>
 
   <ItemGroup>

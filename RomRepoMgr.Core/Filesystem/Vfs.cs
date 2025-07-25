@@ -12,6 +12,7 @@ using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.LZMA;
+using ZstdSharp;
 
 namespace RomRepoMgr.Core.Filesystem;
 
@@ -365,9 +366,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
     internal long Open(string sha384, long fileSize)
     {
-        var sha384Bytes = new byte[48];
+        byte[] sha384Bytes = new byte[48];
 
-        for(var i = 0; i < 48; i++)
+        for(int i = 0; i < 48; i++)
         {
             if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                 sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
@@ -386,19 +387,47 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         string sha384B32 = Base32.ToBase32String(sha384Bytes);
 
-        string repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
-                                       "files",
-                                       sha384B32[0].ToString(),
-                                       sha384B32[1].ToString(),
-                                       sha384B32[2].ToString(),
-                                       sha384B32[3].ToString(),
-                                       sha384B32[4].ToString(),
-                                       sha384B32 + ".lz");
 
-        if(!File.Exists(repoPath)) return -1;
+        string repoPath;
+
+        repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                "files",
+                                sha384B32[0].ToString(),
+                                sha384B32[1].ToString(),
+                                sha384B32[2].ToString(),
+                                sha384B32[3].ToString(),
+                                sha384B32[4].ToString(),
+                                sha384B32 + ".lz");
+
+        long handle;
+
+        if(!File.Exists(repoPath))
+        {
+            repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                    "files",
+                                    sha384B32[0].ToString(),
+                                    sha384B32[1].ToString(),
+                                    sha384B32[2].ToString(),
+                                    sha384B32[3].ToString(),
+                                    sha384B32[4].ToString(),
+                                    sha384B32 + ".zst");
+
+            if(!File.Exists(repoPath)) return -1;
+
+            _lastHandle++;
+            handle = _lastHandle;
+
+            _streamsCache[handle] =
+                Stream.Synchronized(new ForcedSeekStream<DecompressionStream>(fileSize,
+                                                                              new FileStream(repoPath,
+                                                                                  FileMode.Open,
+                                                                                  FileAccess.Read)));
+
+            return handle;
+        }
 
         _lastHandle++;
-        long handle = _lastHandle;
+        handle = _lastHandle;
 
         _streamsCache[handle] =
             Stream.Synchronized(new ForcedSeekStream<LZipStream>(fileSize,
@@ -457,9 +486,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         if(sha1 != null)
         {
-            var sha1Bytes = new byte[20];
+            byte[] sha1Bytes = new byte[20];
 
-            for(var i = 0; i < 20; i++)
+            for(int i = 0; i < 20; i++)
             {
                 if(sha1[i * 2] >= 0x30 && sha1[i * 2] <= 0x39)
                     sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
@@ -490,9 +519,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         if(md5 != null)
         {
-            var md5Bytes = new byte[16];
+            byte[] md5Bytes = new byte[16];
 
-            for(var i = 0; i < 16; i++)
+            for(int i = 0; i < 16; i++)
             {
                 if(md5[i * 2] >= 0x30 && md5[i * 2] <= 0x39)
                     md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
@@ -545,9 +574,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         if(sha256 != null)
         {
-            var sha256Bytes = new byte[32];
+            byte[] sha256Bytes = new byte[32];
 
-            for(var i = 0; i < 32; i++)
+            for(int i = 0; i < 32; i++)
             {
                 if(sha256[i * 2] >= 0x30 && sha256[i * 2] <= 0x39)
                     sha256Bytes[i] = (byte)((sha256[i * 2] - 0x30) * 0x10);
@@ -579,9 +608,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         if(sha1 != null)
         {
-            var sha1Bytes = new byte[20];
+            byte[] sha1Bytes = new byte[20];
 
-            for(var i = 0; i < 20; i++)
+            for(int i = 0; i < 20; i++)
             {
                 if(sha1[i * 2] >= 0x30 && sha1[i * 2] <= 0x39)
                     sha1Bytes[i] = (byte)((sha1[i * 2] - 0x30) * 0x10);
@@ -612,9 +641,9 @@ public class Vfs(ILoggerFactory loggerFactory) : IDisposable
 
         if(md5 != null)
         {
-            var md5Bytes = new byte[16];
+            byte[] md5Bytes = new byte[16];
 
-            for(var i = 0; i < 16; i++)
+            for(int i = 0; i < 16; i++)
             {
                 if(md5[i * 2] >= 0x30 && md5[i * 2] <= 0x39)
                     md5Bytes[i] = (byte)((md5[i * 2] - 0x30) * 0x10);
