@@ -1,16 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components"/>
-        <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons"/>
-        <PackageReference Include="Serilog" />
-        <PackageReference Include="Serilog.AspNetCore" />
-        <PackageReference Include="Serilog.Sinks.Console" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components"/>
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons"/>
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.AspNetCore"/>
+    <PackageReference Include="Serilog.Sinks.Console"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
+  </ItemGroup>
 </Project>

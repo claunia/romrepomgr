@@ -1,6 +1,9 @@
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Blazor;
 using RomRepoMgr.Blazor.Components;
+using RomRepoMgr.Database;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -53,6 +56,19 @@ builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
+Log.Debug("Creating database context...");
+
+builder.Services.AddDbContextFactory<Context>(options =>
+{
+    options.UseSqlite($"Data Source={Consts.DbFolder}/database.db");
+#if DEBUG
+    options.EnableSensitiveDataLogging();
+    options.LogTo(Log.Debug);
+#else
+    options.LogTo(Log.Information, LogLevel.Information);
+#endif
+});
+
 Log.Debug("Building the application...");
 WebApplication app = builder.Build();
 
@@ -69,6 +85,29 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
+Stopwatch stopwatch = new();
+
+using(IServiceScope scope = app.Services.CreateScope())
+{
+    IServiceProvider services = scope.ServiceProvider;
+
+    try
+    {
+        Log.Information("Updating the database...");
+        stopwatch.Start();
+        Context dbContext = services.GetRequiredService<Context>();
+        await dbContext.Database.MigrateAsync();
+        stopwatch.Stop();
+        Log.Debug("Database migration: {Elapsed} seconds", stopwatch.Elapsed.TotalSeconds);
+    }
+    catch(Exception ex)
+    {
+        Log.Error(ex, "An error occurred while updating the database");
+
+        return;
+    }
+}
 
 Log.Debug("Running the application...");
 app.Run();
