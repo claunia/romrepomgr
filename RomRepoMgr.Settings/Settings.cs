@@ -42,11 +42,12 @@ public enum CompressionType
 
 public sealed class SetSettings
 {
-    public string          DatabasePath    { get; set; }
-    public string          RepositoryPath  { get; set; }
-    public string          TemporaryFolder { get; set; }
-    public string          UnArchiverPath  { get; set; }
-    public CompressionType Compression     { get; set; }
+    public string          DatabasePath            { get; set; }
+    public string          RepositoryPath          { get; set; }
+    public string          TemporaryFolder         { get; set; }
+    public string          UnArchiverPath          { get; set; }
+    public CompressionType Compression             { get; set; }
+    public bool            UseInternalDecompressor { get; set; }
 }
 
 /// <summary>Manages statistics</summary>
@@ -118,6 +119,11 @@ public static class Settings
                                                                                     ((NSNumber)obj).ToString())
                                                   : CompressionType.Lzip;
 
+                        Current.UseInternalDecompressor =
+                            parsedPreferences.TryGetValue("UseInternalDecompressor", out obj) &&
+                            bool.TryParse(((NSString)obj).ToString(), out bool b)             &&
+                            b;
+
                         prefsFs.Close();
                     }
                     else
@@ -159,10 +165,11 @@ public static class Settings
                         return;
                     }
 
-                    Current.DatabasePath    = key.GetValue("DatabasePath") as string;
-                    Current.RepositoryPath  = key.GetValue("RepositoryPath") as string;
-                    Current.TemporaryFolder = key.GetValue("TemporaryFolder") as string;
-                    Current.UnArchiverPath  = key.GetValue("UnArchiverPath") as string;
+                    Current.DatabasePath            = key.GetValue("DatabasePath") as string;
+                    Current.RepositoryPath          = key.GetValue("RepositoryPath") as string;
+                    Current.TemporaryFolder         = key.GetValue("TemporaryFolder") as string;
+                    Current.UnArchiverPath          = key.GetValue("UnArchiverPath") as string;
+                    Current.UseInternalDecompressor = key.GetValue("UseInternalDecompressor") as int? > 0;
 
                     if(key.GetValue("Compression") is int compression)
                         Current.Compression = (CompressionType)compression;
@@ -243,6 +250,9 @@ public static class Settings
                         },
                         {
                             "Compression", (NSNumber)(int)Current.Compression
+                        },
+                        {
+                            "UseInternalDecompressor", new NSNumber(Current.UseInternalDecompressor ? 1 : 0)
                         }
                     };
 
@@ -273,11 +283,12 @@ public static class Settings
 
                     RegistryKey key = parentKey?.CreateSubKey("RomRepoMgr");
 
-                    key?.SetValue("DatabasePath",    Current.DatabasePath);
-                    key?.SetValue("RepositoryPath",  Current.RepositoryPath);
-                    key?.SetValue("TemporaryFolder", Current.TemporaryFolder);
-                    key?.SetValue("UnArchiverPath",  Current.UnArchiverPath);
-                    key?.SetValue("Compression",     (int)Current.Compression);
+                    key?.SetValue("DatabasePath",            Current.DatabasePath);
+                    key?.SetValue("RepositoryPath",          Current.RepositoryPath);
+                    key?.SetValue("TemporaryFolder",         Current.TemporaryFolder);
+                    key?.SetValue("UnArchiverPath",          Current.UnArchiverPath);
+                    key?.SetValue("Compression",             (int)Current.Compression);
+                    key?.SetValue("UseInternalDecompressor", Current.UseInternalDecompressor ? 1 : 0);
                 }
 
                     break;

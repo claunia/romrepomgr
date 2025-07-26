@@ -15,13 +15,15 @@ using RomRepoMgr.Core.Models;
 using RomRepoMgr.Core.Resources;
 using RomRepoMgr.Database;
 using RomRepoMgr.Database.Models;
-using RomRepoMgr.Settings;
 using SabreTools.FileTypes.Aaru;
 using SabreTools.FileTypes.CHD;
+using SharpCompress.Common;
 using SharpCompress.Compressors.LZMA;
+using SharpCompress.Readers;
 using ZstdSharp;
 using ZstdSharp.Unsafe;
 using CompressionMode = SharpCompress.Compressors.CompressionMode;
+using CompressionType = RomRepoMgr.Settings.CompressionType;
 
 namespace RomRepoMgr.Core.Workers;
 
@@ -79,6 +81,77 @@ public sealed class FileImporter
                            new MessageEventArgs
                            {
                                Message = "Finished enumerating files. Found " + Files.Count + " files."
+                           });
+
+        Finished?.Invoke(this, System.EventArgs.Empty);
+    }
+
+    public void SeparateFilesAndArchivesManaged()
+    {
+        SetProgressBounds?.Invoke(this,
+                                  new ProgressBoundsEventArgs
+                                  {
+                                      Minimum = 0,
+                                      Maximum = Files.Count
+                                  });
+
+        ConcurrentBag<string> files    = [];
+        ConcurrentBag<string> archives = [];
+
+        Parallel.ForEach(Files,
+                         file =>
+                         {
+                             SetProgress?.Invoke(this,
+                                                 new ProgressEventArgs
+                                                 {
+                                                     Value = _position
+                                                 });
+
+                             SetMessage?.Invoke(this,
+                                                new MessageEventArgs
+                                                {
+                                                    Message = "Checking archives. Found " +
+                                                              archives.Count              +
+                                                              " archives and "            +
+                                                              files.Count                 +
+                                                              " files."
+                                                });
+
+                             SetMessage2?.Invoke(this,
+                                                 new MessageEventArgs
+                                                 {
+                                                     Message =
+                                                         $"Checking if file {Path.GetFileName(file)} is an archive..."
+                                                 });
+
+                             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+                             try
+                             {
+                                 using var     fs     = new FileStream(file, FileMode.Open, FileAccess.Read);
+                                 using IReader reader = ReaderFactory.Open(fs);
+
+                                 archives.Add(file);
+                             }
+                             catch(InvalidOperationException)
+                             {
+                                 files.Add(file);
+                             }
+
+                             Interlocked.Increment(ref _position);
+                         });
+
+        Files    = files.Order().ToList();
+        Archives = archives.Order().ToList();
+
+        SetMessage?.Invoke(this,
+                           new MessageEventArgs
+                           {
+                               Message = "Finished checking archives. Found " +
+                                         Archives.Count                       +
+                                         " archives and "                     +
+                                         Files.Count                          +
+                                         " files."
                            });
 
         Finished?.Invoke(this, System.EventArgs.Empty);
@@ -278,11 +351,8 @@ public sealed class FileImporter
         }
     }
 
-    public bool ExtractArchive(string archive)
+    public bool ExtractArchiveManaged(string archive)
     {
-        string archiveFormat = null;
-        long   archiveFiles  = 0;
-
         SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
 
         SetMessage2?.Invoke(this,
@@ -291,7 +361,60 @@ public sealed class FileImporter
                                 Message = Localization.CheckingIfFIleIsAnArchive
                             });
 
-        archiveFormat = GetArchiveFormat(archive, out archiveFiles);
+        try
+        {
+            using var     fs     = new FileStream(archive, FileMode.Open, FileAccess.Read);
+            using IReader reader = ReaderFactory.Open(fs);
+
+            if(!Directory.Exists(Settings.Settings.Current.TemporaryFolder))
+                Directory.CreateDirectory(Settings.Settings.Current.TemporaryFolder);
+
+            _archiveFolder = Path.Combine(Settings.Settings.Current.TemporaryFolder, Path.GetRandomFileName());
+
+            Directory.CreateDirectory(_archiveFolder);
+
+            SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+            SetMessage2?.Invoke(this,
+                                new MessageEventArgs
+                                {
+                                    Message = Localization.ExtractingArchive
+                                });
+
+            reader.WriteAllToDirectory(_archiveFolder,
+                                       new ExtractionOptions
+                                       {
+                                           ExtractFullPath = true,
+                                           Overwrite       = true
+                                       });
+
+            Files = Directory.GetFiles(_archiveFolder, "*", SearchOption.AllDirectories).Order().ToList();
+
+            SetMessage2?.Invoke(this,
+                                new MessageEventArgs
+                                {
+                                    Message = "Finished extracting files. Extracted " + Files.Count + " files."
+                                });
+
+            return true;
+        }
+        catch(InvalidOperationException)
+        {
+            return false;
+        }
+    }
+
+    public bool ExtractArchive(string archive)
+    {
+        SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+        SetMessage2?.Invoke(this,
+                            new MessageEventArgs
+                            {
+                                Message = Localization.CheckingIfFIleIsAnArchive
+                            });
+
+        string archiveFormat = GetArchiveFormat(archive, out long archiveFiles);
 
         // If a floppy contains only the archive, unar will recognize it, on its skipping of SFXs.
         if(archiveFormat != null && FAT.Identify(archive)) archiveFormat = null;

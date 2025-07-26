@@ -776,5 +776,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("CompressionType", resourceCulture);
             }
         }
+        
+        public static string UseInternalDecompressorLabel {
+            get {
+                return ResourceManager.GetString("UseInternalDecompressorLabel", resourceCulture);
+            }
+        }
     }
 }

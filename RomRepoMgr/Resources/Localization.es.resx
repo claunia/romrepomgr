@@ -384,4 +384,7 @@ Tardará mucho tiempo...</value>
     <data name="CompressionType" xml:space="preserve">
         <value>Compresión</value>
     </data>
+    <data name="UseInternalDecompressorLabel" xml:space="preserve">
+        <value>Usar decompresor interno (soporta menos formatos)</value>
+    </data>
 </root>

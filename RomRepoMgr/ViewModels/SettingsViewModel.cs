@@ -65,6 +65,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
     string _unArPath;
     [ObservableProperty]
     string _unArVersion;
+    bool _useInternalDecompressor;
+    bool _useInternalDecompressorChanged;
 
     // Mock
     public SettingsViewModel() {}
@@ -84,11 +86,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
         DatabaseCommand   = new AsyncRelayCommand(ExecuteDatabaseCommandAsync);
         SaveCommand       = new RelayCommand(ExecuteSaveCommand);
 
-        DatabasePath   = Settings.Settings.Current.DatabasePath;
-        RepositoryPath = Settings.Settings.Current.RepositoryPath;
-        TemporaryPath  = Settings.Settings.Current.TemporaryFolder;
-        UnArPath       = Settings.Settings.Current.UnArchiverPath;
-        Compression    = Settings.Settings.Current.Compression;
+        DatabasePath            = Settings.Settings.Current.DatabasePath;
+        RepositoryPath          = Settings.Settings.Current.RepositoryPath;
+        TemporaryPath           = Settings.Settings.Current.TemporaryFolder;
+        UnArPath                = Settings.Settings.Current.UnArchiverPath;
+        Compression             = Settings.Settings.Current.Compression;
+        UseInternalDecompressor = Settings.Settings.Current.UseInternalDecompressor;
 
         if(!string.IsNullOrWhiteSpace(UnArPath)) CheckUnAr();
     }
@@ -142,6 +145,16 @@ public sealed partial class SettingsViewModel : ViewModelBase
         {
             SetProperty(ref _compression, value);
             _compressionChanged = true;
+        }
+    }
+
+    public bool UseInternalDecompressor
+    {
+        get => _useInternalDecompressor;
+        set
+        {
+            SetProperty(ref _useInternalDecompressor, value);
+            _useInternalDecompressorChanged = true;
         }
     }
 
@@ -352,7 +365,14 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         if(_compressionChanged) Settings.Settings.Current.Compression = Compression;
 
-        if(_databaseChanged || _repositoryChanged || _temporaryChanged || _unArChanged || _compressionChanged)
+        if(_useInternalDecompressorChanged) Settings.Settings.Current.UseInternalDecompressor = UseInternalDecompressor;
+
+        if(_databaseChanged    ||
+           _repositoryChanged  ||
+           _temporaryChanged   ||
+           _unArChanged        ||
+           _compressionChanged ||
+           _useInternalDecompressorChanged)
             Settings.Settings.SaveSettings();
 
         _view.Close();

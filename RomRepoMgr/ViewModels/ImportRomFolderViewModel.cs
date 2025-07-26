@@ -184,7 +184,11 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
             _ = Task.Run(() =>
             {
                 _stopwatch.Restart();
-                _rootImporter.SeparateFilesAndArchives();
+
+                if(Settings.Settings.Current.UseInternalDecompressor)
+                    _rootImporter.SeparateFilesAndArchivesManaged();
+                else
+                    _rootImporter.SeparateFilesAndArchives();
             });
         }
         else
@@ -291,7 +295,9 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                                                                     RemoveFilesChecked);
 
                              // Extract archive
-                             bool ret = archiveImporter.ExtractArchive(archive);
+                             bool ret = Settings.Settings.Current.UseInternalDecompressor
+                                            ? archiveImporter.ExtractArchiveManaged(archive)
+                                            : archiveImporter.ExtractArchive(archive);
 
                              if(!ret) return;
 
