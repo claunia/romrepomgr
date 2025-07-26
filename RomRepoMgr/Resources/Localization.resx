@@ -395,4 +395,7 @@ This will take a long time...</value>
     <data name="UseInternalDecompressorLabel" xml:space="preserve">
         <value>Use internal decompressor (supports less formats)</value>
     </data>
+    <data name="ProcessingArchive" xml:space="preserve">
+        <value>Processing archive: {0}</value>
+    </data>
 </root>

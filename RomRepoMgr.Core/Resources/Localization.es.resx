@@ -186,4 +186,7 @@
     <data name="AddingMedias" xml:space="preserve">
     <value>Añadiendo medios...</value>
   </data>
+    <data name="ImportingFile" xml:space="preserve">
+        <value>Importando fichero...</value>
+    </data>
 </root>

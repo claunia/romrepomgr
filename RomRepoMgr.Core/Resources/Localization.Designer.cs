@@ -392,5 +392,11 @@ namespace RomRepoMgr.Core.Resources {
                 return ResourceManager.GetString("DatImportSuccess", resourceCulture);
             }
         }
+        
+        internal static string ImportingFile {
+            get {
+                return ResourceManager.GetString("ImportingFile", resourceCulture);
+            }
+        }
     }
 }

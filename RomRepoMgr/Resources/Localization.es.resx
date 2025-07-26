@@ -387,4 +387,7 @@ Tardará mucho tiempo...</value>
     <data name="UseInternalDecompressorLabel" xml:space="preserve">
         <value>Usar decompresor interno (soporta menos formatos)</value>
     </data>
+    <data name="ProcessingArchive" xml:space="preserve">
+        <value>Procesando archivo: {0}</value>
+    </data>
 </root>

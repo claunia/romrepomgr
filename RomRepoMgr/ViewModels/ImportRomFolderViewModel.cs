@@ -20,6 +20,7 @@ using RomRepoMgr.Models;
 using RomRepoMgr.Resources;
 using Serilog;
 using Serilog.Extensions.Logging;
+using SharpCompress.Readers;
 
 namespace RomRepoMgr.ViewModels;
 
@@ -87,7 +88,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         CanClose               = true;
         RemoveFilesChecked     = false;
         KnownOnlyChecked       = true;
-        RecurseArchivesChecked = Settings.Settings.UnArUsable;
+        RecurseArchivesChecked = Settings.Settings.CanDecompress;
         RemoveFilesEnabled     = false;
         CanChoose              = true;
     }
@@ -97,7 +98,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
     public ICommand StartCommand        { get; }
     public Window   View                { get; init; }
 
-    public bool RecurseArchivesEnabled => Settings.Settings.UnArUsable;
+    public bool RecurseArchivesEnabled => Settings.Settings.CanDecompress;
 
     public bool RecurseArchivesChecked
     {
@@ -346,6 +347,97 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         ProcessFiles();
     }
 
+    void ProcessArchivesManaged()
+    {
+        // For each archive
+        ProgressMaximum         = _rootImporter.Archives.Count;
+        ProgressMinimum         = 0;
+        ProgressValue           = 0;
+        ProgressIsIndeterminate = false;
+        Progress2Visible        = false;
+        StatusMessage2Visible   = false;
+        _listPosition           = 0;
+        _stopwatch.Restart();
+
+        Parallel.ForEach(_rootImporter.Archives,
+                         archive =>
+                         {
+                             Dispatcher.UIThread.Post(() =>
+                             {
+                                 StatusMessage =
+                                     string.Format(Localization.ProcessingArchive, Path.GetFileName(archive));
+
+                                 ProgressValue = _listPosition;
+                             });
+
+                             // Create FileImporter
+                             var archiveImporter = new FileImporter(_ctx,
+                                                                    _newFiles,
+                                                                    _newDisks,
+                                                                    _newMedias,
+                                                                    KnownOnlyChecked,
+                                                                    RemoveFilesChecked);
+
+                             // Open archive
+                             try
+                             {
+                                 using var     fs     = new FileStream(archive, FileMode.Open, FileAccess.Read);
+                                 using IReader reader = ReaderFactory.Open(fs);
+
+                                 // Process files in archive
+                                 while(reader.MoveToNextEntry())
+                                 {
+                                     if(reader.Entry.IsDirectory) continue;
+
+                                     if(reader.Entry.Crc == 0 && KnownOnlyChecked) continue;
+
+                                     if(!archiveImporter.IsCrcInDb(reader.Entry.Crc) && KnownOnlyChecked) continue;
+
+                                     var model = new RomImporter
+                                     {
+                                         Filename      = Path.GetFileName(reader.Entry.Key),
+                                         Indeterminate = true
+                                     };
+
+                                     var worker = new FileImporter(_ctx,
+                                                                   _newFiles,
+                                                                   _newDisks,
+                                                                   _newMedias,
+                                                                   KnownOnlyChecked,
+                                                                   RemoveFilesChecked);
+
+                                     worker.SetIndeterminateProgress2 += model.OnSetIndeterminateProgress;
+                                     worker.SetMessage2               += model.OnSetMessage;
+                                     worker.SetProgress2              += model.OnSetProgress;
+                                     worker.SetProgressBounds2        += model.OnSetProgressBounds;
+                                     worker.ImportedRom               += model.OnImportedRom;
+                                     worker.WorkFinished              += model.OnWorkFinished;
+
+                                     Dispatcher.UIThread.Post(() => Importers.Add(model));
+
+                                     worker.ImportAndHashRom(reader.OpenEntryStream(),
+                                                             reader.Entry.Key,
+                                                             Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                                                          Path.GetFileName(Path.GetTempFileName())),
+                                                             reader.Entry.Size);
+                                 }
+                             }
+                             catch(InvalidOperationException) {}
+                             finally
+                             {
+                                 Interlocked.Increment(ref _listPosition);
+                             }
+                         });
+
+        _stopwatch.Stop();
+        Log.Debug("Took {TotalSeconds} seconds to process archives", _stopwatch.Elapsed.TotalSeconds);
+
+        Progress2Visible      = false;
+        StatusMessage2Visible = false;
+
+        ProcessFiles();
+    }
+
     void CheckArchivesFinished(object sender, EventArgs e)
     {
         _stopwatch.Stop();
@@ -356,7 +448,10 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
 
         _rootImporter.Finished -= CheckArchivesFinished;
 
-        ProcessArchives();
+        if(Settings.Settings.Current.UseInternalDecompressor)
+            ProcessArchivesManaged();
+        else
+            ProcessArchives();
     }
 
     void SetMessage(object sender, MessageEventArgs e)

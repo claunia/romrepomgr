@@ -540,6 +540,295 @@ public sealed class FileImporter
         }
     }
 
+    public bool IsCrcInDb(long crc32)
+    {
+        lock(DbLock)
+        {
+            return _ctx.Files.Any(f => f.Crc32 == crc32.ToString("x8"));
+        }
+    }
+
+    public void ImportAndHashRom(Stream stream, string filename, string tempPath, long size)
+    {
+        try
+        {
+            var outFs = new FileStream(tempPath, FileMode.Create, FileAccess.Write);
+
+            SetMessage2?.Invoke(this,
+                                new MessageEventArgs
+                                {
+                                    Message = Localization.ImportingFile
+                                });
+
+            byte[] buffer;
+            var    checksumWorker = new Checksum();
+            Stream zStream;
+
+            switch(Settings.Settings.Current.Compression)
+            {
+                case CompressionType.Zstd:
+                {
+                    var zstdStream = new CompressionStream(outFs, 15);
+                    zstdStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+                    zStream = zstdStream;
+
+                    break;
+                }
+                case CompressionType.None:
+                    zStream = outFs;
+
+                    break;
+                default:
+                    zStream = new LZipStream(outFs, CompressionMode.Compress);
+
+                    break;
+            }
+
+
+            if(size > BUFFER_SIZE)
+            {
+                SetProgressBounds2?.Invoke(this,
+                                           new ProgressBoundsEventArgs
+                                           {
+                                               Minimum = 0,
+                                               Maximum = size
+                                           });
+
+                long offset;
+                long remainder = size % BUFFER_SIZE;
+
+                for(offset = 0; offset < size - remainder; offset += (int)BUFFER_SIZE)
+                {
+                    SetProgress2?.Invoke(this,
+                                         new ProgressEventArgs
+                                         {
+                                             Value = offset
+                                         });
+
+                    buffer = new byte[BUFFER_SIZE];
+                    stream.EnsureRead(buffer, 0, (int)BUFFER_SIZE);
+                    checksumWorker.Update(buffer);
+                    zStream.Write(buffer, 0, buffer.Length);
+                }
+
+                SetProgress2?.Invoke(this,
+                                     new ProgressEventArgs
+                                     {
+                                         Value = offset
+                                     });
+
+                buffer = new byte[remainder];
+                stream.EnsureRead(buffer, 0, (int)remainder);
+            }
+            else
+            {
+                SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+                buffer = new byte[size];
+                stream.EnsureRead(buffer, 0, (int)size);
+            }
+
+            checksumWorker.Update(buffer);
+            zStream.Write(buffer, 0, buffer.Length);
+
+            Dictionary<ChecksumType, string> checksums = checksumWorker.End();
+
+            ulong uSize    = (ulong)size;
+            bool  fileInDb = true;
+
+            bool knownFile = _pendingFiles.TryGetValue(checksums[ChecksumType.Sha512], out DbFile dbFile);
+
+            lock(DbLock)
+            {
+                dbFile ??= _ctx.Files.FirstOrDefault(f => (f.Sha512 == checksums[ChecksumType.Sha512] ||
+                                                           f.Sha384 == checksums[ChecksumType.Sha384] ||
+                                                           f.Sha256 == checksums[ChecksumType.Sha256] ||
+                                                           f.Sha1   == checksums[ChecksumType.Sha1]   ||
+                                                           f.Md5    == checksums[ChecksumType.Md5]    ||
+                                                           f.Crc32  == checksums[ChecksumType.Crc32]) &&
+                                                          f.Size == uSize);
+            }
+
+            if(dbFile == null)
+            {
+                if(onlyKnown)
+                {
+                    ImportedRom?.Invoke(this,
+                                        new ImportedRomItemEventArgs
+                                        {
+                                            Item = new ImportRomItem
+                                            {
+                                                Filename = filename,
+                                                Status   = Localization.UnknownFile
+                                            }
+                                        });
+
+                    return;
+                }
+
+                dbFile = new DbFile
+                {
+                    Crc32            = checksums[ChecksumType.Crc32],
+                    Md5              = checksums[ChecksumType.Md5],
+                    Sha1             = checksums[ChecksumType.Sha1],
+                    Sha256           = checksums[ChecksumType.Sha256],
+                    Sha384           = checksums[ChecksumType.Sha384],
+                    Sha512           = checksums[ChecksumType.Sha512],
+                    Size             = uSize,
+                    CreatedOn        = DateTime.UtcNow,
+                    UpdatedOn        = DateTime.UtcNow,
+                    OriginalFileName = Path.GetFileName(filename)
+                };
+
+                fileInDb = false;
+            }
+
+            if(!knownFile) _pendingFiles[checksums[ChecksumType.Sha512]] = dbFile;
+
+            byte[] sha384Bytes = new byte[48];
+            string sha384      = checksums[ChecksumType.Sha384];
+
+            for(int i = 0; i < 48; i++)
+            {
+                if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);
+                else if(sha384[i * 2] >= 0x41 && sha384[i * 2] <= 0x46)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x37) * 0x10);
+                else if(sha384[i * 2] >= 0x61 && sha384[i * 2] <= 0x66)
+                    sha384Bytes[i] = (byte)((sha384[i * 2] - 0x57) * 0x10);
+
+                if(sha384[i * 2 + 1] >= 0x30 && sha384[i * 2 + 1] <= 0x39)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x30);
+                else if(sha384[i * 2 + 1] >= 0x41 && sha384[i * 2 + 1] <= 0x46)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x37);
+                else if(sha384[i * 2 + 1] >= 0x61 && sha384[i * 2 + 1] <= 0x66)
+                    sha384Bytes[i] += (byte)(sha384[i * 2 + 1] - 0x57);
+            }
+
+            string sha384B32 = Base32.ToBase32String(sha384Bytes);
+
+            string repoPath = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                           "files",
+                                           sha384B32[0].ToString(),
+                                           sha384B32[1].ToString(),
+                                           sha384B32[2].ToString(),
+                                           sha384B32[3].ToString(),
+                                           sha384B32[4].ToString());
+
+            if(!Directory.Exists(repoPath)) Directory.CreateDirectory(repoPath);
+
+            repoPath = Settings.Settings.Current.Compression switch
+                       {
+                           CompressionType.Zstd => Path.Combine(repoPath, sha384B32 + ".zst"),
+                           CompressionType.None => Path.Combine(repoPath, sha384B32),
+                           _                    => Path.Combine(repoPath, sha384B32 + ".lz")
+                       };
+
+            if(dbFile.Crc32 == null)
+            {
+                dbFile.Crc32     = checksums[ChecksumType.Crc32];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(dbFile.Md5 == null)
+            {
+                dbFile.Md5       = checksums[ChecksumType.Md5];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(dbFile.Sha1 == null)
+            {
+                dbFile.Sha1      = checksums[ChecksumType.Sha1];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(dbFile.Sha256 == null)
+            {
+                dbFile.Sha256    = checksums[ChecksumType.Sha256];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(dbFile.Sha384 == null)
+            {
+                dbFile.Sha384    = checksums[ChecksumType.Sha384];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(dbFile.Sha512 == null)
+            {
+                dbFile.Sha512    = checksums[ChecksumType.Sha512];
+                dbFile.UpdatedOn = DateTime.UtcNow;
+            }
+
+            if(File.Exists(repoPath))
+            {
+                dbFile.IsInRepo  = true;
+                dbFile.UpdatedOn = DateTime.UtcNow;
+
+                if(!fileInDb) _newFiles.Add(dbFile);
+
+                zStream.Close();
+                outFs.Dispose();
+
+                File.Delete(tempPath);
+
+                ImportedRom?.Invoke(this,
+                                    new ImportedRomItemEventArgs
+                                    {
+                                        Item = new ImportRomItem
+                                        {
+                                            Filename = filename,
+                                            Status   = Localization.OK
+                                        }
+                                    });
+
+                return;
+            }
+
+            SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
+
+            SetMessage2?.Invoke(this,
+                                new MessageEventArgs
+                                {
+                                    Message = Localization.Finishing
+                                });
+
+            zStream.Close();
+            outFs.Dispose();
+
+            File.Move(tempPath, repoPath, true);
+
+            dbFile.IsInRepo  = true;
+            dbFile.UpdatedOn = DateTime.UtcNow;
+
+            if(!fileInDb) _newFiles.Add(dbFile);
+
+            ImportedRom?.Invoke(this,
+                                new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = filename,
+                                        Status   = Localization.OK
+                                    }
+                                });
+        }
+        catch(Exception)
+        {
+            ImportedRom?.Invoke(this,
+                                new ImportedRomItemEventArgs
+                                {
+                                    Item = new ImportRomItem
+                                    {
+                                        Filename = filename,
+                                        Status   = Localization.UnhandledExceptionWhenImporting
+                                    }
+                                });
+
+#pragma warning disable ERP022
+        }
+#pragma warning restore ERP022
+    }
+
     bool ImportRom(string path)
     {
         try
@@ -819,7 +1108,7 @@ public sealed class FileImporter
 
             return true;
         }
-        catch(Exception ex)
+        catch(Exception)
         {
             _lastMessage = Localization.UnhandledExceptionWhenImporting;
 

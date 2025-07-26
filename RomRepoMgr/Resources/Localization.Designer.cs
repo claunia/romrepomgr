@@ -782,5 +782,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("UseInternalDecompressorLabel", resourceCulture);
             }
         }
+        
+        public static string ProcessingArchive {
+            get {
+                return ResourceManager.GetString("ProcessingArchive", resourceCulture);
+            }
+        }
     }
 }

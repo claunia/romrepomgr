@@ -196,4 +196,7 @@
     <data name="DatImportSuccess" xml:space="preserve">
     <value>Imported {0} machines with {1} ROMs.</value>
   </data>
+    <data name="ImportingFile" xml:space="preserve">
+        <value>Importing file...</value>
+    </data>
 </root>
