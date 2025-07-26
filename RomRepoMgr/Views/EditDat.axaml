@@ -41,226 +41,212 @@
     <Design.DataContext>
         <vm:EditDatViewModel />
     </Design.DataContext>
-    <Border Padding="15">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-            <Grid Grid.Row="0"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetNameLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Name, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="1"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetVersionLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Version, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="2"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetAuthorLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Author, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="3"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetCategoryLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Category, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="4"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetCommentLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Comment, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="5"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetDateLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Date, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="6"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.RomSetDescriptionLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Description, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="7"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.HomepageLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBox Grid.Column="1"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Center"
-                         Text="{Binding Homepage, Mode=TwoWay}"
-                         Padding="5" />
-            </Grid>
-            <Grid Grid.Row="8"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.TotalMachinesLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding TotalMachines, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <Grid Grid.Row="9"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.CompleteMachinesLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding CompleteMachines, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <Grid Grid.Row="10"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.IncompleteMachinesLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding IncompleteMachines, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <Grid Grid.Row="11"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.TotalRomsLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding TotalRoms, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <Grid Grid.Row="12"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.HaveRomsLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding HaveRoms, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <Grid Grid.Row="13"
-                  ColumnDefinitions="140,*">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Text="{x:Static resources:Localization.MissRomsLabel}"
-                           FontWeight="Bold"
-                           Padding="5" />
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Center"
-                           Text="{Binding MissRoms, Mode=OneWay}"
-                           Padding="5" />
-            </Grid>
-            <StackPanel Grid.Row="14"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding SaveCommand, Mode=OneWay}"
-                        IsVisible="{Binding Modified, Mode=OneWay}">
-                    <TextBlock Text="{x:Static resources:Localization.SaveLabel}" />
-                </Button>
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding CancelCommand, Mode=OneWay}"
-                        IsVisible="{Binding Modified, Mode=OneWay}">
-                    <TextBlock Text="{x:Static resources:Localization.CancelLabel}" />
-                </Button>
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding CloseCommand, Mode=OneWay}"
-                        IsVisible="{Binding !Modified, Mode=OneWay}">
-                    <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
-                </Button>
-            </StackPanel>
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+          Margin="16"
+          RowSpacing="8">
+        <Grid Grid.Row="0"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetNameLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Name, Mode=TwoWay}" />
         </Grid>
-    </Border>
+        <Grid Grid.Row="1"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetVersionLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Version, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="2"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetAuthorLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Author, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="3"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetCategoryLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Category, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="4"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetCommentLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Comment, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="5"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetDateLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Date, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="6"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.RomSetDescriptionLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Description, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="7"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.HomepageLabel}"
+                       FontWeight="Bold" />
+            <TextBox Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     Text="{Binding Homepage, Mode=TwoWay}" />
+        </Grid>
+        <Grid Grid.Row="8"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.TotalMachinesLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding TotalMachines, Mode=OneWay}" />
+        </Grid>
+        <Grid Grid.Row="9"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.CompleteMachinesLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding CompleteMachines, Mode=OneWay}" />
+        </Grid>
+        <Grid Grid.Row="10"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.IncompleteMachinesLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding IncompleteMachines, Mode=OneWay}" />
+        </Grid>
+        <Grid Grid.Row="11"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.TotalRomsLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding TotalRoms, Mode=OneWay}" />
+        </Grid>
+        <Grid Grid.Row="12"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.HaveRomsLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding HaveRoms, Mode=OneWay}" />
+        </Grid>
+        <Grid Grid.Row="13"
+              ColumnSpacing="8"
+              ColumnDefinitions="140,*">
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{x:Static resources:Localization.MissRomsLabel}"
+                       FontWeight="Bold" />
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="{Binding MissRoms, Mode=OneWay}" />
+        </Grid>
+        <StackPanel Grid.Row="14"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Command="{Binding SaveCommand, Mode=OneWay}"
+                    IsVisible="{Binding Modified, Mode=OneWay}">
+                <TextBlock Text="{x:Static resources:Localization.SaveLabel}" />
+            </Button>
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Command="{Binding CancelCommand, Mode=OneWay}"
+                    IsVisible="{Binding Modified, Mode=OneWay}">
+                <TextBlock Text="{x:Static resources:Localization.CancelLabel}" />
+            </Button>
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Command="{Binding CloseCommand, Mode=OneWay}"
+                    IsVisible="{Binding !Modified, Mode=OneWay}">
+                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
+            </Button>
+        </StackPanel>
+    </Grid>
 </Window>

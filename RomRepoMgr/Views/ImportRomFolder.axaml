@@ -10,7 +10,6 @@
         Height="768"
         x:Class="RomRepoMgr.Views.ImportRomFolder"
         Icon="/Assets/avalonia-logo.ico"
-        CanResize="False"
         Title="{x:Static resources:Localization.ImportRomFolderTitle}"
         WindowStartupLocation="CenterOwner">
     <Design.DataContext>

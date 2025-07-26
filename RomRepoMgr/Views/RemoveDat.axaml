@@ -41,14 +41,14 @@
     <Design.DataContext>
         <vm:RemoveDatViewModel />
     </Design.DataContext>
-    <Border Padding="15">
-        <Grid RowDefinitions="Auto,auto">
-            <TextBlock Grid.Row="0"
-                       Text="{Binding StatusMessage, Mode=OneWay}"
-                       HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="1"
-                         IsIndeterminate="True"
-                         HorizontalAlignment="Stretch" />
-        </Grid>
-    </Border>
+    <Grid RowDefinitions="Auto,auto"
+          Margin="16"
+          RowSpacing="8">
+        <TextBlock Grid.Row="0"
+                   Text="{Binding StatusMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center" />
+        <ProgressBar Grid.Row="1"
+                     IsIndeterminate="True"
+                     HorizontalAlignment="Stretch" />
+    </Grid>
 </Window>

@@ -11,8 +11,8 @@
         Title="ROM Repository Manager"
         SystemDecorations="BorderOnly"
         WindowStartupLocation="CenterScreen"
-        Width="250"
-        Height="175">
+        Width="320"
+        Height="240">
     <Design.DataContext>
         <vm:SplashWindowViewModel />
     </Design.DataContext>
@@ -20,12 +20,14 @@
     <StackPanel HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
                 Orientation="Vertical"
-                Margin="5">
+                Margin="16"
+                Spacing="8">
         <TextBlock Text="{Binding LoadingText, Mode=OneWay}"
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top" />
         <StackPanel HorizontalAlignment="Left"
+                    Spacing="8"
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
@@ -52,6 +54,7 @@
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
+                    Spacing="8"
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
@@ -78,6 +81,7 @@
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
+                    Spacing="8"
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
@@ -104,6 +108,7 @@
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
+                    Spacing="8"
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"
@@ -130,6 +135,7 @@
                        VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"
+                    Spacing="8"
                     Orientation="Horizontal">
             <Image MaxWidth="24"
                    MaxHeight="24"

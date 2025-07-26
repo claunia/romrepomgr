@@ -41,30 +41,30 @@
     <Design.DataContext>
         <vm:ImportDatViewModel />
     </Design.DataContext>
-    <Border Padding="15">
-        <Grid RowDefinitions="Auto,auto,Auto,Auto">
-            <TextBlock Grid.Row="0"
-                       Text="{Binding StatusMessage, Mode=OneWay}"
-                       HorizontalAlignment="Center" />
-            <ProgressBar Grid.Row="1"
-                         IsIndeterminate="{Binding IndeterminateProgress, Mode=OneWay}"
-                         Maximum="{Binding MaximumValue, Mode=OneWay}"
-                         Minimum="{Binding MinimumValue, Mode=OneWay}"
-                         Value="{Binding CurrentValue, Mode=OneWay}"
-                         HorizontalAlignment="Stretch"
-                         IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
-            <TextBlock Grid.Row="2"
-                       Text="{Binding ErrorMessage, Mode=OneWay}"
-                       HorizontalAlignment="Center"
-                       Foreground="Red"
-                       IsVisible="{Binding ErrorVisible, Mode=OneWay}" />
-            <Button Grid.Row="3"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    IsEnabled="{Binding CanClose, Mode=OneWay}"
-                    Command="{Binding CloseCommand, Mode=OneWay}">
-                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
-            </Button>
-        </Grid>
-    </Border>
+    <Grid RowDefinitions="Auto,auto,Auto,Auto"
+          Margin="16"
+          RowSpacing="8">
+        <TextBlock Grid.Row="0"
+                   Text="{Binding StatusMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center" />
+        <ProgressBar Grid.Row="1"
+                     IsIndeterminate="{Binding IndeterminateProgress, Mode=OneWay}"
+                     Maximum="{Binding MaximumValue, Mode=OneWay}"
+                     Minimum="{Binding MinimumValue, Mode=OneWay}"
+                     Value="{Binding CurrentValue, Mode=OneWay}"
+                     HorizontalAlignment="Stretch"
+                     IsVisible="{Binding ProgressVisible, Mode=OneWay}" />
+        <TextBlock Grid.Row="2"
+                   Text="{Binding ErrorMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center"
+                   Foreground="Red"
+                   IsVisible="{Binding ErrorVisible, Mode=OneWay}" />
+        <Button Grid.Row="3"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                IsEnabled="{Binding CanClose, Mode=OneWay}"
+                Command="{Binding CloseCommand, Mode=OneWay}">
+            <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
+        </Button>
+    </Grid>
 </Window>

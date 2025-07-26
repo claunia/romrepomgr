@@ -40,106 +40,106 @@
     <Design.DataContext>
         <vm:AboutViewModel />
     </Design.DataContext>
-    <Border Padding="15">
-        <Grid RowDefinitions="Auto,*,Auto">
-            <Grid Grid.Row="0"
-                  ColumnDefinitions="Auto,*">
-                <Border Grid.Column="0"
-                        BorderThickness="5">
-                    <Image Source="/Assets/avalonia-logo.ico"
-                           Width="48"
-                           Height="48" />
-                </Border>
-                <Grid Grid.Column="1"
-                      HorizontalAlignment="Left"
-                      VerticalAlignment="Center"
-                      RowDefinitions="Auto,Auto">
-                    <TextBlock Grid.Row="0"
-                               Text="{Binding SoftwareName, Mode=OneWay}"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               FontSize="16"
-                               FontWeight="Bold" />
-                    <TextBlock Grid.Row="1"
-                               Text="{Binding VersionText, Mode=OneWay}"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center" />
-                </Grid>
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="16"
+          RowSpacing="8">
+        <Grid Grid.Row="0"
+              ColumnSpacing="8"
+              ColumnDefinitions="Auto,*">
+            <Image Source="/Assets/avalonia-logo.ico"
+                   Width="48"
+                   Height="48" />
+            <Grid Grid.Column="1"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Center"
+                  RowDefinitions="Auto,Auto"
+                  RowSpacing="8">
+                <TextBlock Grid.Row="0"
+                           Text="{Binding SoftwareName, Mode=OneWay}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontWeight="Bold" />
+                <TextBlock Grid.Row="1"
+                           Text="{Binding VersionText, Mode=OneWay}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center" />
             </Grid>
-            <TabControl Grid.Row="1"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch">
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="{x:Static resources:Localization.AboutLabel}" />
-                    </TabItem.Header>
-                    <Grid RowDefinitions="Auto,12,Auto,12,Auto,Auto,*">
-                        <TextBlock Grid.Row="0"
-                                   Text="{Binding SuiteName, Mode=OneWay}" />
-                        <TextBlock Grid.Row="2"
-                                   Text="{Binding Copyright, Mode=OneWay}" />
-                        <Button Grid.Row="4"
-                                BorderThickness="0"
-                                Background="Transparent"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Padding="0"
-                                Command="{Binding WebsiteCommand, Mode=OneWay}">
-                            <!-- TODO: TextDecorations="Underline" in next Avalonia UI version -->
-                            <TextBlock Text="{Binding Website, Mode=OneWay}"
-                                       Foreground="Blue" />
-                        </Button>
-                        <Button Grid.Row="5"
-                                BorderThickness="0"
-                                Background="Transparent"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Padding="0"
-                                Command="{Binding LicenseCommand, Mode=OneWay}">
-                            <!-- TODO: TextDecorations="Underline" in next Avalonia UI version -->
-                            <TextBlock Text="{x:Static resources:Localization.LicenseLabel}"
-                                       Foreground="Blue" />
-                        </Button>
-                    </Grid>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="{x:Static resources:Localization.LibrariesLabel}" />
-                    </TabItem.Header>
-                    <DataGrid ItemsSource="{Binding Assemblies, Mode=OneWay}"
-                              HorizontalScrollBarVisibility="Visible">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}"
-                                                Width="Auto"
-                                                IsReadOnly="True">
-                                <DataGridTextColumn.Header>
-                                    <TextBlock Text="{x:Static resources:Localization.AssembliesLibraryText}" />
-                                </DataGridTextColumn.Header>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Binding="{Binding Version, Mode=OneWay}"
-                                                Width="Auto"
-                                                IsReadOnly="True">
-                                <DataGridTextColumn.Header>
-                                    <TextBlock Text="{x:Static resources:Localization.AssembliesVersionText}" />
-                                </DataGridTextColumn.Header>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock Text="{x:Static resources:Localization.AuthorsLabel}" />
-                    </TabItem.Header>
-                    <TextBox IsReadOnly="True"
-                             Text="{x:Static resources:Localization.AuthorsText}" />
-                </TabItem>
-            </TabControl>
-            <Button Grid.Row="2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Command="{Binding CloseCommand, Mode=OneWay}">
-                <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
-            </Button>
         </Grid>
-    </Border>
+        <TabControl Grid.Row="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{x:Static resources:Localization.AboutLabel}" />
+                </TabItem.Header>
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*"
+                      RowSpacing="8">
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding SuiteName, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Copyright, Mode=OneWay}" />
+                    <Button Grid.Row="2"
+                            Background="Transparent"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Padding="0"
+                            BorderThickness="0"
+                            Command="{Binding WebsiteCommand, Mode=OneWay}">
+                        <TextBlock Text="{Binding Website, Mode=OneWay}"
+                                   Foreground="Blue"
+                                   TextDecorations="Underline" />
+                    </Button>
+                    <Button Grid.Row="3"
+                            Background="Transparent"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Padding="0"
+                            BorderThickness="0"
+                            Command="{Binding LicenseCommand, Mode=OneWay}">
+                        <TextBlock Text="{x:Static resources:Localization.LicenseLabel}"
+                                   Foreground="Blue"
+                                   TextDecorations="Underline" />
+                    </Button>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{x:Static resources:Localization.LibrariesLabel}" />
+                </TabItem.Header>
+                <DataGrid ItemsSource="{Binding Assemblies, Mode=OneWay}"
+                          HorizontalScrollBarVisibility="Visible">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{x:Static resources:Localization.AssembliesLibraryText}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Version, Mode=OneWay}"
+                                            Width="Auto"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{x:Static resources:Localization.AssembliesVersionText}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{x:Static resources:Localization.AuthorsLabel}" />
+                </TabItem.Header>
+                <TextBox IsReadOnly="True"
+                         Text="{x:Static resources:Localization.AuthorsText}" />
+            </TabItem>
+        </TabControl>
+        <Button Grid.Row="2"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Command="{Binding CloseCommand, Mode=OneWay}">
+            <TextBlock Text="{x:Static resources:Localization.CloseLabel}" />
+        </Button>
+    </Grid>
 </Window>

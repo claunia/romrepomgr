@@ -10,8 +10,7 @@
         Height="600"
         x:Class="RomRepoMgr.Views.ImportDatFolder"
         Title="{x:Static resources:Localization.ImportDatFolderTitle}"
-        Icon="/Assets/avalonia-logo.ico"
-        CanResize="False">
+        Icon="/Assets/avalonia-logo.ico">
     <Design.DataContext>
         <vm:ImportDatFolderViewModel />
     </Design.DataContext>
