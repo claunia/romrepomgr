@@ -49,7 +49,6 @@ internal static class Program
         try
         {
             Log.Information("Starting up");
-            Log.Debug("Testing debug logging");
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
