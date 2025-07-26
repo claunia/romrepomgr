@@ -9,5 +9,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components"/>
         <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons"/>
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
 </Project>

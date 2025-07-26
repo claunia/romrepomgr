@@ -1,7 +1,22 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Blazor.Components;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+#if DEBUG
+            .MinimumLevel.Debug()
+#else
+            .MinimumLevel.Information()
+#endif
+            .WriteTo.Console()
+            .Enrich.FromLogContext()
+            .CreateLogger();
+
+Log.Information("Welcome to ROM Repository Manager!");
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
