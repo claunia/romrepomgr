@@ -28,10 +28,11 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
 {
     readonly Context _ctx =
         Context.Create(Settings.Settings.Current.DatabasePath, new SerilogLoggerFactory(Log.Logger));
-    readonly ConcurrentBag<DbDisk>  _newDisks  = [];
-    readonly ConcurrentBag<DbFile>  _newFiles  = [];
-    readonly ConcurrentBag<DbMedia> _newMedias = [];
-    readonly Stopwatch              _stopwatch = new();
+    readonly Stopwatch              _mainStopwatch = new();
+    readonly ConcurrentBag<DbDisk>  _newDisks      = [];
+    readonly ConcurrentBag<DbFile>  _newFiles      = [];
+    readonly ConcurrentBag<DbMedia> _newMedias     = [];
+    readonly Stopwatch              _stopwatch     = new();
     [ObservableProperty]
     bool _canChoose;
     [ObservableProperty]
@@ -129,6 +130,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         IsImporting = true;
         IsReady = false;
         CanChoose = false;
+        _mainStopwatch.Start();
 
         _ = Task.Run(() => _rootImporter.FindFiles(FolderPath));
     }
@@ -264,6 +266,9 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         IsReady                 = false;
         IsImporting             = false;
         StatusMessage           = Localization.Finished;
+        _mainStopwatch.Stop();
+
+        Log.Debug("Took {TotalSeconds} seconds to import ROMs", _mainStopwatch.Elapsed.TotalSeconds);
     }
 
     void ProcessArchives()
