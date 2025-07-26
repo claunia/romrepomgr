@@ -108,7 +108,7 @@
                     <TextBlock Text="{x:Static resources:Localization.ChooseLabel}" />
                 </Button>
             </Grid>
-            <CheckBox Grid.Row="2"
+            <CheckBox Grid.Row="3"
                       IsChecked="{Binding UseInternalDecompressor, Mode=TwoWay}">
                 <CheckBox.Content>
                     <TextBlock Text="{x:Static resources:Localization.UseInternalDecompressorLabel}" />
