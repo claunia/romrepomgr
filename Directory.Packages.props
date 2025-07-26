@@ -46,5 +46,7 @@
     <PackageVersion Include="SharpCompress" Version="0.38.0"/>
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0"/>
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.6"/>
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.9"/>
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.9"/>
   </ItemGroup>
 </Project>
