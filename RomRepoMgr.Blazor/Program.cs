@@ -13,7 +13,9 @@ Log.Logger = new LoggerConfiguration()
             .CreateLogger();
 
 Log.Information("Welcome to ROM Repository Manager!");
+Log.Information("Copyright © 2020-2025 Natalia Portillo");
 
+Log.Debug("Creating the builder...");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
@@ -22,6 +24,7 @@ builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
+Log.Debug("Building the application...");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -38,4 +41,5 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
+Log.Debug("Running the application...");
 app.Run();
