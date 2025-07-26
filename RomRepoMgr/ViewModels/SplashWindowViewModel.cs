@@ -144,7 +144,9 @@ public sealed partial class SplashWindowViewModel : ViewModelBase
             try
             {
                 var worker = new Compression();
-                Settings.Settings.UnArUsable = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath);
+
+                Settings.Settings.CanDecompress = worker.CheckUnAr(Settings.Settings.Current.UnArchiverPath) ||
+                                                  Settings.Settings.Current.UseInternalDecompressor;
 
                 Dispatcher.UIThread.Post(LoadDatabase);
             }

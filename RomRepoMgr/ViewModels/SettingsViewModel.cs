@@ -360,7 +360,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         if(_unArChanged)
         {
             Settings.Settings.Current.UnArchiverPath = UnArPath;
-            Settings.Settings.UnArUsable             = true;
+            Settings.Settings.CanDecompress          = true;
         }
 
         if(_compressionChanged) Settings.Settings.Current.Compression = Compression;
