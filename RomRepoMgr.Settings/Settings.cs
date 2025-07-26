@@ -121,8 +121,7 @@ public static class Settings
 
                         Current.UseInternalDecompressor =
                             parsedPreferences.TryGetValue("UseInternalDecompressor", out obj) &&
-                            bool.TryParse(((NSString)obj).ToString(), out bool b)             &&
-                            b;
+                            ((NSNumber)obj).ToBool();
 
                         prefsFs.Close();
                     }
