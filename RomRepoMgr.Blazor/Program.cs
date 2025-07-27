@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Blazor;
 using RomRepoMgr.Blazor.Components;
@@ -103,10 +104,10 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Localization
-string[] supportedCultures = new[]
-{
+string[] supportedCultures =
+[
     "en", "es"
-};
+];
 
 RequestLocalizationOptions localizationOptions = new RequestLocalizationOptions().SetDefaultCulture("en")
    .AddSupportedCultures(supportedCultures)
