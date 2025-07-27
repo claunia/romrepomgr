@@ -4,6 +4,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Blazor;
 using RomRepoMgr.Blazor.Components;
 using RomRepoMgr.Database;
+using RomRepoMgr.Settings;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -68,6 +69,17 @@ builder.Services.AddDbContextFactory<Context>(options =>
     options.LogTo(Log.Information, LogLevel.Information);
 #endif
 });
+
+Log.Debug("Setting the settings...");
+
+Settings.Current = new SetSettings
+{
+    DatabasePath            = Path.Combine(Environment.CurrentDirectory, Consts.DbFolder, "database.db"),
+    TemporaryFolder         = Path.Combine(Environment.CurrentDirectory, Consts.TemporaryFolder),
+    RepositoryPath          = Path.Combine(Environment.CurrentDirectory, Consts.RepositoryFolder),
+    UseInternalDecompressor = true,
+    Compression             = CompressionType.Zstd // Todo: Read from configuration
+};
 
 Log.Debug("Building the application...");
 WebApplication app = builder.Build();
