@@ -1,35 +1,39 @@
 ﻿@page "/"
+@using Microsoft.Extensions.Localization
+@using RomRepoMgr.Blazor.Resources
 @using RomRepoMgr.Database
 @rendermode InteractiveServer
-@inject IDialogService DialogService
-@inject Context        ctx
+@inject IDialogService                 DialogService
+@inject Context                        ctx
+@inject IStringLocalizer<Localization> Localizer
+
 
 <PageTitle>ROM Repository Manager</PageTitle>
 
 <FluentToolbar>
-    <FluentButton OnClick="@ImportDatsAsync">Import DATs</FluentButton>
-    <FluentButton Disabled="true">Export DAT</FluentButton>
-    <FluentButton Disabled="true">Remove DAT</FluentButton>
-    <FluentButton OnClick="@ImportRomsAsync">Import ROMs</FluentButton>
-    <FluentButton Disabled="true">Export ROMs</FluentButton>
+    <FluentButton OnClick="@ImportDatsAsync">@Localizer["ImportDats"]</FluentButton>
+    <FluentButton Disabled="true">@Localizer["ExportDat"]</FluentButton>
+    <FluentButton Disabled="true">@Localizer["RemoveDat"]</FluentButton>
+    <FluentButton OnClick="@ImportRomsAsync">@Localizer["ImportRoms"]</FluentButton>
+    <FluentButton Disabled="true">@Localizer["ExportRoms"]</FluentButton>
 </FluentToolbar>
 
 <FluentDataGrid @ref="romSetsGrid" Items="@RomSets" Style="width: 100%;" AutoFit="true" Pagination="@pagination"
                 AutoItemsPerPage="true" ResizableColumns="true">
-    <PropertyColumn Property="@(p => p.Name)" Title="Name"/>
-    <PropertyColumn Property="@(p => p.Version)" Title="Version"/>
-    <PropertyColumn Property="@(p => p.Author)" Title="Author"/>
-    <PropertyColumn Property="@(p => p.Category)" Title="Category"/>
-    <PropertyColumn Property="@(p => p.Date)" Title="Date"/>
-    <PropertyColumn Property="@(p => p.Description)" Title="Description"/>
-    <PropertyColumn Property="@(p => p.Comment)" Title="Comment"/>
-    <PropertyColumn Property="@(p => p.Homepage)" Title="Homepage"/>
-    <PropertyColumn Property="@(p => p.TotalMachines)" Title="Total machines"/>
-    <PropertyColumn Property="@(p => p.CompleteMachines)" Title="Complete machines"/>
-    <PropertyColumn Property="@(p => p.IncompleteMachines)" Title="Incomplete machines"/>
-    <PropertyColumn Property="@(p => p.TotalRoms)" Title="Total ROMs"/>
-    <PropertyColumn Property="@(p => p.HaveRoms)" Title="Have ROMs"/>
-    <PropertyColumn Property="@(p => p.MissRoms)" Title="Miss ROMs"/>
+    <PropertyColumn Property="@(p => p.Name)" Title="@Localizer["RomSetNameLabel"]"/>
+    <PropertyColumn Property="@(p => p.Version)" Title="@Localizer["RomSetVersionLabel"]"/>
+    <PropertyColumn Property="@(p => p.Author)" Title="@Localizer["RomSetAuthorLabel"]"/>
+    <PropertyColumn Property="@(p => p.Category)" Title="@Localizer["RomSetCategoryLabel"]"/>
+    <PropertyColumn Property="@(p => p.Date)" Title="@Localizer["RomSetDateLabel"]"/>
+    <PropertyColumn Property="@(p => p.Description)" Title="@Localizer["RomSetDescriptionLabel"]"/>
+    <PropertyColumn Property="@(p => p.Comment)" Title="@Localizer["RomSetCommentLabel"]"/>
+    <PropertyColumn Property="@(p => p.Homepage)" Title="@Localizer["HomepageLabel"]"/>
+    <PropertyColumn Property="@(p => p.TotalMachines)" Title="@Localizer["RomSetTotalMachinesLabel"]"/>
+    <PropertyColumn Property="@(p => p.CompleteMachines)" Title="@Localizer["RomSetCompleteMachinesLabel"]"/>
+    <PropertyColumn Property="@(p => p.IncompleteMachines)" Title="@Localizer["RomSetIncompleteMachinesLabel"]"/>
+    <PropertyColumn Property="@(p => p.TotalRoms)" Title="@Localizer["RomSetTotalRomsLabel"]"/>
+    <PropertyColumn Property="@(p => p.HaveRoms)" Title="@Localizer["RomSetHaveRomsLabel"]"/>
+    <PropertyColumn Property="@(p => p.MissRoms)" Title="@Localizer["RomSetMissRomsLabel"]"/>
 
 </FluentDataGrid>
 

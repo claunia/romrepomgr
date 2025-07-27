@@ -12,42 +12,39 @@ namespace RomRepoMgr.Blazor.Components.Dialogs;
 
 public partial class ImportRoms : ComponentBase
 {
-    readonly ConcurrentBag<DbDisk>  _newDisks  = [];
-    readonly ConcurrentBag<DbFile>  _newFiles  = [];
-    readonly ConcurrentBag<DbMedia> _newMedias = [];
+    readonly Stopwatch              _mainStopwatch = new();
+    readonly ConcurrentBag<DbDisk>  _newDisks      = [];
+    readonly ConcurrentBag<DbFile>  _newFiles      = [];
+    readonly ConcurrentBag<DbMedia> _newMedias     = [];
+    readonly Stopwatch              _stopwatch     = new();
     int                             _listPosition;
-
-    readonly Stopwatch _mainStopwatch = new();
-    FileImporter       _rootImporter;
-    readonly Stopwatch _stopwatch = new();
-    PaginationState?   pagination;
+    FileImporter                    _rootImporter;
+    PaginationState?                pagination;
     [CascadingParameter]
-    public FluentDialog Dialog { get;                        set; }
-    public bool                IsBusy                 { get; set; }
-    public bool                NotYetStarted          { get; set; }
-    public bool                RemoveFilesChecked     { get; set; }
-    public bool                KnownOnlyChecked       { get; set; }
-    public bool                RecurseArchivesChecked { get; set; }
-    public Color?              StatusMessageColor     { get; set; }
-    public string?             StatusMessage          { get; set; }
-    public int?                ProgressMax            { get; set; }
-    public int?                ProgressMin            { get; set; }
-    public int?                ProgressValue          { get; set; }
-    public string?             StatusMessage2         { get; set; }
-    public int?                Progress2Max           { get; set; }
-    public int?                Progress2Min           { get; set; }
-    public int?                Progress2Value         { get; set; }
-    public IQueryable<object>? Importers              { get; set; }
-    public string?             FolderPath             { get; set; }
-    public bool                Importing              { get; set; }
-    public bool                Progress2Visible       { get; set; }
-    public bool                DataGridVisible        { get; set; }
-    public bool                CannotClose            { get; set; }
+    public FluentDialog Dialog { get;            set; }
+    public bool    IsBusy                 { get; set; }
+    public bool    NotYetStarted          { get; set; }
+    public bool    RemoveFilesChecked     { get; set; }
+    public bool    KnownOnlyChecked       { get; set; }
+    public bool    RecurseArchivesChecked { get; set; }
+    public Color?  StatusMessageColor     { get; set; }
+    public string? StatusMessage          { get; set; }
+    public int?    ProgressMax            { get; set; }
+    public int?    ProgressMin            { get; set; }
+    public int?    ProgressValue          { get; set; }
+    public string? StatusMessage2         { get; set; }
+    public int?    Progress2Max           { get; set; }
+    public int?    Progress2Min           { get; set; }
+    public int?    Progress2Value         { get; set; }
+    public string? FolderPath             { get; set; }
+    public bool    Importing              { get; set; }
+    public bool    Progress2Visible       { get; set; }
+    public bool    DataGridVisible        { get; set; }
+    public bool    CannotClose            { get; set; }
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
         FolderPath             = Path.Combine(Environment.CurrentDirectory, Consts.IncomingRomsFolder);
         IsBusy                 = false;
         NotYetStarted          = true;
@@ -209,7 +206,7 @@ public partial class ImportRoms : ComponentBase
                          {
                              _ = InvokeAsync(() =>
                              {
-                                 StatusMessage = string.Format("Importing {0}...", Path.GetFileName(file));
+                                 StatusMessage = string.Format(Localizer["ImportingItem"], Path.GetFileName(file));
                                  ProgressValue = _listPosition;
 
                                  StateHasChanged();
@@ -242,7 +239,7 @@ public partial class ImportRoms : ComponentBase
             CannotClose   = false;
             IsBusy        = false;
             Importing     = false;
-            StatusMessage = "Finished";
+            StatusMessage = Localizer["Finished"];
 
             StateHasChanged();
         });
@@ -291,7 +288,8 @@ public partial class ImportRoms : ComponentBase
                          {
                              _ = InvokeAsync(() =>
                              {
-                                 StatusMessage = string.Format("Processing archive: {0}", Path.GetFileName(archive));
+                                 StatusMessage =
+                                     string.Format(Localizer["ProcessingArchive"], Path.GetFileName(archive));
 
                                  ProgressValue = _listPosition;
 

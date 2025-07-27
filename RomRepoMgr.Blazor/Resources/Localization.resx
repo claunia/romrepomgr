@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="ROMs_will_be_imported_from" xml:space="preserve">
+        <value>ROM files will be imported from {0}.</value>
+    </data>
+    <data name="RemoveFilesLabel" xml:space="preserve">
+        <value>Remove files after import successful.</value>
+    </data>
+    <data name="KnownOnlyLabel" xml:space="preserve">
+        <value>Only import known files.</value>
+    </data>
+    <data name="RecurseArchivesLabel" xml:space="preserve">
+        <value>Try to detect archives and import their contents.</value>
+    </data>
+    <data name="Start" xml:space="preserve">
+        <value>Start</value>
+    </data>
+    <data name="Close" xml:space="preserve">
+        <value>Close</value>
+    </data>
+    <data name="ImportingItem" xml:space="preserve">
+        <value>Importing {0}...</value>
+    </data>
+    <data name="ProcessingArchive" xml:space="preserve">
+        <value>Processing archive: {0}</value>
+    </data>
+    <data name="Finished" xml:space="preserve">
+        <value>Finished</value>
+    </data>
+    <data name="DATs_will_be_imported_from" xml:space="preserve">
+        <value>DAT files will be imported from {0}.</value>
+    </data>
+    <data name="SearchingForFiles" xml:space="preserve">
+        <value>Searching for files...</value>
+    </data>
+    <data name="RomSetNameLabel" xml:space="preserve">
+        <value>Name</value>
+    </data>
+    <data name="RomSetVersionLabel" xml:space="preserve">
+        <value>Version</value>
+    </data>
+    <data name="RomSetAuthorLabel" xml:space="preserve">
+        <value>Author</value>
+    </data>
+    <data name="RomSetCategoryLabel" xml:space="preserve">
+        <value>Category</value>
+    </data>
+    <data name="RomSetDateLabel" xml:space="preserve">
+        <value>Date</value>
+    </data>
+    <data name="RomSetDescriptionLabel" xml:space="preserve">
+        <value>Description</value>
+    </data>
+    <data name="RomSetCommentLabel" xml:space="preserve">
+        <value>Comment</value>
+    </data>
+    <data name="HomepageLabel" xml:space="preserve">
+        <value>Homepage</value>
+    </data>
+    <data name="RomSetTotalMachinesLabel" xml:space="preserve">
+        <value>Games</value>
+    </data>
+    <data name="RomSetCompleteMachinesLabel" xml:space="preserve">
+        <value>Complete</value>
+    </data>
+    <data name="RomSetIncompleteMachinesLabel" xml:space="preserve">
+        <value>Incomplete</value>
+    </data>
+    <data name="RomSetTotalRomsLabel" xml:space="preserve">
+        <value>ROMs</value>
+    </data>
+    <data name="RomSetHaveRomsLabel" xml:space="preserve">
+        <value>Have</value>
+    </data>
+    <data name="RomSetMissRomsLabel" xml:space="preserve">
+        <value>Miss</value>
+    </data>
+    <data name="ImportDats" xml:space="preserve">
+        <value>Import DATs</value>
+    </data>
+    <data name="ImportRoms" xml:space="preserve">
+        <value>Import ROMs</value>
+    </data>
+    <data name="ExportDat" xml:space="preserve">
+        <value>Export DAT</value>
+    </data>
+    <data name="RemoveDat" xml:space="preserve">
+        <value>Remove DAT</value>
+    </data>
+    <data name="ExportRoms" xml:space="preserve">
+        <value>Export ROMs</value>
+    </data>
+</root>

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Blazor;
 using RomRepoMgr.Blazor.Components;
@@ -57,6 +56,9 @@ builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
+// Localization
+builder.Services.AddLocalization();
+
 Log.Debug("Creating database context...");
 
 builder.Services.AddDbContextFactory<Context>(options =>
@@ -99,6 +101,18 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
+// Localization
+string[] supportedCultures = new[]
+{
+    "en", "es"
+};
+
+RequestLocalizationOptions localizationOptions = new RequestLocalizationOptions().SetDefaultCulture("en")
+   .AddSupportedCultures(supportedCultures)
+   .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
 
 Stopwatch stopwatch = new();
 

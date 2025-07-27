@@ -1,19 +1,22 @@
+@using Microsoft.Extensions.Localization
+@using RomRepoMgr.Blazor.Resources
 @using RomRepoMgr.Database
 @implements IDialogContentComponent
-@inject ILogger<ImportRoms> Logger
-@inject Context             _ctx
+@inject ILogger<ImportRoms>            Logger
+@inject Context                        _ctx
+@inject IStringLocalizer<Localization> Localizer
 
 <FluentDialog Width="1600px" Height="800px" Title="Import DATs" Modal="true" TrapFocus="true">
     <FluentDialogBody>
-        <p hidden="@IsBusy">ROM files will be imported from @FolderPath.</p>
+        <p hidden="@IsBusy">@string.Format(Localizer["ROMs_will_be_imported_from"], FolderPath)</p>
         @if(NotYetStarted)
         {
-            <FluentCheckbox @bind-Value="@RemoveFilesChecked" Label="Remove files after import successful."/>
+            <FluentCheckbox @bind-Value="@RemoveFilesChecked" Label="@Localizer["RemoveFilesLabel"]"/>
 
-            <FluentCheckbox @bind-Value="@KnownOnlyChecked" Label="Only import known files."/>
+            <FluentCheckbox @bind-Value="@KnownOnlyChecked" Label="@Localizer["KnownOnlyLabel"]"/>
 
             <FluentCheckbox @bind-Value="@RecurseArchivesChecked"
-                            Label="Try to detect archives and import their contents."/>
+                            Label=@Localizer["RecurseArchivesLabel"]/>
         }
         @if(Importing)
         {
@@ -32,8 +35,8 @@
     </FluentDialogBody>
     <FluentDialogFooter>
         <FluentStack Orientation="Orientation.Horizontal">
-            <FluentButton OnClick="@Start" Disabled="@IsBusy">Start</FluentButton>
-            <FluentButton OnClick="@CloseAsync" Disabled="@CannotClose">Close</FluentButton>
+            <FluentButton OnClick="@Start" Disabled="@IsBusy">@Localizer["Start"]</FluentButton>
+            <FluentButton OnClick="@CloseAsync" Disabled="@CannotClose">@Localizer["Close"]</FluentButton>
         </FluentStack>
     </FluentDialogFooter>
 </FluentDialog>

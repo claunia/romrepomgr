@@ -52,7 +52,7 @@ public partial class ImportDats : ComponentBase
         CannotClose     = true;
         ProgressVisible = true;
         ProgressValue   = null;
-        StatusMessage   = "Searching for files...";
+        StatusMessage   = Localizer["SearchingForFiles"];
 
         _stopwatch.Restart();
         string[] dats = Directory.GetFiles(path, "*.dat", SearchOption.AllDirectories);
@@ -66,7 +66,7 @@ public partial class ImportDats : ComponentBase
                         _stopwatch.Elapsed.TotalSeconds,
                         _datFiles.Length);
 
-        StatusMessage = string.Format("Found {0} files...", _datFiles.Length);
+        StatusMessage = string.Format(Localizer["FoundFiles"], _datFiles.Length);
 
         ProgressMin      = 0;
         ProgressMax      = _datFiles.Length;
@@ -89,7 +89,7 @@ public partial class ImportDats : ComponentBase
             {
                 ProgressVisible  = false;
                 Progress2Visible = false;
-                StatusMessage    = "Finished";
+                StatusMessage    = Localizer["Finished"];
                 CannotClose      = false;
 
                 StateHasChanged();
@@ -107,7 +107,7 @@ public partial class ImportDats : ComponentBase
 
         _ = InvokeAsync(() =>
         {
-            StatusMessage = string.Format("Importing {0}...", Path.GetFileName(_datFiles[_listPosition]));
+            StatusMessage = string.Format(Localizer["ImportingItem"], Path.GetFileName(_datFiles[_listPosition]));
             ProgressValue = _listPosition;
 
             StateHasChanged();
