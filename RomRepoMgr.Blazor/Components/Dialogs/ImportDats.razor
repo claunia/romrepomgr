@@ -3,13 +3,22 @@
 
 <FluentDialog Width="800px" Height="400px" Title="Import DATs" Modal="true" TrapFocus="true">
     <FluentDialogBody>
-        <p hidden="@IsBusy">DAT files will be imported from @path.</p>
-        <FluentLabel Color="@StatusColor">@StatusMessage</FluentLabel>
-        <FluentProgress Max="@ProgressMax" Min="@ProgressMin" Value="@ProgressValue" Visible="@ProgressVisible"/>
+        <div>
+            <p hidden="@IsBusy">DAT files will be imported from @path.</p>
+            <FluentLabel Color="@StatusColor">@StatusMessage</FluentLabel>
+            <FluentProgress Max="@ProgressMax" Min="@ProgressMin" Value="@ProgressValue" Visible="@ProgressVisible"/>
+        </div>
+        @if(Progress2Visible)
+        {
+            <div>
+                <p>@StatusMessage2</p>
+                <FluentProgress Max="@Progress2Max" Min="@Progress2Min" Value="@Progress2Value"/>
+            </div>
+        }
     </FluentDialogBody>
     <FluentDialogFooter>
         <FluentStack Orientation="Orientation.Horizontal">
-            <FluentButton OnClick="@StartAsync" Disabled="@IsBusy">Start</FluentButton>
+            <FluentButton OnClick="@Start" Disabled="@IsBusy">Start</FluentButton>
             <FluentButton OnClick="@CloseAsync" Disabled="@CannotClose">Close</FluentButton>
         </FluentStack>
     </FluentDialogFooter>
