@@ -1,0 +1,39 @@
+@using RomRepoMgr.Database
+@implements IDialogContentComponent
+@inject ILogger<ImportRoms> Logger
+@inject Context             _ctx
+
+<FluentDialog Width="1600px" Height="800px" Title="Import DATs" Modal="true" TrapFocus="true">
+    <FluentDialogBody>
+        <p hidden="@IsBusy">ROM files will be imported from @FolderPath.</p>
+        @if(NotYetStarted)
+        {
+            <FluentCheckbox @bind-Value="@RemoveFilesChecked" Label="Remove files after import successful."/>
+
+            <FluentCheckbox @bind-Value="@KnownOnlyChecked" Label="Only import known files."/>
+
+            <FluentCheckbox @bind-Value="@RecurseArchivesChecked"
+                            Label="Try to detect archives and import their contents."/>
+        }
+        @if(Importing)
+        {
+            <div>
+                <FluentLabel Color="@StatusMessageColor">@StatusMessage</FluentLabel>
+                <FluentProgress Max="@ProgressMax" Min="@ProgressMin" Value="@ProgressValue"/>
+            </div>
+        }
+        @if(Progress2Visible)
+        {
+            <div>
+                <FluentLabel>@StatusMessage2</FluentLabel>
+                <FluentProgress Max="@Progress2Max" Min="@Progress2Min" Value="@Progress2Value"/>
+            </div>
+        }
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <FluentStack Orientation="Orientation.Horizontal">
+            <FluentButton OnClick="@Start" Disabled="@IsBusy">Start</FluentButton>
+            <FluentButton OnClick="@CloseAsync" Disabled="@CannotClose">Close</FluentButton>
+        </FluentStack>
+    </FluentDialogFooter>
+</FluentDialog>

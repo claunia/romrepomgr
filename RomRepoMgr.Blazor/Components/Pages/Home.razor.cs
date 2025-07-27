@@ -20,6 +20,11 @@ public partial class Home : ComponentBase
         IDialogReference dialog = await DialogService.ShowDialogAsync<ImportDats>(new DialogParameters());
     }
 
+    async Task ImportRomsAsync()
+    {
+        IDialogReference dialog = await DialogService.ShowDialogAsync<ImportRoms>(new DialogParameters());
+    }
+
     /// <inheritdoc />
     protected override void OnInitialized()
     {
