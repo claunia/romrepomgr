@@ -75,7 +75,7 @@ public sealed class SpamSumContext : IChecksum
             Bh = new BlockhashContext[NUM_BLOCKHASHES]
         };
 
-        for(var i = 0; i < NUM_BLOCKHASHES; i++) _self.Bh[i].Digest = new byte[SPAMSUM_LENGTH];
+        for(int i = 0; i < NUM_BLOCKHASHES; i++) _self.Bh[i].Digest = new byte[SPAMSUM_LENGTH];
 
         _self.Bhstart          = 0;
         _self.Bhend            = 1;
@@ -240,7 +240,7 @@ public sealed class SpamSumContext : IChecksum
         var  sb     = new StringBuilder();
         uint bi     = _self.Bhstart;
         uint h      = roll_sum();
-        var  remain = (int)(FUZZY_MAX_RESULT - 1); /* Exclude terminating '\0'. */
+        int  remain = (int)(FUZZY_MAX_RESULT - 1); /* Exclude terminating '\0'. */
         result = new byte[FUZZY_MAX_RESULT];
 
         /* Verify that our elimination was not overeager. */
@@ -423,7 +423,7 @@ public sealed class SpamSumContext : IChecksum
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static string CToString(byte[] cString)
     {
-        var count = 0;
+        int count = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
         // LINQ is six times slower
@@ -506,7 +506,7 @@ public sealed class SpamSumContext : IChecksum
     {
         _self.TotalSize += len;
 
-        for(var i = 0; i < len; i++) fuzzy_engine_step(data[i]);
+        for(int i = 0; i < len; i++) fuzzy_engine_step(data[i]);
     }
 
     /// <inheritdoc />

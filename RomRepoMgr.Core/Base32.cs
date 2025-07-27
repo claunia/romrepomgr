@@ -38,17 +38,17 @@ public static class Base32
         var builder = new StringBuilder(bytes.Length * _inByteSize / _outByteSize);
 
         // Position in the input buffer
-        var bytesPosition = 0;
+        int bytesPosition = 0;
 
         // Offset inside a single byte that <bytesPosition> points to (from left to right)
         // 0 - highest bit, 7 - lowest bit
-        var bytesSubPosition = 0;
+        int bytesSubPosition = 0;
 
         // Byte to look up in the dictionary
         byte outputBase32Byte = 0;
 
         // The number of bits filled in the current output byte
-        var outputBase32BytePosition = 0;
+        int outputBase32BytePosition = 0;
 
         // Iterate through input buffer until we reach past the end of it
         while(bytesPosition < bytes.Length)
@@ -119,22 +119,22 @@ public static class Base32
         string base32StringUpperCase = base32String.ToUpperInvariant();
 
         // Prepare output byte array
-        var outputBytes = new byte[base32StringUpperCase.Length * _outByteSize / _inByteSize];
+        byte[] outputBytes = new byte[base32StringUpperCase.Length * _outByteSize / _inByteSize];
 
         // Check the size
         if(outputBytes.Length == 0) throw new ArgumentException(Localization.Base32_Not_enought_data);
 
         // Position in the string
-        var base32Position = 0;
+        int base32Position = 0;
 
         // Offset inside the character in the string
-        var base32SubPosition = 0;
+        int base32SubPosition = 0;
 
         // Position within outputBytes array
-        var outputBytePosition = 0;
+        int outputBytePosition = 0;
 
         // The number of bits filled in the current output byte
-        var outputByteSubPosition = 0;
+        int outputByteSubPosition = 0;
 
         // Normally we would iterate on the input array but in this case we actually iterate on the output array
         // We do it because output array doesn't have overflow bits, while input does and it will cause output array overflow if we don''t stop in time

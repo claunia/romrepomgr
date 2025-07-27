@@ -509,7 +509,7 @@ public sealed class Fuse : FileSystem
         {
             xattr = new byte[hash.Length / 2];
 
-            for(var i = 0; i < xattr.Length; i++)
+            for(int i = 0; i < xattr.Length; i++)
             {
                 if(hash[i * 2] >= 0x30 && hash[i * 2] <= 0x39)
                     xattr[i] = (byte)((hash[i * 2] - 0x30) * 0x10);
@@ -823,8 +823,8 @@ public sealed class Fuse : FileSystem
 
     public void Umount()
     {
-        var rnd   = new Random();
-        var token = new byte[64];
+        var    rnd   = new Random();
+        byte[] token = new byte[64];
         rnd.NextBytes(token);
         _umountToken = Base32.ToBase32String(token);
         setxattr(Path.Combine(MountPoint, ".fuse_umount"), _umountToken, IntPtr.Zero, 0, 0);

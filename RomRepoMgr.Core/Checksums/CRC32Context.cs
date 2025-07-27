@@ -379,15 +379,15 @@ public sealed partial class Crc32Context : IChecksum
 
     static uint[][] GenerateTable(uint polynomial)
     {
-        var table = new uint[8][];
+        uint[][] table = new uint[8][];
 
-        for(var i = 0; i < 8; i++) table[i] = new uint[256];
+        for(int i = 0; i < 8; i++) table[i] = new uint[256];
 
-        for(var i = 0; i < 256; i++)
+        for(int i = 0; i < 256; i++)
         {
-            var entry = (uint)i;
+            uint entry = (uint)i;
 
-            for(var j = 0; j < 8; j++)
+            for(int j = 0; j < 8; j++)
             {
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ polynomial;
@@ -398,9 +398,9 @@ public sealed partial class Crc32Context : IChecksum
             table[0][i] = entry;
         }
 
-        for(var slice = 1; slice < 8; slice++)
+        for(int slice = 1; slice < 8; slice++)
         {
-            for(var i = 0; i < 256; i++)
+            for(int i = 0; i < 256; i++)
                 table[slice][i] = table[slice - 1][i] >> 8 ^ table[0][table[slice - 1][i] & 0xFF];
         }
 
@@ -417,7 +417,7 @@ public sealed partial class Crc32Context : IChecksum
             return;
         }
 
-        var currentPos = 0;
+        int currentPos = 0;
 
         if(useIso)
         {
@@ -467,7 +467,7 @@ public sealed partial class Crc32Context : IChecksum
             {
                 uint one = BitConverter.ToUInt32(data, currentPos) ^ crc;
                 currentPos += 4;
-                var two = BitConverter.ToUInt32(data, currentPos);
+                uint two = BitConverter.ToUInt32(data, currentPos);
                 currentPos += 4;
 
                 crc = table[0][two >> 24 & 0xFF] ^
@@ -528,8 +528,8 @@ public sealed partial class Crc32Context : IChecksum
 
         uint[][] localTable = GenerateTable(polynomial);
 
-        var buffer = new byte[65536];
-        int read   = fileStream.EnsureRead(buffer, 0, 65536);
+        byte[] buffer = new byte[65536];
+        int    read   = fileStream.EnsureRead(buffer, 0, 65536);
 
         while(read > 0)
         {
@@ -661,7 +661,7 @@ public sealed partial class Crc32Context : IChecksum
             crc32_free(_nativeContext);
         }
 
-        for(var i = 0; i < BigEndianBitConverter.GetBytes(crc).Length; i++)
+        for(int i = 0; i < BigEndianBitConverter.GetBytes(crc).Length; i++)
             crc32Output.Append(BigEndianBitConverter.GetBytes(crc)[i].ToString("x2"));
 
         return crc32Output.ToString();

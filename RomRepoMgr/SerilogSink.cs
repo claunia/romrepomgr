@@ -14,23 +14,27 @@ public class SerilogSink(LogEventLevel minimumLevel, IList<string>? areas = null
     public void Log(LogEventLevel level, string area, object? source, string messageTemplate)
     {
         if(IsEnabled(level, area))
+        {
             Serilog.Log.Write(LogLevelToSerilogLevel(level),
                               "[{Area} {Source}] {MessageTemplate}",
                               area,
                               source,
                               messageTemplate);
+        }
     }
 
     public void Log(LogEventLevel    level, string area, object? source, string messageTemplate,
                     params object?[] propertyValues)
     {
         if(IsEnabled(level, area))
+        {
             Serilog.Log.Write(LogLevelToSerilogLevel(level),
                               "[{Area} {Source}] {MessageTemplate}",
                               propertyValues,
                               area,
                               source,
                               messageTemplate);
+        }
     }
 
     private static Serilog.Events.LogEventLevel LogLevelToSerilogLevel(LogEventLevel level)

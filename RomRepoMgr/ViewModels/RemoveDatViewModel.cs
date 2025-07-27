@@ -76,10 +76,10 @@ public sealed partial class RemoveDatViewModel : ViewModelBase
 
             Dispatcher.UIThread.Post(() => StatusMessage = Localization.RemovingDatFileFromRepo);
 
-            var    sha384Bytes = new byte[48];
+            byte[] sha384Bytes = new byte[48];
             string sha384      = romSet.Sha384;
 
-            for(var i = 0; i < 48; i++)
+            for(int i = 0; i < 48; i++)
             {
                 if(sha384[i * 2] >= 0x30 && sha384[i * 2] <= 0x39)
                     sha384Bytes[i] = (byte)((sha384[i * 2] - 0x30) * 0x10);

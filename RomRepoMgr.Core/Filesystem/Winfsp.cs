@@ -369,7 +369,7 @@ public class Winfsp(Vfs vfs) : FileSystemBase
 
         if(fileNode is not FileNode { Handle: > 0 } node) return STATUS_INVALID_HANDLE;
 
-        var buf = new byte[length];
+        byte[] buf = new byte[length];
 
         int ret = vfs.Read(node.Handle, buf, (long)offset);
 
@@ -575,10 +575,10 @@ public class Winfsp(Vfs vfs) : FileSystemBase
 
             if(securityDescriptor == null) return STATUS_SUCCESS;
 
-            var rootSddl = "O:BAG:BAD:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;WD)";
+            string rootSddl = "O:BAG:BAD:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;WD)";
 
-            var rootSecurityDescriptor = new RawSecurityDescriptor(rootSddl);
-            var fileSecurity           = new byte[rootSecurityDescriptor.BinaryLength];
+            var    rootSecurityDescriptor = new RawSecurityDescriptor(rootSddl);
+            byte[] fileSecurity           = new byte[rootSecurityDescriptor.BinaryLength];
             rootSecurityDescriptor.GetBinaryForm(fileSecurity, 0);
             securityDescriptor = fileSecurity;
 

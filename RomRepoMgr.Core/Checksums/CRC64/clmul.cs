@@ -72,7 +72,7 @@ static class Clmul
 
     internal static ulong Step(ulong crc, byte[] data, uint length)
     {
-        var         bufPos         = 16;
+        int         bufPos         = 16;
         const ulong k1             = 0xe05dd497ca393ae4;
         const ulong k2             = 0xdabe95afc7875f40;
         const ulong mu             = 0x9c3e466c172963d5;

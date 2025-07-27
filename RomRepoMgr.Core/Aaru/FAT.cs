@@ -74,14 +74,14 @@ public static class FAT
         byte   bpbSignature;
         byte   fat32Signature;
         ulong  hugeSectors;
-        var    fat32Id  = new byte[8];
-        var    msxId    = new byte[6];
-        var    dosOem   = new byte[8];
-        var    atariOem = new byte[6];
+        byte[] fat32Id  = new byte[8];
+        byte[] msxId    = new byte[6];
+        byte[] dosOem   = new byte[8];
+        byte[] atariOem = new byte[6];
         ushort bootable = 0;
 
-        var bpbSector = new byte[512];
-        var fatSector = new byte[512];
+        byte[] bpbSector = new byte[512];
+        byte[] fatSector = new byte[512];
         imageStream.Position = 0;
         imageStream.EnsureRead(bpbSector, 0, 512);
         imageStream.EnsureRead(fatSector, 0, 512);
@@ -111,13 +111,13 @@ public static class FAT
 
         string oemString = Encoding.ASCII.GetString(dosOem);
 
-        var  apricotBps          = BitConverter.ToUInt16(bpbSector, 0x50);
-        byte apricotSpc          = bpbSector[0x52];
-        var  apricotReservedSecs = BitConverter.ToUInt16(bpbSector, 0x53);
-        byte apricotFatsNo       = bpbSector[0x55];
-        var  apricotRootEntries  = BitConverter.ToUInt16(bpbSector, 0x56);
-        var  apricotSectors      = BitConverter.ToUInt16(bpbSector, 0x58);
-        var  apricotFatSectors   = BitConverter.ToUInt16(bpbSector, 0x5B);
+        ushort apricotBps          = BitConverter.ToUInt16(bpbSector, 0x50);
+        byte   apricotSpc          = bpbSector[0x52];
+        ushort apricotReservedSecs = BitConverter.ToUInt16(bpbSector, 0x53);
+        byte   apricotFatsNo       = bpbSector[0x55];
+        ushort apricotRootEntries  = BitConverter.ToUInt16(bpbSector, 0x56);
+        ushort apricotSectors      = BitConverter.ToUInt16(bpbSector, 0x58);
+        ushort apricotFatSectors   = BitConverter.ToUInt16(bpbSector, 0x5B);
 
         bool apricotCorrectSpc = apricotSpc is 1 or 2 or 4 or 8 or 16 or 32 or 64;
 
@@ -197,12 +197,12 @@ public static class FAT
         byte z80Di = bpbSector[0];
 
         // First FAT1 sector resides at LBA 0x14
-        var fat1Sector0 = new byte[512];
+        byte[] fat1Sector0 = new byte[512];
         imageStream.Position = 0x14 * 512;
         imageStream.EnsureRead(fat1Sector0, 0, 512);
 
         // First FAT2 sector resides at LBA 0x1A
-        var fat2Sector0 = new byte[512];
+        byte[] fat2Sector0 = new byte[512];
         imageStream.Position = 0x1A * 512;
         imageStream.EnsureRead(fat2Sector0, 0, 512);
         bool equalFatIds = fat1Sector0[0] == fat2Sector0[0] && fat1Sector0[1] == fat2Sector0[1];
@@ -210,7 +210,7 @@ public static class FAT
         // Volume is software interleaved 2:1
         var rootMs = new MemoryStream();
 
-        var tmp = new byte[512];
+        byte[] tmp = new byte[512];
 
         foreach(long position in new long[]
                 {
@@ -223,12 +223,12 @@ public static class FAT
         }
 
         byte[] rootDir      = rootMs.ToArray();
-        var    validRootDir = true;
+        bool   validRootDir = true;
 
         // Iterate all root directory
-        for(var e = 0; e < 96 * 32; e += 32)
+        for(int e = 0; e < 96 * 32; e += 32)
         {
-            for(var c = 0; c < 11; c++)
+            for(int c = 0; c < 11; c++)
             {
                 if((rootDir[c + e] >= 0x20 || rootDir[c + e] == 0x00 || rootDir[c + e] == 0x05) &&
                    rootDir[c + e] != 0xFF                                                       &&

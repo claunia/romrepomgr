@@ -95,9 +95,9 @@ public sealed partial class ExportDatViewModel : ViewModelBase
         ProgressVisible = true;
         StatusMessage   = Localization.DecompressingDat;
 
-        var sha384Bytes = new byte[48];
+        byte[] sha384Bytes = new byte[48];
 
-        for(var i = 0; i < 48; i++)
+        for(int i = 0; i < 48; i++)
         {
             if(_datHash[i * 2] >= 0x30 && _datHash[i * 2] <= 0x39)
                 sha384Bytes[i] = (byte)((_datHash[i * 2] - 0x30) * 0x10);

@@ -324,15 +324,15 @@ public sealed partial class Crc64Context : IChecksum
 
     static ulong[][] GenerateTable(ulong polynomial)
     {
-        var table = new ulong[8][];
+        ulong[][] table = new ulong[8][];
 
-        for(var i = 0; i < 8; i++) table[i] = new ulong[256];
+        for(int i = 0; i < 8; i++) table[i] = new ulong[256];
 
-        for(var i = 0; i < 256; i++)
+        for(int i = 0; i < 256; i++)
         {
-            var entry = (ulong)i;
+            ulong entry = (ulong)i;
 
-            for(var j = 0; j < 8; j++)
+            for(int j = 0; j < 8; j++)
             {
                 if((entry & 1) == 1)
                     entry = entry >> 1 ^ polynomial;
@@ -343,9 +343,9 @@ public sealed partial class Crc64Context : IChecksum
             table[0][i] = entry;
         }
 
-        for(var slice = 1; slice < 4; slice++)
+        for(int slice = 1; slice < 4; slice++)
         {
-            for(var i = 0; i < 256; i++)
+            for(int i = 0; i < 256; i++)
                 table[slice][i] = table[slice - 1][i] >> 8 ^ table[0][table[slice - 1][i] & 0xFF];
         }
 
@@ -362,7 +362,7 @@ public sealed partial class Crc64Context : IChecksum
             return;
         }
 
-        var dataOff = 0;
+        int dataOff = 0;
 
         if(useEcma && Pclmulqdq.IsSupported && Sse41.IsSupported && Ssse3.IsSupported && Sse2.IsSupported)
         {
@@ -393,7 +393,7 @@ public sealed partial class Crc64Context : IChecksum
 
             while(dataOff < limit)
             {
-                var tmp = (uint)(crc ^ BitConverter.ToUInt32(data, dataOff));
+                uint tmp = (uint)(crc ^ BitConverter.ToUInt32(data, dataOff));
                 dataOff += 4;
 
                 crc = table[3][tmp      & 0xFF]  ^
@@ -449,8 +449,8 @@ public sealed partial class Crc64Context : IChecksum
 
         ulong[][] localTable = GenerateTable(polynomial);
 
-        var buffer = new byte[65536];
-        int read   = fileStream.EnsureRead(buffer, 0, 65536);
+        byte[] buffer = new byte[65536];
+        int    read   = fileStream.EnsureRead(buffer, 0, 65536);
 
         while(read > 0)
         {
@@ -582,7 +582,7 @@ public sealed partial class Crc64Context : IChecksum
             crc64_free(_nativeContext);
         }
 
-        for(var i = 0; i < BigEndianBitConverter.GetBytes(crc).Length; i++)
+        for(int i = 0; i < BigEndianBitConverter.GetBytes(crc).Length; i++)
             crc64Output.Append(BigEndianBitConverter.GetBytes(crc)[i].ToString("x2"));
 
         return crc64Output.ToString();

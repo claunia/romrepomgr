@@ -110,9 +110,9 @@ static class Clmul
         Vector128<uint> xmmCRC1    = Vector128<uint>.Zero;
         Vector128<uint> xmmCRC2    = Vector128<uint>.Zero;
         Vector128<uint> xmmCRC3    = Vector128<uint>.Zero;
-        var             bufPos     = 0;
+        int             bufPos     = 0;
 
-        var first = true;
+        bool first = true;
 
         /* fold 512 to 32 step variable declarations for ISO-C90 compat. */
         var xmmMask  = Vector128.Create(0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000);
