@@ -1,6 +1,8 @@
 ﻿@page "/"
+@using RomRepoMgr.Database
 @rendermode InteractiveServer
 @inject IDialogService DialogService
+@inject Context        ctx
 
 <PageTitle>ROM Repository Manager</PageTitle>
 
@@ -11,3 +13,24 @@
     <FluentButton Disabled="true">Import ROMs</FluentButton>
     <FluentButton Disabled="true">Export ROMs</FluentButton>
 </FluentToolbar>
+
+<FluentDataGrid @ref="romSetsGrid" Items="@RomSets" Style="width: 100%;" AutoFit="true" Pagination="@pagination"
+                AutoItemsPerPage="true" ResizableColumns="true">
+    <PropertyColumn Property="@(p => p.Name)" Title="Name"/>
+    <PropertyColumn Property="@(p => p.Version)" Title="Version"/>
+    <PropertyColumn Property="@(p => p.Author)" Title="Author"/>
+    <PropertyColumn Property="@(p => p.Category)" Title="Category"/>
+    <PropertyColumn Property="@(p => p.Date)" Title="Date"/>
+    <PropertyColumn Property="@(p => p.Description)" Title="Description"/>
+    <PropertyColumn Property="@(p => p.Comment)" Title="Comment"/>
+    <PropertyColumn Property="@(p => p.Homepage)" Title="Homepage"/>
+    <PropertyColumn Property="@(p => p.TotalMachines)" Title="Total machines"/>
+    <PropertyColumn Property="@(p => p.CompleteMachines)" Title="Complete machines"/>
+    <PropertyColumn Property="@(p => p.IncompleteMachines)" Title="Incomplete machines"/>
+    <PropertyColumn Property="@(p => p.TotalRoms)" Title="Total ROMs"/>
+    <PropertyColumn Property="@(p => p.HaveRoms)" Title="Have ROMs"/>
+    <PropertyColumn Property="@(p => p.MissRoms)" Title="Miss ROMs"/>
+
+</FluentDataGrid>
+
+<FluentPaginator State="@pagination"/>

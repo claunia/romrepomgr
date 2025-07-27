@@ -70,6 +70,8 @@ builder.Services.AddDbContextFactory<Context>(options =>
 #endif
 });
 
+builder.Services.AddDataGridEntityFrameworkAdapter();
+
 Log.Debug("Setting the settings...");
 
 Settings.Current = new SetSettings
