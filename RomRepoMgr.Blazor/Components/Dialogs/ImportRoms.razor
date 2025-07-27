@@ -1,10 +1,10 @@
-@using Microsoft.Extensions.Localization
 @using RomRepoMgr.Blazor.Resources
 @using RomRepoMgr.Database
 @implements IDialogContentComponent
 @inject ILogger<ImportRoms>            Logger
 @inject Context                        _ctx
 @inject IStringLocalizer<Localization> Localizer
+@inject IConfiguration                 Configuration
 
 <FluentDialog Width="1600px" Height="800px" Title="Import DATs" Modal="true" TrapFocus="true">
     <FluentDialogBody>

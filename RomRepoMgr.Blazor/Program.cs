@@ -1,12 +1,40 @@
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.FluentUI.AspNetCore.Components;
-using RomRepoMgr.Blazor;
 using RomRepoMgr.Blazor.Components;
 using RomRepoMgr.Database;
 using RomRepoMgr.Settings;
 using Serilog;
+using Serilog.Events;
 
+// Start the application
+Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console().Enrich.FromLogContext().CreateLogger();
+
+Log.Information("Welcome to ROM Repository Manager!");
+Log.Information("Copyright © 2020-2025 Natalia Portillo");
+
+// Configuration and settings
+// We need the builder now
+Log.Debug("Creating the builder...");
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Access the full configuration
+Log.Debug("Creating the configuration reader...");
+ConfigurationManager config = builder.Configuration;
+
+string logFile         = config["LogFile"]                  ?? "logs/rom-repo-mgr.log";
+string defaultLogLevel = config["Logging:LogLevel:Default"] ?? "Information";
+
+// Parse to LogEventLevel
+if(!Enum.TryParse(defaultLogLevel, true, out LogEventLevel level))
+{
+    // Fallback if parsing fails
+#if DEBUG
+    level = LogEventLevel.Debug;
+#else
+    level = LogEventLevel.Information;
+#endif
+}
+
+// Now create a logger with the specified log level and log file
 Log.Logger = new LoggerConfiguration()
 #if DEBUG
             .MinimumLevel.Debug()
@@ -14,23 +42,37 @@ Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
 #endif
             .WriteTo.Console()
+            .WriteTo.File(logFile, rollingInterval: RollingInterval.Day, fileSizeLimitBytes: 10 * 1048576)
             .Enrich.FromLogContext()
             .CreateLogger();
 
-Log.Information("Welcome to ROM Repository Manager!");
-Log.Information("Copyright © 2020-2025 Natalia Portillo");
+// Read the rest of the configuration and settings
+Log.Debug("Reading configuration settings...");
+string repoFolder            = config["DataFolders:Repository"] ?? "repo";
+string importRoms            = config["DataFolders:ImportRoms"] ?? "incoming";
+string importDats            = config["DataFolders:ImportDats"] ?? "incoming-dats";
+string exportRoms            = config["DataFolders:ExportRoms"] ?? "export";
+string exportDats            = config["DataFolders:ExportDats"] ?? "export-dats";
+string databaseFolder        = config["DataFolders:Database"]   ?? "db";
+string temporaryFolder       = config["DataFolders:Temporary"]  ?? "tmp";
+string compressionTypeString = config["CompressionType"]        ?? "Zstd";
+
+// Parse the compression type
+if(!Enum.TryParse(compressionTypeString, true, out CompressionType compressionType))
+{
+    // Fallback if parsing fails
+    compressionType = CompressionType.Zstd;
+}
 
 // Ensure the folders exist
 Log.Information("Ensuring folders exist...");
 
-string[] folders =
-[
-    Consts.DbFolder, Consts.DatFolder, Consts.IncomingDatFolder, Consts.RepositoryFolder, Consts.IncomingRomsFolder
-];
+string[] folders = [repoFolder, importRoms, importDats, databaseFolder, exportRoms, exportDats, temporaryFolder];
 
 foreach(string folder in folders)
 {
-    if(!Directory.Exists(folder))
+    // Check File.Exists for symlinks or junctions
+    if(!Directory.Exists(folder) && !File.Exists(folder))
     {
         Log.Debug("Creating folder: {Folder}", folder);
         Directory.CreateDirectory(folder);
@@ -39,19 +81,8 @@ foreach(string folder in folders)
         Log.Debug("Folder already exists: {Folder}", folder);
 }
 
-// Ensure the temporary folder exists but it can also be a symlink
-if(!Directory.Exists(Consts.TemporaryFolder) && !File.Exists(Consts.TemporaryFolder))
-{
-    Log.Debug("Creating folder: {TemporaryFolder}", Consts.TemporaryFolder);
-    Directory.CreateDirectory(Consts.TemporaryFolder);
-}
-else
-    Log.Debug("Folder already exists: {TemporaryFolder}", Consts.TemporaryFolder);
-
-Log.Debug("Creating the builder...");
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog(); // ✅ Plug Serilog into the host
+// ✅ Plug Serilog into the host
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -64,7 +95,7 @@ Log.Debug("Creating database context...");
 
 builder.Services.AddDbContextFactory<Context>(options =>
 {
-    options.UseSqlite($"Data Source={Consts.DbFolder}/database.db");
+    options.UseSqlite($"Data Source={databaseFolder}/database.db");
 #if DEBUG
     options.EnableSensitiveDataLogging();
     options.LogTo(Log.Debug);
@@ -79,11 +110,11 @@ Log.Debug("Setting the settings...");
 
 Settings.Current = new SetSettings
 {
-    DatabasePath            = Path.Combine(Environment.CurrentDirectory, Consts.DbFolder, "database.db"),
-    TemporaryFolder         = Path.Combine(Environment.CurrentDirectory, Consts.TemporaryFolder),
-    RepositoryPath          = Path.Combine(Environment.CurrentDirectory, Consts.RepositoryFolder),
+    DatabasePath            = Path.Combine(Environment.CurrentDirectory, databaseFolder, "database.db"),
+    TemporaryFolder         = Path.Combine(Environment.CurrentDirectory, temporaryFolder),
+    RepositoryPath          = Path.Combine(Environment.CurrentDirectory, repoFolder),
     UseInternalDecompressor = true,
-    Compression             = CompressionType.Zstd // Todo: Read from configuration
+    Compression             = compressionType
 };
 
 Log.Debug("Building the application...");
@@ -104,10 +135,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Localization
-string[] supportedCultures =
-[
-    "en", "es"
-];
+string[] supportedCultures = ["en", "es"];
 
 RequestLocalizationOptions localizationOptions = new RequestLocalizationOptions().SetDefaultCulture("en")
    .AddSupportedCultures(supportedCultures)

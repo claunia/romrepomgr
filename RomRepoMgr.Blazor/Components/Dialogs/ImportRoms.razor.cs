@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
-using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using RomRepoMgr.Database.Models;
@@ -45,7 +44,7 @@ public partial class ImportRoms : ComponentBase
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        FolderPath             = Path.Combine(Environment.CurrentDirectory, Consts.IncomingRomsFolder);
+        FolderPath             = Configuration["DataFolders:ImportRoms"] ?? "incoming";
         IsBusy                 = false;
         NotYetStarted          = true;
         RemoveFilesChecked     = false;

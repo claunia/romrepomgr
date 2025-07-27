@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
-using Microsoft.FluentUI.AspNetCore.Components;
 using RomRepoMgr.Core.EventArgs;
 using RomRepoMgr.Core.Workers;
 using Serilog;
@@ -37,7 +36,7 @@ public partial class ImportDats : ComponentBase
     {
         base.OnInitialized();
 
-        path             = Path.Combine(Environment.CurrentDirectory, Consts.IncomingDatFolder);
+        path             = Configuration["DataFolders:ImportDats"] ?? "incoming-dats";
         StatusMessage    = "";
         StatusMessage2   = "";
         IsBusy           = false;

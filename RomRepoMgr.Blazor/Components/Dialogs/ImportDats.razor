@@ -1,8 +1,8 @@
-@using Microsoft.Extensions.Localization
 @using RomRepoMgr.Blazor.Resources
 @implements IDialogContentComponent
 @inject ILogger<ImportDats>            Logger
 @inject IStringLocalizer<Localization> Localizer
+@inject IConfiguration                 Configuration
 
 <FluentDialog Width="800px" Height="400px" Title="Import DATs" Modal="true" TrapFocus="true">
     <FluentDialogBody>
