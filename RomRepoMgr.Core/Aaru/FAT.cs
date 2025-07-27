@@ -83,8 +83,8 @@ public static class FAT
         byte[] bpbSector = new byte[512];
         byte[] fatSector = new byte[512];
         imageStream.Position = 0;
-        imageStream.EnsureRead(bpbSector, 0, 512);
-        imageStream.EnsureRead(fatSector, 0, 512);
+        imageStream.ReadExactly(bpbSector, 0, 512);
+        imageStream.ReadExactly(fatSector, 0, 512);
 
         Array.Copy(bpbSector, 0x02, atariOem, 0, 6);
         Array.Copy(bpbSector, 0x03, dosOem,   0, 8);
@@ -199,12 +199,12 @@ public static class FAT
         // First FAT1 sector resides at LBA 0x14
         byte[] fat1Sector0 = new byte[512];
         imageStream.Position = 0x14 * 512;
-        imageStream.EnsureRead(fat1Sector0, 0, 512);
+        imageStream.ReadExactly(fat1Sector0, 0, 512);
 
         // First FAT2 sector resides at LBA 0x1A
         byte[] fat2Sector0 = new byte[512];
         imageStream.Position = 0x1A * 512;
-        imageStream.EnsureRead(fat2Sector0, 0, 512);
+        imageStream.ReadExactly(fat2Sector0, 0, 512);
         bool equalFatIds = fat1Sector0[0] == fat2Sector0[0] && fat1Sector0[1] == fat2Sector0[1];
 
         // Volume is software interleaved 2:1
@@ -218,7 +218,7 @@ public static class FAT
                 })
         {
             imageStream.Position = position * 512;
-            imageStream.EnsureRead(tmp, 0, 512);
+            imageStream.ReadExactly(tmp, 0, 512);
             rootMs.Write(tmp, 0, tmp.Length);
         }
 

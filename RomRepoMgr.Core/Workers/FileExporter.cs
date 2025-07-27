@@ -297,7 +297,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                              Value = inFs.Position
                                          });
 
-                    inFs.EnsureRead(buffer, 0, buffer.Length);
+                    inFs.ReadExactly(buffer, 0, buffer.Length);
                     outFs.Write(buffer, 0, buffer.Length);
                 }
 
@@ -309,7 +309,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                          Value = inFs.Position
                                      });
 
-                inFs.EnsureRead(buffer, 0, buffer.Length);
+                inFs.ReadExactly(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
 
                 inFs.Close();
@@ -464,7 +464,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                              Value = inFs.Position
                                          });
 
-                    inFs.EnsureRead(buffer, 0, buffer.Length);
+                    inFs.ReadExactly(buffer, 0, buffer.Length);
                     outFs.Write(buffer, 0, buffer.Length);
                 }
 
@@ -476,7 +476,7 @@ public class FileExporter(long romSetId, string outPath, ILoggerFactory loggerFa
                                          Value = inFs.Position
                                      });
 
-                inFs.EnsureRead(buffer, 0, buffer.Length);
+                inFs.ReadExactly(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
 
                 inFs.Close();

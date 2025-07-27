@@ -606,7 +606,7 @@ public sealed class FileImporter
                                          });
 
                     buffer = new byte[BUFFER_SIZE];
-                    stream.EnsureRead(buffer, 0, (int)BUFFER_SIZE);
+                    stream.ReadExactly(buffer, 0, (int)BUFFER_SIZE);
                     checksumWorker.Update(buffer);
                     zStream.Write(buffer, 0, buffer.Length);
                 }
@@ -618,13 +618,13 @@ public sealed class FileImporter
                                      });
 
                 buffer = new byte[remainder];
-                stream.EnsureRead(buffer, 0, (int)remainder);
+                stream.ReadExactly(buffer, 0, (int)remainder);
             }
             else
             {
                 SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
                 buffer = new byte[size];
-                stream.EnsureRead(buffer, 0, (int)size);
+                stream.ReadExactly(buffer, 0, (int)size);
             }
 
             checksumWorker.Update(buffer);
@@ -866,7 +866,7 @@ public sealed class FileImporter
                                          });
 
                     buffer = new byte[BUFFER_SIZE];
-                    inFs.EnsureRead(buffer, 0, (int)BUFFER_SIZE);
+                    inFs.ReadExactly(buffer, 0, (int)BUFFER_SIZE);
                     checksumWorker.Update(buffer);
                 }
 
@@ -877,13 +877,13 @@ public sealed class FileImporter
                                      });
 
                 buffer = new byte[remainder];
-                inFs.EnsureRead(buffer, 0, (int)remainder);
+                inFs.ReadExactly(buffer, 0, (int)remainder);
             }
             else
             {
                 SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
                 buffer = new byte[inFs.Length];
-                inFs.EnsureRead(buffer, 0, (int)inFs.Length);
+                inFs.ReadExactly(buffer, 0, (int)inFs.Length);
             }
 
             checksumWorker.Update(buffer);
@@ -1072,7 +1072,7 @@ public sealed class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.EnsureRead(buffer, 0, buffer.Length);
+                inFs.ReadExactly(buffer, 0, buffer.Length);
                 zStream.Write(buffer, 0, buffer.Length);
             }
 
@@ -1084,7 +1084,7 @@ public sealed class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.EnsureRead(buffer, 0, buffer.Length);
+            inFs.ReadExactly(buffer, 0, buffer.Length);
             zStream.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
@@ -1352,7 +1352,7 @@ public sealed class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.EnsureRead(buffer, 0, buffer.Length);
+                inFs.ReadExactly(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
             }
 
@@ -1364,7 +1364,7 @@ public sealed class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.EnsureRead(buffer, 0, buffer.Length);
+            inFs.ReadExactly(buffer, 0, buffer.Length);
             outFs.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);
@@ -1694,7 +1694,7 @@ public sealed class FileImporter
                                          Value = inFs.Position
                                      });
 
-                inFs.EnsureRead(buffer, 0, buffer.Length);
+                inFs.ReadExactly(buffer, 0, buffer.Length);
                 outFs.Write(buffer, 0, buffer.Length);
             }
 
@@ -1706,7 +1706,7 @@ public sealed class FileImporter
                                      Value = inFs.Position
                                  });
 
-            inFs.EnsureRead(buffer, 0, buffer.Length);
+            inFs.ReadExactly(buffer, 0, buffer.Length);
             outFs.Write(buffer, 0, buffer.Length);
 
             SetIndeterminateProgress2?.Invoke(this, System.EventArgs.Empty);

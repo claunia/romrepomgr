@@ -90,7 +90,7 @@ public sealed class Compression
                                     Value = inFs.Position
                                 });
 
-            inFs.EnsureRead(buffer, 0, buffer.Length);
+            inFs.ReadExactly(buffer, 0, buffer.Length);
             zStream.Write(buffer, 0, buffer.Length);
         }
 
@@ -103,7 +103,7 @@ public sealed class Compression
                                       Maximum = inFs.Length
                                   });
 
-        inFs.EnsureRead(buffer, 0, buffer.Length);
+        inFs.ReadExactly(buffer, 0, buffer.Length);
         zStream.Write(buffer, 0, buffer.Length);
 
         inFs.Close();

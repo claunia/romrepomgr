@@ -118,12 +118,12 @@ internal sealed class ForcedSeekStream<T> : Stream where T : Stream
         for(int i = 0; i < fullBufferReads; i++)
         {
             buffer = new byte[BUFFER_LEN];
-            _baseStream.EnsureRead(buffer, 0, BUFFER_LEN);
+            _baseStream.ReadExactly(buffer, 0, BUFFER_LEN);
             _backStream.Write(buffer, 0, BUFFER_LEN);
         }
 
         buffer = new byte[restToRead];
-        _baseStream.EnsureRead(buffer, 0, restToRead);
+        _baseStream.ReadExactly(buffer, 0, restToRead);
         _backStream.Write(buffer, 0, restToRead);
     }
 
