@@ -1,9 +1,11 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject IDialogService DialogService
 
 <PageTitle>ROM Repository Manager</PageTitle>
 
 <FluentToolbar>
-    <FluentButton Disabled="true">Import DATs</FluentButton>
+    <FluentButton OnClick="@ImportDatsAsync">Import DATs</FluentButton>
     <FluentButton Disabled="true">Export DAT</FluentButton>
     <FluentButton Disabled="true">Remove DAT</FluentButton>
     <FluentButton Disabled="true">Import ROMs</FluentButton>

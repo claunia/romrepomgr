@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RomRepoMgr.Core\RomRepoMgr.Core.csproj"/>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
   </ItemGroup>
 </Project>
