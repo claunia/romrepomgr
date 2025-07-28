@@ -51,5 +51,6 @@
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.6"/>
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.12.1"/>
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.12.1"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1" Condition="$(RuntimeIdentifier.StartsWith('linux'))" />
   </ItemGroup>
 </Project>

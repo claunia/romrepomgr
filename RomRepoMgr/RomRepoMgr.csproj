@@ -47,6 +47,7 @@
     <PackageReference Include="Serilog.Sinks.Console"/>
     <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer"/>
     <PackageReference Include="Text.Analyzers"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Condition="$(RuntimeIdentifier.StartsWith('linux'))"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RomRepoMgr.Database\RomRepoMgr.Database.csproj"/>
