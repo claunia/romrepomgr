@@ -61,4 +61,39 @@
       <LastGenOutput>Localization.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="CreateMacAppBundle" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
+    <!-- Create Directory Structure -->
+    <MakeDir Directories="
+    $(PublishDir)MacPackage/RomRepoMgr.app/Contents/MacOS;
+    $(PublishDir)MacPackage/RomRepoMgr.app/Contents/Resources" />
+
+    <!-- Copy Executable -->
+    <Copy SourceFiles="$(PublishDir)RomRepoMgr" DestinationFiles="$(PublishDir)MacPackage/RomRepoMgr.app/Contents/MacOS/RomRepoMgr" />
+
+    <!-- Copy .dylib files -->
+    <ItemGroup>
+      <DylibFiles Include="$(PublishDir)**\*.dylib" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DylibFiles)" DestinationFolder="$(PublishDir)MacPackage/RomRepoMgr.app/Contents/MacOS\%(RecursiveDir)" />
+
+    <!-- Copy Icon (optional) -->
+    <Copy SourceFiles="Assets/RomRepoMgr.icns" DestinationFiles="$(PublishDir)MacPackage/RomRepoMgr.app/Contents/Resources/RomRepoMgr.icns" />
+
+    <!-- Generate Info.plist -->
+    <WriteLinesToFile File="$(PublishDir)MacPackage/RomRepoMgr.app/Contents/Info.plist" Lines="
+    &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+    &lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
+    &lt;plist version=&quot;1.0&quot;&gt;
+    &lt;dict&gt;
+      &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;RomRepoMgr&lt;/string&gt;
+      &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;es.natportillo.romrepomgr&lt;/string&gt;
+      &lt;key&gt;CFBundleVersion&lt;/key&gt;&lt;string&gt;1.0&lt;/string&gt;
+      &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;RomRepoMgr&lt;/string&gt;
+      &lt;key&gt;CFBundleIconFile&lt;/key&gt;&lt;string&gt;RomRepoMgr.icns&lt;/string&gt;
+      &lt;key&gt;NSHumanReadableCopyright&lt;/key&gt;&lt;string&gt;© 2025 Nat Portillo.&lt;/string&gt;
+    &lt;/dict&gt;
+    &lt;/plist&gt;" Overwrite="true" />
+  </Target>
+
 </Project>
