@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RomRepoMgr.Core.EventArgs;
 
@@ -24,7 +25,7 @@ public partial class DatImporter : ObservableObject
     public Task   Task     { get; set; }
     public bool   Running  { get; private set; } = true;
 
-    internal void OnErrorOccurred(object sender, ErrorEventArgs e)
+    internal void OnErrorOccurred(object sender, ErrorEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
         StatusMessage = e.Message;
         StatusColor   = Colors.Red;
@@ -33,31 +34,25 @@ public partial class DatImporter : ObservableObject
 
         Indeterminate = false;
         Progress      = 0;
-    }
+    });
 
-    internal void OnSetIndeterminateProgress(object sender, EventArgs e)
-    {
-        Indeterminate = true;
-    }
+    internal void OnSetIndeterminateProgress(object sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(() => Indeterminate = true);
 
-    internal void OnSetMessage(object sender, MessageEventArgs e)
-    {
-        StatusMessage = e.Message;
-    }
+    internal void OnSetMessage(object sender, MessageEventArgs e) =>
+        Dispatcher.UIThread.Post(() => StatusMessage = e.Message);
 
-    internal void OnSetProgress(object sender, ProgressEventArgs e)
-    {
-        Progress = e.Value;
-    }
+    internal void OnSetProgress(object sender, ProgressEventArgs e) =>
+        Dispatcher.UIThread.Post(() => Progress = e.Value);
 
-    internal void OnSetProgressBounds(object sender, ProgressBoundsEventArgs e)
+    internal void OnSetProgressBounds(object sender, ProgressBoundsEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
         Indeterminate = false;
         Maximum       = e.Maximum;
         Minimum       = e.Minimum;
-    }
+    });
 
-    internal void OnWorkFinished(object sender, MessageEventArgs e)
+    internal void OnWorkFinished(object sender, MessageEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
         Indeterminate = false;
         Maximum       = 1;
@@ -65,5 +60,5 @@ public partial class DatImporter : ObservableObject
         Progress      = 1;
         StatusMessage = e.Message;
         Running       = false;
-    }
+    });
 }
