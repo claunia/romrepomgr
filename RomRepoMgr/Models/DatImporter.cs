@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -22,8 +21,6 @@ public partial class DatImporter : ObservableObject
     [ObservableProperty]
     string _statusMessage;
     public string Filename { get; internal init; }
-    public Task   Task     { get; set; }
-    public bool   Running  { get; private set; } = true;
 
     internal void OnErrorOccurred(object sender, ErrorEventArgs e) => Dispatcher.UIThread.Post(() =>
     {
@@ -59,6 +56,5 @@ public partial class DatImporter : ObservableObject
         Minimum       = 0;
         Progress      = 1;
         StatusMessage = e.Message;
-        Running       = false;
     });
 }

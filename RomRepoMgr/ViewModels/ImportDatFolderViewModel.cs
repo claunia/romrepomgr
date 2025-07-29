@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -50,7 +51,6 @@ public sealed partial class ImportDatFolderViewModel : ViewModelBase
     bool _recursiveChecked;
     [ObservableProperty]
     string _statusMessage;
-    int _workers;
 
     public ImportDatFolderViewModel()
     {
@@ -100,75 +100,63 @@ public sealed partial class ImportDatFolderViewModel : ViewModelBase
         CanStart                = false;
         IsReady                 = false;
         IsImporting             = true;
-        _workers                = 0;
         _stopwatch.Restart();
 
-        Import();
+        _ = Task.Run(Import);
     }
 
     void Import()
     {
+        Parallel.ForEach(_datFiles,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
+                         datFile =>
+                         {
+                             Dispatcher.UIThread.Post(() =>
+                             {
+                                 StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(datFile));
+
+                                 ProgressValue = _listPosition;
+                             });
+
+                             var model = new DatImporter
+                             {
+                                 Filename      = Path.GetFileName(datFile),
+                                 Minimum       = 0,
+                                 Maximum       = _datFiles.Length,
+                                 Progress      = 0,
+                                 Indeterminate = false
+                             };
+
+                             var worker = new Core.Workers.DatImporter(datFile,
+                                                                       Category,
+                                                                       new SerilogLoggerFactory(Log.Logger));
+
+                             worker.ErrorOccurred            += model.OnErrorOccurred;
+                             worker.SetIndeterminateProgress += model.OnSetIndeterminateProgress;
+                             worker.SetMessage               += model.OnSetMessage;
+                             worker.SetProgress              += model.OnSetProgress;
+                             worker.SetProgressBounds        += model.OnSetProgressBounds;
+                             worker.WorkFinished             += model.OnWorkFinished;
+                             worker.RomSetAdded              += RomSetAdded;
+
+                             Dispatcher.UIThread.Post(() => Importers.Add(model));
+
+                             worker.Import();
+
+                             Interlocked.Increment(ref _listPosition);
+                         });
+
         Dispatcher.UIThread.Post(() =>
         {
-            if(_listPosition >= _datFiles.Length)
-            {
-                if(_workers != 0) return;
-
-                ProgressVisible = false;
-                StatusMessage   = Localization.Finished;
-                CanClose        = true;
-                CanStart        = false;
-                IsReady         = true;
-                _stopwatch.Stop();
-
-                return;
-            }
-
-            StatusMessage = string.Format(Localization.ImportingItem, Path.GetFileName(_datFiles[_listPosition]));
-            ProgressValue = _listPosition;
-
-            var model = new DatImporter
-            {
-                Filename      = Path.GetFileName(_datFiles[_listPosition]),
-                Minimum       = 0,
-                Maximum       = _datFiles.Length,
-                Progress      = 0,
-                Indeterminate = false
-            };
-
-            var worker =
-                new Core.Workers.DatImporter(_datFiles[_listPosition], Category, new SerilogLoggerFactory(Log.Logger));
-
-            worker.ErrorOccurred            += model.OnErrorOccurred;
-            worker.SetIndeterminateProgress += model.OnSetIndeterminateProgress;
-            worker.SetMessage               += model.OnSetMessage;
-            worker.SetProgress              += model.OnSetProgress;
-            worker.SetProgressBounds        += model.OnSetProgressBounds;
-            worker.WorkFinished             += model.OnWorkFinished;
-            worker.RomSetAdded              += RomSetAdded;
-
-            worker.WorkFinished += (_, _) =>
-            {
-                _workers--;
-
-                if(_workers < Environment.ProcessorCount) Import();
-            };
-
-            worker.ErrorOccurred += (_, _) =>
-            {
-                _workers--;
-
-                if(_workers < Environment.ProcessorCount) Import();
-            };
-
-            Importers.Add(model);
-
-            model.Task = Task.Run(worker.Import);
-
-            _workers++;
-            _listPosition++;
-
-            if(_workers < Environment.ProcessorCount) Import();
+            ProgressVisible = false;
+            StatusMessage   = Localization.Finished;
+            CanClose        = true;
+            CanStart        = false;
+            IsReady         = true;
+            _stopwatch.Stop();
         });
     }
 
