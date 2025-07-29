@@ -432,11 +432,15 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
 
                                      Dispatcher.UIThread.Post(() => Importers.Add(model));
 
+                                     string tmpFile = Path.Combine(Settings.Settings.Current.RepositoryPath,
+                                                                   Path.GetRandomFileName());
+
                                      worker.ImportAndHashRom(reader.OpenEntryStream(),
                                                              reader.Entry.Key,
-                                                             Path.Combine(Settings.Settings.Current.RepositoryPath,
-                                                                          Path.GetFileName(Path.GetTempFileName())),
+                                                             tmpFile,
                                                              reader.Entry.Size);
+
+                                     if(File.Exists(tmpFile)) File.Delete(tmpFile);
                                  }
                              }
                              catch(InvalidOperationException) {}
