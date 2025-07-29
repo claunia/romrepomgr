@@ -154,6 +154,13 @@ public sealed partial class ImportDatFolderViewModel : ViewModelBase
                 if(_workers < Environment.ProcessorCount) Import();
             };
 
+            worker.ErrorOccurred += (_, _) =>
+            {
+                _workers--;
+
+                if(_workers < Environment.ProcessorCount) Import();
+            };
+
             Importers.Add(model);
 
             model.Task = Task.Run(worker.Import);
