@@ -213,6 +213,10 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         _stopwatch.Restart();
 
         Parallel.ForEach(_rootImporter.Files,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          file =>
                          {
                              Dispatcher.UIThread.Post(() =>
@@ -284,6 +288,10 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         _stopwatch.Restart();
 
         Parallel.ForEach(_rootImporter.Archives,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          archive =>
                          {
                              Dispatcher.UIThread.Post(() =>
@@ -365,6 +373,10 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
         _stopwatch.Restart();
 
         Parallel.ForEach(_rootImporter.Archives,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          archive =>
                          {
                              Dispatcher.UIThread.Post(() =>

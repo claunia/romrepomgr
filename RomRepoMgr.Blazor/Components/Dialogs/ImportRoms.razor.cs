@@ -202,6 +202,10 @@ public partial class ImportRoms : ComponentBase
         _stopwatch.Restart();
 
         Parallel.ForEach(_rootImporter.Files,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          file =>
                          {
                              _ = InvokeAsync(() =>
@@ -284,6 +288,10 @@ public partial class ImportRoms : ComponentBase
 
         // For each archive
         Parallel.ForEach(_rootImporter.Archives,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          archive =>
                          {
                              _ = InvokeAsync(() =>

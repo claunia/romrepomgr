@@ -99,6 +99,10 @@ public sealed class FileImporter
         ConcurrentBag<string> archives = [];
 
         Parallel.ForEach(Files,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          file =>
                          {
                              SetProgress?.Invoke(this,
@@ -170,6 +174,10 @@ public sealed class FileImporter
         ConcurrentBag<string> archives = [];
 
         Parallel.ForEach(Files,
+                         new ParallelOptions
+                         {
+                             MaxDegreeOfParallelism = Environment.ProcessorCount
+                         },
                          file =>
                          {
                              try
