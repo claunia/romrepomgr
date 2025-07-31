@@ -464,7 +464,7 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                                      Progress      = 1,
                                      Maximum       = 1,
                                      Minimum       = 0,
-                                     StatusMessage = "Error processing archive."
+                                     StatusMessage = Localization.ErrorProcessingArchive
                                  }));
 #pragma warning disable ERP022
                              }

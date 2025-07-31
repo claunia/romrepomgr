@@ -390,4 +390,7 @@ Tardará mucho tiempo...</value>
     <data name="ProcessingArchive" xml:space="preserve">
         <value>Procesando archivo: {0}</value>
     </data>
+    <data name="ErrorProcessingArchive" xml:space="preserve">
+        <value>Error procesando archivo.</value>
+    </data>
 </root>

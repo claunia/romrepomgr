@@ -398,4 +398,7 @@ This will take a long time...</value>
     <data name="ProcessingArchive" xml:space="preserve">
         <value>Processing archive: {0}</value>
     </data>
+    <data name="ErrorProcessingArchive" xml:space="preserve">
+        <value>Error processing archive.</value>
+    </data>
 </root>

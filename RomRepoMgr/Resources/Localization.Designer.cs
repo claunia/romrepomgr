@@ -788,5 +788,11 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("ProcessingArchive", resourceCulture);
             }
         }
+        
+        public static string ErrorProcessingArchive {
+            get {
+                return ResourceManager.GetString("ErrorProcessingArchive", resourceCulture);
+            }
+        }
     }
 }
