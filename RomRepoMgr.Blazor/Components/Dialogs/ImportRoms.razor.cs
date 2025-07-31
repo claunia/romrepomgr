@@ -327,6 +327,9 @@ public partial class ImportRoms : ComponentBase
 
                                      if(!archiveImporter.IsCrcInDb(reader.Entry.Crc) && KnownOnlyChecked) continue;
 
+                                     // Do not import files that are already in the repository
+                                     if(archiveImporter.IsInRepo(reader.Entry.Crc)) continue;
+
                                      var worker = new FileImporter(_ctx,
                                                                    _newFiles,
                                                                    _newDisks,

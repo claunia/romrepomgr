@@ -410,6 +410,9 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
 
                                      if(!archiveImporter.IsCrcInDb(reader.Entry.Crc) && KnownOnlyChecked) continue;
 
+                                     // Do not import files that are already in the repository
+                                     if(archiveImporter.IsInRepo(reader.Entry.Crc)) continue;
+
                                      var model = new RomImporter
                                      {
                                          Filename      = Path.GetFileName(reader.Entry.Key),

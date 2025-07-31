@@ -556,6 +556,14 @@ public sealed class FileImporter
         }
     }
 
+    public bool IsInRepo(long crc32)
+    {
+        lock(DbLock)
+        {
+            return _ctx.Files.Any(f => f.Crc32 == crc32.ToString("x8") && f.IsInRepo);
+        }
+    }
+
     public void ImportAndHashRom(Stream stream, string filename, string tempPath, long size)
     {
         try
