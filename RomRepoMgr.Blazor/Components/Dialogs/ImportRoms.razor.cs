@@ -345,9 +345,6 @@ public partial class ImportRoms : ComponentBase
                                                              tmpFile,
                                                              reader.Entry.Size);
 
-                                     if(File.Exists(tmpFile)) File.Delete(tmpFile);
-                                 }
-                             }
                                      try
                                      {
                                          if(File.Exists(tmpFile)) File.Delete(tmpFile);
@@ -360,6 +357,12 @@ public partial class ImportRoms : ComponentBase
 #pragma warning restore PH2098
                                  }
                              }
+#pragma warning disable RCS1075, PH2098, ERP022
+                             catch(Exception)
+                             {
+                                 // Show must go on
+                             }
+#pragma warning restore RCS1075, PH2098, ERP022
                              finally
                              {
                                  Interlocked.Increment(ref _listPosition);

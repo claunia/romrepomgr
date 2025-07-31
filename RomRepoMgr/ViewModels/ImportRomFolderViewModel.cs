@@ -443,9 +443,6 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                                                              tmpFile,
                                                              reader.Entry.Size);
 
-                                     if(File.Exists(tmpFile)) File.Delete(tmpFile);
-                                 }
-                             }
                                      try
                                      {
                                          if(File.Exists(tmpFile)) File.Delete(tmpFile);
@@ -458,6 +455,20 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
 #pragma warning restore PH2098
                                  }
                              }
+                             catch(Exception)
+                             {
+                                 Dispatcher.UIThread.Post(() => Importers.Add(new RomImporter
+                                 {
+                                     Filename      = Path.GetFileName(archive),
+                                     Indeterminate = false,
+                                     Progress      = 1,
+                                     Maximum       = 1,
+                                     Minimum       = 0,
+                                     StatusMessage = "Error processing archive."
+                                 }));
+#pragma warning disable ERP022
+                             }
+#pragma warning restore ERP022
                              finally
                              {
                                  Interlocked.Increment(ref _listPosition);
