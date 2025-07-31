@@ -404,14 +404,41 @@ public sealed partial class ImportRomFolderViewModel : ViewModelBase
                                  // Process files in archive
                                  while(reader.MoveToNextEntry())
                                  {
+                                     string filename = Path.GetFileName(reader.Entry.Key);
+
                                      if(reader.Entry.IsDirectory) continue;
 
-                                     if(reader.Entry.Crc == 0 && KnownOnlyChecked) continue;
+                                     if(reader.Entry.Crc == 0                        && KnownOnlyChecked ||
+                                        !archiveImporter.IsCrcInDb(reader.Entry.Crc) && KnownOnlyChecked)
+                                     {
+                                         Dispatcher.UIThread.Post(() => Importers.Add(new RomImporter
+                                         {
+                                             Filename      = filename,
+                                             Indeterminate = false,
+                                             Progress      = 1,
+                                             Maximum       = 1,
+                                             Minimum       = 0,
+                                             StatusMessage = Localization.UnknownFile
+                                         }));
 
-                                     if(!archiveImporter.IsCrcInDb(reader.Entry.Crc) && KnownOnlyChecked) continue;
+                                         continue;
+                                     }
 
                                      // Do not import files that are already in the repository
-                                     if(archiveImporter.IsInRepo(reader.Entry.Crc)) continue;
+                                     if(archiveImporter.IsInRepo(reader.Entry.Crc))
+                                     {
+                                         Dispatcher.UIThread.Post(() => Importers.Add(new RomImporter
+                                         {
+                                             Filename      = filename,
+                                             Indeterminate = false,
+                                             Progress      = 1,
+                                             Maximum       = 1,
+                                             Minimum       = 0,
+                                             StatusMessage = Localization.FileAlreadyInRepository
+                                         }));
+
+                                         continue;
+                                     }
 
                                      var model = new RomImporter
                                      {

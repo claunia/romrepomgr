@@ -794,5 +794,17 @@ namespace RomRepoMgr.Resources {
                 return ResourceManager.GetString("ErrorProcessingArchive", resourceCulture);
             }
         }
+        
+        public static string UnknownFile {
+            get {
+                return ResourceManager.GetString("UnknownFile", resourceCulture);
+            }
+        }
+        
+        public static string FileAlreadyInRepository {
+            get {
+                return ResourceManager.GetString("FileAlreadyInRepository", resourceCulture);
+            }
+        }
     }
 }

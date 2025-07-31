@@ -401,4 +401,10 @@ This will take a long time...</value>
     <data name="ErrorProcessingArchive" xml:space="preserve">
         <value>Error processing archive.</value>
     </data>
+    <data name="UnknownFile" xml:space="preserve">
+        <value>Unknown file.</value>
+    </data>
+    <data name="FileAlreadyInRepository" xml:space="preserve">
+        <value>File already in repository.</value>
+    </data>
 </root>

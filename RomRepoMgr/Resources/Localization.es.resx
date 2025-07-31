@@ -393,4 +393,10 @@ Tardará mucho tiempo...</value>
     <data name="ErrorProcessingArchive" xml:space="preserve">
         <value>Error procesando archivo.</value>
     </data>
+    <data name="UnknownFile" xml:space="preserve">
+        <value>Fichero desconocido.</value>
+    </data>
+    <data name="FileAlreadyInRepository" xml:space="preserve">
+        <value>Fichero ya en el repositorio.</value>
+    </data>
 </root>
