@@ -348,7 +348,18 @@ public partial class ImportRoms : ComponentBase
                                      if(File.Exists(tmpFile)) File.Delete(tmpFile);
                                  }
                              }
-                             catch(InvalidOperationException) {}
+                                     try
+                                     {
+                                         if(File.Exists(tmpFile)) File.Delete(tmpFile);
+                                     }
+                                     catch(IOException)
+#pragma warning disable PH2098
+                                     {
+                                         // Ignore IO exceptions when deleting temporary files
+                                     }
+#pragma warning restore PH2098
+                                 }
+                             }
                              finally
                              {
                                  Interlocked.Increment(ref _listPosition);
