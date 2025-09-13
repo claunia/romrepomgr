@@ -50,52 +50,52 @@ public static class BigEndianBitConverter
     /// <summary>Returns the specified Boolean value as an array of bytes.</summary>
     /// <param name="value">A Boolean value.</param>
     /// <returns>An array of bytes with length 1.</returns>
-    public static byte[] GetBytes(bool value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(bool value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified Unicode character value as an array of bytes.</summary>
     /// <param name="value">A character to convert.</param>
     /// <returns>An array of bytes with length 2.</returns>
-    public static byte[] GetBytes(char value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(char value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified double-precision floating point value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 8.</returns>
-    public static byte[] GetBytes(double value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(double value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified single-precision floating point value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 4.</returns>
-    public static byte[] GetBytes(float value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(float value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 32-bit signed integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 4.</returns>
-    public static byte[] GetBytes(int value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(int value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 64-bit signed integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 8.</returns>
-    public static byte[] GetBytes(long value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(long value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 16-bit signed integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 2.</returns>
-    public static byte[] GetBytes(short value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(short value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 32-bit unsigned integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 4.</returns>
-    public static byte[] GetBytes(uint value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(uint value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 64-bit unsigned integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 8.</returns>
-    public static byte[] GetBytes(ulong value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(ulong value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Returns the specified 16-bit unsigned integer value as an array of bytes.</summary>
     /// <param name="value">The number to convert.</param>
     /// <returns>An array of bytes with length 2.</returns>
-    public static byte[] GetBytes(ushort value) => BitConverter.GetBytes(value).Reverse().ToArray();
+    public static byte[] GetBytes(ushort value) => Enumerable.ToArray(Enumerable.Reverse(BitConverter.GetBytes(value)));
 
     /// <summary>Converts the specified 64-bit signed integer to a double-precision floating point number.</summary>
     /// <param name="value">The number to convert.</param>
@@ -154,7 +154,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static short ToInt16(byte[] value, int startIndex) =>
-        BitConverter.ToInt16(value.Reverse().ToArray(), value.Length - sizeof(short) - startIndex);
+        BitConverter.ToInt16(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(short) - startIndex);
 
     /// <summary>Returns a 32-bit signed integer converted from four bytes at a specified position in a byte array.</summary>
     /// <param name="value">An array of bytes.</param>
@@ -170,7 +170,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static int ToInt32(byte[] value, int startIndex) =>
-        BitConverter.ToInt32(value.Reverse().ToArray(), value.Length - sizeof(int) - startIndex);
+        BitConverter.ToInt32(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(int) - startIndex);
 
     /// <summary>Returns a 64-bit signed integer converted from eight bytes at a specified position in a byte array.</summary>
     /// <param name="value">An array of bytes.</param>
@@ -186,7 +186,7 @@ public static class BigEndianBitConverter
     ///     length of value minus 1.
     /// </exception>
     public static long ToInt64(byte[] value, int startIndex) =>
-        BitConverter.ToInt64(value.Reverse().ToArray(), value.Length - sizeof(long) - startIndex);
+        BitConverter.ToInt64(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(long) - startIndex);
 
     /// <summary>
     ///     Returns a single-precision floating point number converted from four bytes  at a specified position in a byte
@@ -205,7 +205,7 @@ public static class BigEndianBitConverter
     ///     length of value minus 1.
     /// </exception>
     public static float ToSingle(byte[] value, int startIndex) =>
-        BitConverter.ToSingle(value.Reverse().ToArray(), value.Length - sizeof(float) - startIndex);
+        BitConverter.ToSingle(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(float) - startIndex);
 
     /// <summary>
     ///     Converts the numeric value of each element of a specified array of bytes to its equivalent hexadecimal string
@@ -217,7 +217,7 @@ public static class BigEndianBitConverter
     ///     element in value; for example, "7F-2C-4A".
     /// </returns>
     /// <exception cref="System.ArgumentNullException">value is null.</exception>
-    public static string ToString(byte[] value) => BitConverter.ToString(value.Reverse().ToArray());
+    public static string ToString(byte[] value) => BitConverter.ToString(Enumerable.ToArray(Enumerable.Reverse(value)));
 
     /// <summary>
     ///     Converts the numeric value of each element of a specified subarray of bytes to its equivalent hexadecimal
@@ -235,7 +235,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static string ToString(byte[] value, int startIndex) =>
-        BitConverter.ToString(value.Reverse().ToArray(), startIndex);
+        BitConverter.ToString(Enumerable.ToArray(Enumerable.Reverse(value)), startIndex);
 
     /// <summary>
     ///     Converts the numeric value of each element of a specified subarray of bytes to its equivalent hexadecimal
@@ -258,7 +258,7 @@ public static class BigEndianBitConverter
     ///     value; that is, the startIndex parameter is greater than the length of value minus the length parameter.
     /// </exception>
     public static string ToString(byte[] value, int startIndex, int length) =>
-        BitConverter.ToString(value.Reverse().ToArray(), startIndex, length);
+        BitConverter.ToString(Enumerable.ToArray(Enumerable.Reverse(value)), startIndex, length);
 
     /// <summary>Returns a 16-bit unsigned integer converted from two bytes at a specified position in a byte array.</summary>
     /// <param name="value">The array of bytes.</param>
@@ -271,7 +271,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static ushort ToUInt16(byte[] value, int startIndex) =>
-        BitConverter.ToUInt16(value.Reverse().ToArray(), value.Length - sizeof(ushort) - startIndex);
+        BitConverter.ToUInt16(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(ushort) - startIndex);
 
     /// <summary>Returns a 32-bit unsigned integer converted from four bytes at a specified position in a byte array.</summary>
     /// <param name="value">An array of bytes.</param>
@@ -287,7 +287,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static uint ToUInt32(byte[] value, int startIndex) =>
-        BitConverter.ToUInt32(value.Reverse().ToArray(), value.Length - sizeof(uint) - startIndex);
+        BitConverter.ToUInt32(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(uint) - startIndex);
 
     /// <summary>Returns a 64-bit unsigned integer converted from eight bytes at a specified position in a byte array.</summary>
     /// <param name="value">An array of bytes.</param>
@@ -303,7 +303,7 @@ public static class BigEndianBitConverter
     ///     minus 1.
     /// </exception>
     public static ulong ToUInt64(byte[] value, int startIndex) =>
-        BitConverter.ToUInt64(value.Reverse().ToArray(), value.Length - sizeof(ulong) - startIndex);
+        BitConverter.ToUInt64(Enumerable.ToArray(Enumerable.Reverse(value)), value.Length - sizeof(ulong) - startIndex);
 
     public static Guid ToGuid(byte[] value, int startIndex) => new(ToUInt32(value, 0 + startIndex),
                                                                    ToUInt16(value, 4 + startIndex),
