@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/Solution items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="codealike.json" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="logo.png" />
+    <File Path="README.md" />
+    <File Path="RomRepoMgr.sln.DotSettings" />
+  </Folder>
+  <Project Path="RomRepoMgr.Blazor/RomRepoMgr.Blazor.csproj" />
+  <Project Path="RomRepoMgr.Core/RomRepoMgr.Core.csproj" />
+  <Project Path="RomRepoMgr.Database/RomRepoMgr.Database.csproj" />
+  <Project Path="RomRepoMgr.Settings/RomRepoMgr.Settings.csproj" />
+  <Project Path="RomRepoMgr/RomRepoMgr.csproj" />
+  <Project Path="SabreTools/SabreTools.Core/SabreTools.Core.csproj" />
+  <Project Path="SabreTools/SabreTools.DatFiles/SabreTools.DatFiles.csproj" />
+  <Project Path="SabreTools/SabreTools.DatItems/SabreTools.DatItems.csproj" />
+  <Project Path="SabreTools/SabreTools.DatTools/SabreTools.DatTools.csproj" />
+  <Project Path="SabreTools/SabreTools.FileTypes/SabreTools.FileTypes.csproj" />
+  <Project Path="SabreTools/SabreTools.Reports/SabreTools.Reports.csproj" />
+</Solution>
