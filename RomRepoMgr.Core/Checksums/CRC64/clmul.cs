@@ -18,7 +18,7 @@
 //     https://github.com/rawrunprotected/crc
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2011-2025 Natalia Portillo
+// Copyright © 2011-2026 Natalia Portillo
 // ****************************************************************************/
 
 using System;

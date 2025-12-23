@@ -11,7 +11,7 @@ using Serilog.Events;
 Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console().Enrich.FromLogContext().CreateLogger();
 
 Log.Information("Welcome to ROM Repository Manager!");
-Log.Information("Copyright © 2020-2025 Natalia Portillo");
+Log.Information("Copyright © 2020-2026 Natalia Portillo");
 
 // Configuration and settings
 // We need the builder now

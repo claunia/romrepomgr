@@ -83,6 +83,6 @@ This project is licensed under the GPL version 3. See the LICENSE file for detai
 
 For more information, visit the [GitHub repository](https://github.com/claunia/RomRepoMgr).
 
-© 2020-2025 [Nat Portillo](https://www.natportillo.es)
+© 2020-2026 [Nat Portillo](https://www.natportillo.es)
 
 Happy ROM managing!

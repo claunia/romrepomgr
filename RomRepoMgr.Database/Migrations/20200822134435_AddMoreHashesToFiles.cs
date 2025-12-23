@@ -20,7 +20,7 @@
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // ----------------------------------------------------------------------------
-// Copyright © 2020-2024 Natalia Portillo
+// Copyright © 2020-2026 Natalia Portillo
 *******************************************************************************/
 
 using Microsoft.EntityFrameworkCore.Migrations;
